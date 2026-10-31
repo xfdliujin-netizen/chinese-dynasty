@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>华夏千年历史长卷 · 全景无级缩放版</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-paper: #F5F0E6;
+      --bg-paper-dark: #EAE1D0;
+      --ink-black: #1E1B18;
+      --ink-secondary: #524B42;
+      --cinnabar: #B8332A;
+      --gold-ochre: #B8863B;
+      --border-ancient: #C9B99B;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-paper);
+      color: var(--ink-black);
+      font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+      overflow: hidden;
+      height: 100dvh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(rgba(184, 134, 59, 0.07) 1px, transparent 0),
+        radial-gradient(rgba(184, 51, 42, 0.04) 1px, transparent 0);
+      background-size: 28px 28px;
+      background-position: 0 0, 14px 14px;
+    }
+
+    .font-calligraphy {
+      font-family: 'Ma Shan Zheng', cursive, serif;
+    }
+
+    /* 隐藏滚动条但保留流畅滚动 */
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* 底部详情区古风细滚动条 */
+    .ancient-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .ancient-scroll::-webkit-scrollbar-track {
+      background: rgba(201, 185, 155, 0.25);
+      border-radius: 4px;
+    }
+    .ancient-scroll::-webkit-scrollbar-thumb {
+      background: rgba(184, 51, 42, 0.45);
+      border-radius: 4px;
+    }
+
+    /* 顶部朝代滑动容器样式 */
+    .dynasty-nav-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      scroll-behavior: smooth;
+      touch-action: pan-x;
+      cursor: grab;
+    }
+    .dynasty-nav-scroll:active {
+      cursor: grabbing;
+      scroll-behavior: auto;
+    }
+
+    /* 卷轴视口容器 */
+    #timeline-viewport {
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+      cursor: grab;
+      background: linear-gradient(180deg, 
+        rgba(234, 225, 208, 0.65) 0%, 
+        rgba(245, 240, 230, 0.95) 45%, 
+        rgba(234, 225, 208, 0.75) 100%);
+      border-top: 2px solid var(--border-ancient);
+      border-bottom: 2px solid var(--border-ancient);
+      box-shadow: inset 0 6px 16px rgba(30, 27, 24, 0.06);
+    }
+
+    #timeline-viewport:active {
+      cursor: grabbing;
+    }
+
+    /* 顶层大朝代块 */
+    .macro-dynasty-block {
+      position: absolute;
+      top: 26px;
+      height: 52px;
+      border-radius: 7px;
+      transition: filter 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2px 4px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .macro-dynasty-block.active-dynasty {
+      box-shadow: 0 0 0 2.5px var(--cinnabar), 0 4px 12px rgba(184, 51, 42, 0.22);
+      z-index: 15;
+    }
+
+    /* 细分政权与并立国家块 */
+    .sub-regime-block {
+      position: absolute;
+      height: 34px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+      overflow: hidden;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .sub-regime-block:hover {
+      z-index: 25;
+      transform: translateY(-1px);
+    }
+
+    .sub-regime-block.active-sub {
+      box-shadow: 0 0 0 2px var(--cinnabar), 0 4px 10px rgba(184, 51, 42, 0.28);
+      z-index: 30;
+    }
+
+    /* 历史事件节点 - 柔和过渡动画 */
+    .event-node {
+      position: absolute;
+      transform: translateX(-50%);
+      z-index: 35;
+      cursor: pointer;
+      transition: opacity 0.38s ease, transform 0.38s ease;
+    }
+
+    /* 竹简竖排文字本体动画包装器（支持 >=80% 展开与 <80% 柔和折叠） */
+    .slip-fold-wrapper {
+      transform-origin: top center;
+      transition: 
+        opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.48s cubic-bezier(0.34, 1.4, 0.64, 1);
+      will-change: transform, opacity;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 当缩放比例小于 80% 时的柔和折叠状态（保留圆点，收起竹简） */
+    .event-node.folded-by-zoom .slip-fold-wrapper {
+      opacity: 0;
+      transform: translateY(-10px) scaleY(0.15) scaleX(0.6);
+      pointer-events: none;
+    }
+
+    .event-node.folded-by-zoom .pulse-circle {
+      transform: scale(0.75);
+      opacity: 0.72;
+    }
+
+    /* 当用户手动关闭“重大事件”总开关时的完全隐藏状态 */
+    .event-node.hidden-by-switch {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(-8px) scale(0.5);
+    }
+
+    /* 竹简竖排文字卡片（精简短标题版） */
+    .vertical-bamboo-slip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 26px;
+      padding: 3px 2px 6px 2px;
+      background: linear-gradient(180deg, #FDFBF5 0%, #F5EDE0 100%);
+      border: 1.5px solid #B8A686;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(30, 27, 24, 0.12);
+      transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .vertical-bamboo-slip .slip-year {
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1.1;
+      padding: 1px 2px;
+      border-radius: 2px;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      letter-spacing: -0.3px;
+    }
+
+    .vertical-bamboo-slip .slip-title {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 12.5px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: 2px;
+      color: #1E1B18;
+      padding: 1px 0;
+    }
+
+    /* 选中态竹简卡片 */
+    .event-node.selected {
+      z-index: 42;
+    }
+    .event-node.selected .vertical-bamboo-slip {
+      background: linear-gradient(180deg, #C8382E 0%, #9E261E 100%);
+      border-color: #7F1D1D;
+      box-shadow: 0 5px 14px rgba(184, 51, 42, 0.42);
+      transform: translateY(2px) scale(1.08);
+    }
+
+    .event-node.selected .vertical-bamboo-slip .slip-year {
+      background: rgba(255, 255, 255, 0.22) !important;
+      color: #FFF !important;
+    }
+
+    .event-node.selected .vertical-bamboo-slip .slip-title {
+      color: #FFFFFF;
+    }
+
+    .pulse-circle {
+      transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.85); opacity: 0.85; }
+      70% { transform: scale(2.2); opacity: 0; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .event-node.selected .pulse-circle::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 9999px;
+      border: 2px solid var(--cinnabar);
+      animation: pulse-ring 1.6s infinite;
+    }
+
+    /* 中心游标指示线 */
+    .center-indicator {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1.5px;
+      background: linear-gradient(180deg, 
+        rgba(184, 51, 42, 0.85) 0%, 
+        rgba(184, 51, 42, 0.22) 55%, 
+        rgba(184, 51, 42, 0.85) 100%);
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    /* 宣纸古籍边角装饰 */
+    .ancient-card {
+      position: relative;
+      background: #FAF6EE;
+      border: 1px solid #C9B99B;
+      box-shadow: 0 4px 16px rgba(30, 27, 24, 0.08);
+    }
+
+    /* 底部详情内容切换柔和过渡 */
+    .detail-fade-transition {
+      transition: opacity 0.24s ease, transform 0.24s ease;
+    }
+    .detail-fade-out {
+      opacity: 0.25;
+      transform: translateY(3px);
+    }
+  </style>
+</head>
+<body class="select-none">
+
+  <!-- 顶部标题栏 + 可左右滑动的朝代快速检索栏 -->
+  <header class="shrink-0 bg-[#EFE8D8] border-b border-[#C9B99B] px-2.5 pt-1.5 pb-1.5 z-30 shadow-sm">
+    <div class="max-w-3xl mx-auto flex items-center justify-between gap-1 mb-1.5">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded bg-[#B8332A] text-[#F5F0E6] flex items-center justify-center font-calligraphy text-base shadow-sm border border-[#8E241D]">
+          史
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-black tracking-wider text-[#1E1B18] leading-tight">华夏千年历史长卷</h1>
+        </div>
+      </div>
+
+      <!-- 实时中心年份 + 无级缩放百分比控制（支持 20% ~ 220% 缩放，满80%自动展开事件，低于80%自动折叠） -->
+      <div class="flex items-center gap-1.5">
+        <div class="bg-[#E5DEC9] border border-[#C5B698] rounded px-2 py-0.5 text-right">
+          <span id="center-era-badge" class="text-[11px] font-bold text-[#B8332A] mr-1">三国</span>
+          <span id="center-year-display" class="text-xs font-black text-[#1E1B18] font-mono">公元220年</span>
+        </div>
+
+        <div class="flex items-center bg-[#E5DEC9] rounded p-0.5 border border-[#C5B698]">
+          <button id="zoom-out-btn" class="w-6 h-5 flex items-center justify-center rounded text-[#1E1B18] hover:bg-[#D6CCB4] active:scale-95 text-xs font-bold">－</button>
+          <span id="zoom-label" class="text-[10px] font-black px-1.5 text-[#1E1B18] font-mono min-w-[38px] text-center">100%</span>
+          <button id="zoom-in-btn" class="w-6 h-5 flex items-center justify-center rounded text-[#1E1B18] hover:bg-[#D6CCB4] active:scale-95 text-xs font-bold">＋</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 朝代左右滑动检索条（带左右快捷滑动箭头） -->
+    <div class="max-w-3xl mx-auto relative flex items-center">
+      <button id="nav-scroll-left" class="shrink-0 w-6 h-7 flex items-center justify-center bg-[#E5DEC9]/90 border border-[#C5B698] rounded-l text-[#524B42] active:bg-[#D6CCB4] z-10 text-xs font-bold">
+        ‹
+      </button>
+      <div id="dynasty-quick-nav" class="dynasty-nav-scroll no-scrollbar flex items-center gap-1.5 px-2 py-0.5 flex-1 bg-[#E8E0CE]/60 border-y border-[#C5B698]/60">
+        <!-- 动态渲染全部16个大朝代胶囊按钮 -->
+      </div>
+      <button id="nav-scroll-right" class="shrink-0 w-6 h-7 flex items-center justify-center bg-[#E5DEC9]/90 border border-[#C5B698] rounded-r text-[#524B42] active:bg-[#D6CCB4] z-10 text-xs font-bold">
+        ›
+      </button>
+    </div>
+  </header>
+
+  <!-- 中部核心：纯净无遮挡的时间轴画卷（已彻底移除三处提示框，支持 20%~220% 双指捏合无级缩放） -->
+  <main id="timeline-viewport" class="relative w-full h-[46dvh] sm:h-[48dvh] shrink-0 select-none">
+    
+    <!-- 中心红色指示标尺 -->
+    <div class="center-indicator">
+      <div class="w-3 h-3 rounded-full bg-[#B8332A] border-2 border-[#FAF6EE] -ml-[5.5px] -mt-0.5 shadow"></div>
+    </div>
+
+    <!-- 内部画布层 -->
+    <div id="timeline-canvas" class="relative h-full will-change-transform">
+      <!-- 1. 顶部时间刻度线 (0~24px) -->
+      <div id="ticks-layer" class="absolute top-0 left-0 right-0 h-6 pointer-events-none"></div>
+
+      <!-- 2. 顶层大朝代色块层 (top: 26px, height: 52px) -->
+      <div id="macro-dynasty-layer" class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none"></div>
+
+      <!-- 3. 细分朝代与多国并立三轨层 (top: 84px ~ 198px) -->
+      <div id="sub-regime-layer" class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none"></div>
+
+      <!-- 4. 重大历史事件基线与竖排竹简层 (基线 top: 204px) -->
+      <div id="events-axis-line" class="absolute left-0 right-0 top-[204px] h-[2px] bg-[#8C7A6B]/55 pointer-events-none"></div>
+      <div id="events-layer" class="absolute left-0 right-0 top-0 bottom-0 pointer-events-none"></div>
+    </div>
+  </main>
+
+  <!-- 控制栏：重大历史事件开关 + 类别筛选 -->
+  <section class="shrink-0 bg-[#EAE1D0] border-b border-[#C9B99B] px-3 py-1.5 z-20">
+    <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
+      <!-- 重大历史事件显隐总开关 -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="toggle-events-btn" role="switch" aria-checked="true"
+          class="relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out bg-[#B8332A] focus:outline-none shadow-inner">
+          <span id="toggle-knob"
+            class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-[#FAF6EE] shadow ring-0 transition duration-300 ease-in-out translate-x-5"></span>
+        </button>
+        <span class="text-xs font-black text-[#1E1B18]">重大事件</span>
+        <span id="event-status-pill" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#B8332A]/15 text-[#B8332A] transition-colors">展开中</span>
+      </div>
+
+      <!-- 事件分类过滤按钮组 -->
+      <div id="category-filter-bar" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+        <button data-cat="all" class="cat-pill px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#1E1B18] text-[#FAF6EE] shrink-0 transition">全部</button>
+        <button data-cat="政治变革" class="cat-pill px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#DCD1BC] text-[#524B42] shrink-0 transition">政治兴替</button>
+        <button data-cat="军事风云" class="cat-pill px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#DCD1BC] text-[#524B42] shrink-0 transition">军事风云</button>
+        <button data-cat="文明盛世" class="cat-pill px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#DCD1BC] text-[#524B42] shrink-0 transition">文明盛世</button>
+        <button data-cat="对外开拓" class="cat-pill px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#DCD1BC] text-[#524B42] shrink-0 transition">对外开拓</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 底部详情联动卡片区（支持向下深度滚动阅读完整史料、脉络与典故） -->
+  <footer class="flex-1 min-h-0 bg-[#F5F0E6] px-2.5 py-2 overflow-hidden flex flex-col">
+    <div class="max-w-3xl w-full mx-auto flex-1 min-h-0 flex flex-col ancient-card rounded-lg overflow-hidden">
+      
+      <!-- 固定在卡片顶部的事件元信息与导航栏 -->
+      <div class="shrink-0 flex items-center justify-between gap-2 bg-[#EFE7D6] border-b border-[#D8CBB3] px-3 py-1.5">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span id="detail-badge-type" class="px-2 py-0.5 text-[11px] font-black rounded bg-[#B8332A] text-[#FAF6EE]">政治变革</span>
+          <span id="detail-dynasty-tag" class="px-2 py-0.5 text-[11px] font-bold rounded bg-[#E2D8C0] text-[#1E1B18] border border-[#C5B698]">三国 · 曹魏</span>
+          <span id="detail-year-tag" class="text-xs font-black text-[#B8332A] font-mono">公元 220 年</span>
+        </div>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="prev-event-btn" class="px-2 py-0.5 rounded bg-[#E5DEC9] hover:bg-[#D8CEB5] active:scale-95 text-[11px] font-bold text-[#1E1B18] border border-[#C5B698]">
+            ◀ 上一节点
+          </button>
+          <button id="next-event-btn" class="px-2 py-0.5 rounded bg-[#E5DEC9] hover:bg-[#D8CEB5] active:scale-95 text-[11px] font-bold text-[#1E1B18] border border-[#C5B698]">
+            下一节点 ▶
+          </button>
+        </div>
+      </div>
+
+      <!-- 可向下自由滚动的深度历史详情主体 -->
+      <div id="detail-scroll-container" class="flex-1 min-h-0 overflow-y-auto ancient-scroll px-3 py-2.5 detail-fade-transition space-y-2">
+        <!-- 完整标题与核心人物 -->
+        <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <h2 id="detail-title" class="text-base sm:text-lg font-black text-[#1E1B18] tracking-wide">曹丕受禅代汉建魏</h2>
+          <span id="detail-figure" class="text-xs font-bold text-[#7A5C38]">风云人物：魏文帝曹丕、汉献帝刘协、陈群</span>
+        </div>
+
+        <!-- 第一段：核心事件综述 -->
+        <p id="detail-desc" class="text-xs sm:text-sm text-[#2C2621] leading-relaxed font-medium"></p>
+
+        <!-- 第二段：历史深层背景与详细经过（向下延伸阅读） -->
+        <div id="detail-extended-box" class="bg-[#F3ECE0] border border-[#DCD0B8] rounded p-2.5 text-xs sm:text-sm text-[#3A322B] leading-relaxed space-y-1.5">
+          <div class="font-black text-[#7A5C38] text-xs flex items-center gap-1">
+            <span>📜 历史来龙去脉与细节深读</span>
+            <span class="text-[10px] font-normal text-[#8C7A6B]">（可向下滚动阅览）</span>
+          </div>
+          <p id="detail-extended-text" class="leading-relaxed text-xs sm:text-[13px] text-[#2C2621]"></p>
+        </div>
+
+        <!-- 第三段：史家评述与深远影响 -->
+        <div class="bg-[#EDE4D3] border-l-4 border-[#B8332A] px-2.5 py-2 rounded-r">
+          <div class="text-xs text-[#3A322B] leading-relaxed">
+            <span class="font-black text-[#B8332A]">【史家评述与制度遗产】</span>
+            <span id="detail-impact"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    /********************************************************************
+     * 1. 顶层大朝代数据 (全部16个核心历史时期，附带 20% 极小缩放下的简称 shortName)
+     ********************************************************************/
+    const MACRO_DYNASTIES = [
+      { id: 'xia', shortName: '夏', name: '夏朝', period: '前2070—前1600', start: -2070, end: -1600, color: '#6E5A4F', bg: '#EFEBE7', capital: '阳城 / 二里头', founder: '大禹 / 姒启', desc: '中国史书记载的第一个世袭制王朝，由大禹治水奠基，其子启废除部落联盟禅让制，开创“家天下”的王位世袭局面。', detail: '夏朝统治中心位于河南嵩山、伊洛河流域及晋南一带。考古学界普遍以河南偃师二里头文化遗址作为探索夏文化的核心遗存，遗址中已出现大型宫殿基址、青铜爵礼器、绿松石龙形器及早期城市道路网。夏朝历十七王、四百七十余年，末代夏王桀暴虐无道，最终在鸣条之战中被商汤推翻。', impact: '奠定了华夏早期国家形态、王权世袭制度与农业历法（《夏小正》）传统。' },
+      { id: 'shang', shortName: '商', name: '商朝', period: '前1600—前1046', start: -1600, end: -1046, color: '#5A6B5C', bg: '#EBF0EC', capital: '亳 / 殷(安阳)', founder: '商汤 (子履)', desc: '商汤灭夏后建立，前期屡次迁都，至盘庚迁殷（今河南安阳）后稳定发展，武丁中兴时期国力达到顶峰。', detail: '商朝是中国青铜器铸造艺术与文字体系走向成熟的关键时代。安阳殷墟出土的十余万片甲骨卜辞，记录了商王室的祭祀、征伐、天象、农事与疾病，证实了《史记·殷本纪》记载的商王世系真实可靠。后母戊鼎、四羊方尊与妇好墓随葬品展现了当时高超的复合范青铜铸造工艺。', impact: '留下中国最早的成熟文字系统——甲骨文，中国有文字可考的信史时代由此全面确立。' },
+      { id: 'xzhou', shortName: '西周', name: '西周', period: '前1046—前771', start: -1046, end: -771, color: '#8C4A32', bg: '#F4EAE6', capital: '镐京(西安)', founder: '周武王姬发', desc: '周武王牧野伐纣灭商，定都镐京。周公旦东征平叛、制礼作乐，确立分封制、宗法制与井田制三位一体的统治体系。', detail: '西周改变了商代“率民以事神”的神权色彩，提出“皇天无亲，惟德是辅”与“敬天保民”的政治理念。通过大封同姓宗室与功臣（如鲁、齐、燕、晋、卫），将周文化推广至黄河中下游及江汉流域。西周晚期经历国人暴动、“共和行政”（前841年，中国历史确切纪年之始）与宣王中兴，最终因周幽王废嫡立庶、犬戎攻破镐京而亡。', impact: '确立嫡长子继承制与礼乐文明秩序，深刻塑造了后世三千年的中国社会伦理与宗族观念。' },
+      { id: 'dzhou', shortName: '东周', name: '东周(春秋战国)', period: '前770—前221', start: -770, end: -221, color: '#9E6224', bg: '#F7EFE4', capital: '洛邑(洛阳)', founder: '周平王姬宜臼', desc: '周平王东迁洛邑后，周天子王室衰微，“礼乐征伐自诸侯出”，先后经历春秋争霸与战国七雄兼并两大阶段。', detail: '春秋时期诸侯打着“尊王攘夷”旗号争当霸主；进入战国后，铁犁牛耕普及推动井田制瓦解，各国纷纷延揽游士推行变法（李悝在魏、吴起在楚、商鞅在秦、赵武灵王胡服骑射），由车阵礼仪之战演变为数十万大军的野战与攻城总体战。与此同时，士阶层崛起，儒、墨、道、法、兵、名、阴阳诸子百家争鸣，学术思想空前解放。', impact: '实现了从贵族领主制向官僚郡县制的社会大转型，诸子百家思想构筑了中华文明的精神总源头。' },
+      { id: 'qin', shortName: '秦', name: '秦朝', period: '前221—前207', start: -221, end: -207, color: '#2B2B2B', bg: '#E5E5E5', capital: '咸阳', founder: '秦始皇嬴政', desc: '秦始皇耗时十年扫灭六国，结束春秋战国五百余年分裂，建立中国历史上第一个大一统中央集权帝国。', detail: '秦朝在中央实行三公九卿制，在地方彻底废除分封制、全面推行郡县制，官员由朝廷直接任免；统一文字（小篆）、货币（秦半两）、度量衡与车轨宽度；北击匈奴修筑万里长城，南征百越开凿灵渠、设置桂林象郡南海三郡。但由于赋役严苛（修阿房宫、骊山陵、弛道）与秦二世胡亥、赵高残暴统治，前209年陈胜吴广揭竿而起，秦朝二世而亡。', impact: '创立皇帝制度与郡县官僚体系，奠定中国两千余年大一统国家的基本政治格局。' },
+      { id: 'han', shortName: '两汉', name: '两汉', period: '前202—220年', start: -202, end: 220, color: '#B8332A', bg: '#F8E8E6', capital: '长安 / 洛阳', founder: '汉高祖刘邦 / 光武帝刘秀', desc: '分为西汉与东汉（中间经历王莽新朝），国祚绵延四百余年，与同时期的罗马帝国并列为世界东西方两大超级文明中心。', detail: '西汉初年奉行黄老无为、与民休息，铸就“文景之治”；汉武帝时期罢黜百家、表章六经，行推恩令削弱诸侯，派卫青、霍去病北击匈奴，遣张骞通西域开辟丝绸之路，设西域都护府。公元25年刘秀重建东汉，实现“光武中兴”与“明章之治”，班超重定西域，蔡伦改进造纸术，张衡创制浑天仪与候风地动仪，司马迁《史记》与班固《汉书》确立纪传体正史范式。', impact: '汉族、汉字、汉文化由此定名，“犯强汉者，虽远必诛”的开拓精神熔铸了民族脊梁。' },
+      { id: 'sanguo', shortName: '三国', name: '三国', period: '220—280年', start: 220, end: 280, color: '#8A3B28', bg: '#F5EAE6', capital: '洛阳 / 成都 / 建业', founder: '曹丕 / 刘备 / 孙权', desc: '东汉末年黄巾起义与军阀混战后，曹魏据中原北方、蜀汉据巴蜀汉中、东吴据江东荆扬，形成三国鼎立格局。', detail: '曹操“挟天子以令诸侯”，在官渡之战击败袁绍统一北方；208年孙刘联军在赤壁之战阻遏曹操南下；220—222年魏、蜀、吴相继建国。诸葛亮治蜀并数次北伐曹魏，东吴陆逊在夷陵之战与石亭之战稳固江东并开发江南、远航夷洲（台湾），曹魏推行屯田制与九品中正制。263年魏灭蜀，266年司马炎代魏建西晋，280年西晋灭吴。', impact: '巴蜀西南与江南水乡得到大规模开发，英雄辈出的历史记忆孕育了深厚的古典文学传统。' },
+      { id: 'jin16', shortName: '两晋', name: '两晋十六国', period: '266—420年', start: 266, end: 439, color: '#4A6B82', bg: '#E9EFF2', capital: '洛阳 / 建康', founder: '晋武帝司马炎 / 晋元帝司马睿', desc: '西晋短暂统一后因八王之乱衰落，北方陷入五胡十六国更迭；晋室南渡建立东晋，形成门阀政治与南北对峙。', detail: '西晋太康年间一度繁荣，但晋惠帝时期爆发长达十六年的“八王之乱”，导致中原空虚。304年成汉、汉赵相继建立，匈奴、鲜卑、羯、氐、羌等内迁民族在北方及巴蜀先后建立十余个政权。311年永嘉之乱洛阳失守，317年司马睿在王导、王敦辅佐下于建康重建东晋。383年东晋在淝水之战中以八万北府兵大破前秦苻坚百万大军，保住江南半壁江山。', impact: '“衣冠南渡”将中原先进生产技术与士族文化带入江南，王羲之书法、顾恺之绘画与陶渊明田园诗光照千古。' },
+      { id: 'nanbeichao', shortName: '南北朝', name: '南北朝', period: '420—589年', start: 420, end: 589, color: '#3B6E5C', bg: '#E6F0EC', capital: '建康 / 平城·洛阳', founder: '刘裕(南朝宋) / 拓跋珪(北魏)', desc: '南方经历宋、齐、梁、陈四朝更替（合称南朝）；北方由鲜卑北魏统一后分裂为东魏、西魏，再演变为北齐、北周。', detail: '南朝定都建康（南京），刘宋“元嘉之治”与萧梁前期经济文化极为昌盛，祖冲之将圆周率精确到小数点后七位；但548年“侯景之乱”使江南士族遭受毁灭性打击。北朝方面，北魏太武帝439年统一北方，孝文帝元宏于494年迁都洛阳，全面推行汉化改革与均田制；后北魏分裂，西魏—北周宇文泰创立府兵制与关陇集团，最终由北周外戚杨坚建立隋朝并南下灭陈。', impact: '北方胡汉民族大融合与南方六朝文化开发并进，云冈、龙门石窟艺术与《文心雕龙》《齐民要术》影响深远。' },
+      { id: 'sui', shortName: '隋', name: '隋朝', period: '581—618年', start: 581, end: 618, color: '#7D4E8D', bg: '#F2EBF5', capital: '大兴(长安) / 洛阳', founder: '隋文帝杨坚', desc: '结束自西晋末年以来近四百年的南北分裂重归大一统，开创三省六部制、科举制与京杭大运河。', detail: '隋文帝杨坚励精图治，整顿户籍（大索貌阅、输籍定样），减轻赋役，仓廪充实，史称“开皇之治”。隋炀帝杨广营建东都洛阳，开凿以洛阳为中心、北达涿郡（北京）、南至余杭（杭州）的大运河，并正式设立进士科开创科举制；但因三征高句丽及急政暴敛引发全国隋末农民大起义，国祚仅三十八年而亡。', impact: '修筑贯通南北的经济命脉大运河，创立科举取士与三省六部官制，直接为大唐盛世奠定制度根基。' },
+      { id: 'tang', shortName: '唐', name: '唐朝', period: '618—907年', start: 618, end: 907, color: '#C27D1A', bg: '#FAF1E2', capital: '长安 / 洛阳', founder: '唐高祖李渊 / 唐太宗李世民', desc: '中国古典文明的黄金巅峰，历经贞观之治、武周遗风与开元盛世，万国来朝、丝路繁盛，唐诗艺术冠绝古今。', detail: '唐太宗李世民知人善任、从谏如流，击败东突厥被尊为“天可汗”，设安西都护府经营西域；武则天大力推行科举殿试选拔寒门；唐玄宗开元年间国力登峰造极，长安城汇聚各国使节、商旅与遣唐使。755年爆发持续八年的“安史之乱”，唐朝由盛转衰，中后期受藩镇割据、宦官专权与牛李党争困扰，但推行“两税法”改革了中国赋税制度，最终于907年灭亡。', impact: '开放包容的盛唐气象塑造了整个东亚汉字文化圈（律令、建筑、服饰、茶道），唐人街成为华人的世界名片。' },
+      { id: 'wudai', shortName: '五代', name: '五代十国', period: '907—979年', start: 907, end: 979, color: '#6E5D4F', bg: '#EFECE8', capital: '开封 / 洛阳及诸国都城', founder: '朱温(后梁) / 柴荣(后周)等', desc: '唐亡后中原依次更替后梁、后唐、后晋、后汉、后周五个朝代，中原之外并存前蜀、后蜀、吴越、南唐等十个割据政权。', detail: '中原五代武人拥兵自重、政权更迭频繁，936年石敬瑭借契丹兵力灭后唐建后晋，将燕云十六州割让契丹，致使中原失去北方长城屏障。与此同时，南方的吴越（钱氏保境安民）、南唐（江南富庶、文人词曲中心）、前后蜀（成都天府之国）社会相对安定，茶叶、丝绸、造纸、雕版印刷与海外贸易迅速发展。954年周世宗柴荣即位后整军经武，为北宋统一扫清道路。', impact: '中国经济重心南移在此期间加速推进，开封作为全国水陆漕运枢纽正式取代长安洛阳成为帝都。' },
+      { id: 'song', shortName: '宋辽金', name: '宋辽夏金', period: '960—1279年', start: 960, end: 1279, color: '#2C6E7A', bg: '#E6F2F4', capital: '开封(北宋) / 临安(南宋)', founder: '宋太祖赵匡胤', desc: '北宋与南宋同契丹辽朝、党项西夏、女真金朝长期并立。宋代商品经济、市民生活、科技发明与文人雅艺达到古代最高峰。', detail: '960年赵匡胤陈桥兵变建宋，通过杯酒释兵权确立文官治国体系。北宋突破唐代坊市制度，出现早市夜市与世界最早纸币“交子”，1005年与辽订立澶渊之盟。1127年女真金朝南下酿成“靖康之变”，北宋灭亡；宋高宗赵构在临安（杭州）建立南宋，岳飞、韩世忠等抗金名将保住江南半壁。两宋时期活字印刷、指南针航海、火药火器全面普及，程朱理学与宋词、宋瓷影响深远。', impact: '经济总量与人均生活水平位居当时世界前列，科技与商业文明高度繁荣。' },
+      { id: 'yuan', shortName: '元', name: '元朝', period: '1271—1368年', start: 1271, end: 1368, color: '#395A7F', bg: '#E7EEF5', capital: '大都(北京)', founder: '元世祖忽必烈', desc: '由蒙古族建立的第一个全国性大一统王朝，1271年忽必烈改国号为大元，1279年灭南宋，疆域空前辽阔。', detail: '元朝结束自唐末以来三百余年的多政权并立局面，首创“行中书省”（行省制）管理地方；中央设宣政院直接统辖西藏地区，设澎湖巡检司管辖台湾与澎湖。元朝重修裁弯京杭大运河，开辟南粮北运海运航线，泉州港成为世界第一大港，马可·波罗来华游历，郭守敬编订《授时历》，关汉卿、王实甫等元曲杂剧名家辈出。', impact: '开创中国行省行政区划制度，使西藏、台湾及云南边疆与中央王朝的统一管辖更为紧密。' },
+      { id: 'ming', shortName: '明', name: '明朝', period: '1368—1644年', start: 1368, end: 1644, color: '#B02E26', bg: '#F8E7E6', capital: '南京 / 北京', founder: '明太祖朱元璋', desc: '朱元璋建立的汉族大一统王朝，历经洪武之治、永乐盛世、仁宣之治与万历张居正改革，国祚二百七十六年。', detail: '明太祖朱元璋废除延续千年的丞相制度，至明成祖朱棣时正式形成内阁大学士辅政机制；朱棣迁都北京（天子守国门），修纂《永乐大典》，并派郑和率领庞大船队七下西洋。明朝中后期戚继光平定东南倭患，张居正推行“一条鞭法”将田赋徭役合并折银征收；江南地区丝织、棉纺与景德镇制瓷业兴盛，王阳明心学与《三国演义》《水浒传》《西游记》等市民小说风行，晚明徐光启、宋应星、李时珍总结传统科技巨著。', impact: '奠定北京故宫城市中轴线格局，白银货币化推动明代深度融入全球大航海贸易网络。' },
+      { id: 'qing', shortName: '清', name: '清朝', period: '1636—1912年', start: 1636, end: 1912, color: '#244A6E', bg: '#E5ECF4', capital: '盛京 / 北京', founder: '皇太极 / 顺治帝', desc: '中国历史上最后一个封建大一统王朝，康雍乾盛世彻底奠定近代中国多民族辽阔版图，晚清步入近代化艰难转型。', detail: '1644年清军入关定都北京，康熙、雍正、乾隆三朝历时百余年，平定三藩、统一台湾设府、驱逐沙俄雅克萨侵略签订《尼布楚条约》、平定准噶尔与大小和卓叛乱设伊犁将军、派遣驻藏大臣并确立金瓶掣签制度、在西南推行“改土归流”；雍正设立军机处使君主集权达到顶峰，乾隆朝编纂《四库全书》。1840年鸦片战争后中国饱受列强侵略，先后经历洋务运动、戊戌变法与清末新政，1911年辛亥革命爆发，1912年清帝退位。', impact: '凝聚了汉、满、蒙、回、藏等多元一体的中华民族格局，奠定现代中国疆域版图。' }
+    ];
+
+    /********************************************************************
+     * 2. 细分朝代与并立政权三轨数据 (仅展示朝代名与时间，点击可看深度史料)
+     ********************************************************************/
+    const SUB_REGIMES = [
+      { id: 'chunqiu', shortName: '春秋', name: '春秋时期', period: '前770—前476', start: -770, end: -476, track: 0, color: '#9E6224', founder: '齐桓公 / 晋文公 / 楚庄王', desc: '周平王东迁后诸侯争霸的时代，因孔子修订鲁国史书《春秋》而得名。', detail: '齐桓公任用管仲“九合诸侯，一匡天下”首成霸业；晋文公城濮之战退避三舍大破楚军；秦穆公称霸西戎；楚庄王问鼎中原；春秋晚期吴王阖闾用孙武、伍子胥破楚入郢，越王勾践卧薪尝胆灭吴称霸。', impact: '列国在争霸与会盟中加快了华夏族群与周边戎狄蛮夷的融合。' },
+      { id: 'zhanguo', shortName: '战国', name: '战国七雄', period: '前475—前221', start: -475, end: -221, track: 0, color: '#7D4816', founder: '秦/齐/楚/燕/韩/赵/魏', desc: '三家分晋、田氏代齐后，形成齐、楚、燕、韩、赵、魏、秦七大强国并立兼并的格局。', detail: '战国初期魏文侯任用李悝、吴起、西门豹率先变法称雄；中期齐国在桂陵之战、马陵之战两败魏军，与秦国东西对峙；后期赵国胡服骑射强军，但前260年长平之战赵军主力被秦将白起击溃，山东六国再无力单独抗秦。', impact: '郡县制、官僚制与铁器农耕全面普及，为秦统一天下准备了制度与经济条件。' },
+      { id: 'zg_qin', shortName: '秦', name: '战国·秦', period: '前475—前221', start: -475, end: -221, track: 1, color: '#2B2B2B', founder: '秦孝公 / 秦昭襄王 / 嬴政', desc: '据守函谷关以西关中之地，经商鞅变法后实行二十等军功爵制，连续六代君主励精图治。', detail: '秦国于前316年司马错灭巴蜀获得天府粮仓，李冰父子修筑都江堰，郑国开凿郑国渠使关中成为沃野；外交上采取张仪“连横”与范雎“远交近攻”策略，最终由秦王嬴政在十年内依次攻灭韩、赵、魏、楚、燕、齐。', impact: '以彻底的法治与军功激励机制完成大一统。' },
+      { id: 'zg_chu_qi', shortName: '楚齐燕', name: '楚 / 齐 / 燕', period: '战国诸雄', start: -475, end: -222, track: 2, color: '#5E6E46', founder: '楚威王 / 齐威王 / 燕昭王', desc: '南方大国楚国、东方富国齐国与北方强国燕国，共同构成战国多元地域文明。', detail: '齐国都城临淄繁华富庶，稷下学宫汇聚天下名士（孟子、荀子、邹衍皆曾游学于此）；楚国疆域囊括江淮与江南，屈原创立《楚辞》浪漫主义文学；燕昭王筑黄金台招揽乐毅等名将，一度联合五国攻破齐都。', impact: '齐鲁文化、荆楚文化、燕赵文化与三晋、秦陇文化交融汇聚为秦汉大一统文化。' },
+
+      { id: 'xihan', shortName: '西汉', name: '西汉', period: '前202—公元8年', start: -202, end: 8, track: 0, color: '#B8332A', founder: '汉高祖刘邦', desc: '刘邦击败项羽后建立，定都长安，历经文景之治、汉武盛世与昭宣中兴。', detail: '汉初实行郡国并行制，汉景帝平定“七国之乱”；汉武帝刘彻在位五十四年，内设中朝、外置十三州刺史，实行盐铁官营与均输平准，北破匈奴、南平百越、通西域；汉宣帝时期设立西域都护府，匈奴呼韩邪单于附汉（昭君出塞）。', impact: '奠定大一统汉帝国的辽阔疆域与儒法合流治国模式。' },
+      { id: 'xin', shortName: '新', name: '新朝', period: '9—23年', start: 9, end: 23, track: 1, color: '#6E4C32', founder: '王莽', desc: '西汉外戚王莽代汉建立的短命王朝，因托古改制脱离现实而迅速引发天下大乱。', detail: '王莽依据《周礼》实行王田制（土地国有禁止买卖）、奴婢私属制、五均六筦及频繁更改币制与官名地名，导致经济秩序崩溃，加之黄河决口灾荒，引发绿林、赤眉大起义，23年绿林军攻入长安，王莽被杀。', impact: '中国历史上一次极具争议的复古改革尝试。' },
+      { id: 'donghan', shortName: '东汉', name: '东汉', period: '25—220年', start: 25, end: 220, track: 0, color: '#9E2A22', founder: '汉光武帝刘秀', desc: '刘秀定都洛阳重建汉室，史称后汉或东汉，前期政治清明、文化科技璀璨。', detail: '刘秀“退功臣而进文吏”，多次下诏释放奴婢、合并郡县；汉明帝、汉章帝时期窦固、窦宪大破北匈奴（燕然勒功），班超经营西域三十一年。东汉中后期陷入外戚与宦官交替专权及“党锢之祸”，184年黄巾起义爆发后地方州牧拥兵割据。', impact: '造纸术改进、佛教传入与道教创立均发生于东汉时期。' },
+
+      // 三国三轨
+      { id: 'caowei', shortName: '魏', name: '曹魏', period: '220—266年', start: 220, end: 266, track: 0, color: '#2F4F6F', founder: '魏文帝曹丕 (曹操奠基)', desc: '220年曹丕迫汉献帝禅让建魏，定都洛阳，据有中原北方广大地区，人口与国力居三国之首。', detail: '曹操生前推行军屯与民屯恢复中原农业，唯才是举；曹丕称帝后采纳陈群建议创立“九品中正制”，魏明帝曹叡时期成功抵御诸葛亮北伐与孙权北攻，派司马懿平定辽东公孙氏；249年司马懿发动高平陵之变掌控魏政，266年司马炎代魏。', impact: '恢复北方经济，九品中正制影响了整个魏晋南北朝的选官制度。' },
+      { id: 'shuhan', shortName: '蜀', name: '蜀汉', period: '221—263年', start: 221, end: 263, track: 1, color: '#A83228', founder: '汉昭烈帝刘备', desc: '221年刘备在成都称帝，以延续汉室正统自居，据有益州（巴蜀与南中）险塞之地。', detail: '刘备三顾茅庐请诸葛亮出山，联吴抗曹夺取荆州、益州与汉中；夷陵之战战败后白帝城托孤。诸葛亮任丞相期间依法治蜀、平定南中孟获、发展蜀锦经济，并五次率军北伐曹魏，病逝五丈原；后期姜维继续九伐中原，263年邓艾偷渡阴平至成都，刘禅降魏。', impact: '深度开发西南巴蜀与云贵地区，诸葛亮《出师表》成为千古忠义典范。' },
+      { id: 'dongwu', shortName: '吴', name: '东吴', period: '222—280年', start: 222, end: 280, track: 2, color: '#2F6E4E', founder: '吴大帝孙权', desc: '孙策、孙权兄弟据有江东六郡，222年孙权建号吴王，229年称帝定都建业（南京），统治江南与交广地区。', detail: '东吴依靠周瑜、鲁肃、吕蒙、陆逊四大都督稳固长江防线，先后取得赤壁之战、袭取荆州、夷陵之战与石亭之战胜利；对内平定山越补充人口，大力兴修江南水利、发展造船与海外航运（230年派卫温、诸葛直率万人船队到达台湾夷洲），280年为西晋所灭。', impact: '开创南京“六朝古都”之始，奠定江南鱼米之乡的经济基础。' },
+
+      // 两晋与十六国细分
+      { id: 'xijin', shortName: '西晋', name: '西晋', period: '266—316年', start: 266, end: 316, track: 0, color: '#3E5F7A', founder: '晋武帝司马炎', desc: '266年司马炎代魏建晋，280年灭吴统一全国，但因宗室分封与八王之乱迅速走向崩溃。', detail: '晋武帝灭吴后颁布占田制与户调式，出现短暂繁荣的“太康之治”，但门阀士族斗富奢靡（石崇王恺斗富）。晋惠帝即位后贾南风干政引发“八王之乱”，随之爆发永嘉之乱，洛阳、长安相继被匈奴汉赵攻陷，西晋灭亡。', impact: '短暂结束三国分裂，其速亡教训深刻警示后世王朝宗室分封之弊。' },
+      { id: 'dongjin', shortName: '东晋', name: '东晋', period: '317—420年', start: 317, end: 420, track: 0, color: '#4B728F', founder: '晋元帝司马睿', desc: '317年司马睿在南渡侨姓士族拥戴下于建康重建晋室，维持江南半壁百余年安定。', detail: '东晋实行典型的门阀政治，先后由琅琊王氏（王与马共天下）、颍川庾氏、谯国桓氏、陈郡谢氏执掌朝政；祖逖、桓温、刘裕等先后发起北伐；383年谢安、谢玄指挥北府兵取得淝水之战大捷；420年北府名将刘裕代晋建宋。', impact: '保存华夏衣冠正朔，促成魏晋风度、玄学清谈与书画艺术的极盛。' },
+      { id: 'shiliuguo_early', shortName: '前十六国', name: '成汉 / 汉赵 / 后赵 / 前燕', period: '304—370年', start: 304, end: 370, track: 1, color: '#7D5836', founder: '李雄 / 刘渊 / 石勒 / 慕容皝', desc: '五胡十六国前期主要政权，巴蜀有賨人成汉，北方先后由匈奴汉赵、羯族后赵与鲜卑前燕主导。', detail: '304年李雄在成都建大成（成汉）、刘渊在左国城建汉（前赵），标志十六国开始；羯族石勒建立后赵，重用汉人张宾一度统一北方大部；后赵崩溃后，鲜卑慕容氏建立前燕进入中原，与关中前秦对峙。', impact: '内迁各民族在北方纷纷采用中原汉制立国，开启胡汉碰撞融合。' },
+      { id: 'qianqin', shortName: '前秦', name: '前秦', period: '351—394年', start: 351, end: 394, track: 2, color: '#6E3B3B', founder: '苻健 / 苻坚(王猛辅政)', desc: '氐族苻氏建立的政权，在天王苻坚与汉族名相王猛辅佐下，于376年一度完成北方大一统。', detail: '苻坚礼贤下士，任用王猛整顿吏治、抑制豪强、兴办学校、劝课农桑，先后攻灭前燕、前凉、代国，统一整个黄河流域并收复巴蜀；但383年不顾王猛遗言强行南征东晋，在淝水之战惨败后北方再度陷入分裂。', impact: '十六国时期唯一统一北方的政权，展现了胡汉合作治国的强大潜力。' },
+      { id: 'shiliuguo_late', shortName: '后十六国', name: '后燕 / 后秦 / 北凉 / 胡夏', period: '384—439年', start: 384, end: 439, track: 1, color: '#8A6343', founder: '慕容垂 / 姚苌 / 沮渠蒙逊 / 赫连勃勃', desc: '淝水之战后北方涌现的后期十六国政权，最终于439年被鲜卑北魏全部统一。', detail: '慕容垂在河北复国建立后燕；羌族姚苌在关中建后秦，姚兴时期迎高僧鸠摩罗什入长安译经；河西走廊先后有前凉、后凉、南凉、西凉、北凉，保存大量中原儒学典籍并开凿敦煌莫高窟早期洞窟；赫连勃勃在陕北筑统万城建胡夏。', impact: '河西走廊成为乱世中的文化绿洲，直接滋养了后来北魏的典章制度。' },
+
+      // 南北朝细分
+      { id: 'nan_song', shortName: '宋', name: '南朝·宋', period: '420—479年', start: 420, end: 479, track: 0, color: '#2E6E5E', founder: '宋武帝刘裕', desc: '刘裕代晋建立，史称刘宋，是南朝宋、齐、梁、陈四朝中疆域最广、历时最久的朝代。', detail: '刘裕出身寒门北府兵将领，曾北伐灭南燕、后秦，收复洛阳与长安；其子宋文帝刘义隆在位三十年，整顿吏治、劝课农桑，江南出现“元嘉之治”的富庶景象，谢灵运开创山水诗派，范晔撰成《后汉书》。', impact: '开启南朝寒人掌机要与江南经济繁荣的新阶段。' },
+      { id: 'nan_qi', shortName: '齐', name: '南朝·齐', period: '479—502年', start: 479, end: 502, track: 0, color: '#387A68', founder: '齐高帝萧道成', desc: '萧道成代宋建齐，史称萧齐或南齐，齐武帝时期出现“永明之治”。', detail: '萧道成与齐武帝萧赜提倡节俭，开展“检籍”整顿户籍赋役，与北魏保持和平互市；竟陵王萧子良招揽沈约、谢朓等“竟陵八友”，发现汉语四声八病规律，创立“永明体”新体诗，为唐代律诗奠定格律基础。', impact: '中国古典近体格律诗的声律理论在南齐走向成熟。' },
+      { id: 'nan_liang', shortName: '梁', name: '南朝·梁', period: '502—557年', start: 502, end: 557, track: 0, color: '#428774', founder: '梁武帝萧衍', desc: '萧衍代齐建梁，前期享国四十余年和平昌盛，晚年因“侯景之乱”导致江南盛景毁于一旦。', detail: '梁武帝萧衍博学能文，前期勤于政务、兴办国学，昭明太子萧统编纂《昭明文选》，刘勰著《文心雕龙》，建康佛寺林立（“南朝四百八十寺”）；548年东魏降将侯景举兵叛乱攻破建康台城，梁武帝饿死，江南人口十损七八。', impact: '侯景之乱彻底摧垮了六朝门阀士族，使南北实力对比发生根本逆转。' },
+      { id: 'nan_chen', shortName: '陈', name: '南朝·陈', period: '557—589年', start: 557, end: 589, track: 0, color: '#4D9480', founder: '陈武帝陈霸先', desc: '陈霸先平定侯景之乱后代梁建陈，依靠江南本土豪强维持偏安，589年被隋朝攻灭。', detail: '陈朝立国时已失去巴蜀、荆襄与江北淮南之地，仅保长江以南狭小疆域；陈武帝、陈文帝、陈宣帝励精图治恢复生产，但末主陈叔宝荒于酒色，589年隋军韩擒虎、贺若弼渡江攻入建康，南北朝分裂终结。', impact: '南朝最后一个政权，在江南战后废墟上抢救保存了六朝文化余脉。' },
+
+      { id: 'beiwei', shortName: '北魏', name: '北魏', period: '386—534年', start: 386, end: 534, track: 1, color: '#395A7F', founder: '道武帝拓跋珪 / 孝文帝元宏', desc: '鲜卑拓跋氏建立的北方强朝，439年统一北方，孝文帝改革实现了波澜壮阔的北方民族大交融。', detail: '道武帝拓跋珪定都平城（山西大同），太武帝拓跋焘灭胡夏、北燕、北凉统一北方；冯太后与孝文帝元宏先后推行均田制、三长制与俸禄制，494年迁都洛阳，全面改鲜卑姓为汉姓、禁胡服胡语、通胡汉婚姻；晚年因“六镇起义”与河阴之变分裂为东魏、西魏。', impact: '均田制直接为北齐、北周、隋、唐所继承，云冈石窟与龙门石窟辉映千古。' },
+      { id: 'dongwei_beiqi', shortName: '东魏北齐', name: '东魏 → 北齐', period: '534—577年', start: 534, end: 577, track: 1, color: '#4A698C', founder: '高欢(奠基) / 文宣帝高洋', desc: '高欢挟北魏孝静帝迁都邺城建东魏，550年其子高洋代东魏建北齐，据有富庶的华北平原与山西。', detail: '东魏与北齐继承了北魏洛阳与河北的雄厚经济基础，农业、盐铁与瓷器业发达，军事上拥有骁勇的鲜卑六镇精兵（斛律光、高长恭兰陵王）；颁布的《北齐律》篇目精炼、科条简要，但后期君主荒暴内乱，577年被北周武帝攻灭。', impact: '《北齐律》确定“重罪十条”（十恶），成为隋《开皇律》与《唐律疏议》的直接蓝本。' },
+      { id: 'xiwei_beizhou', shortName: '西魏北周', name: '西魏 → 北周', period: '535—581年', start: 535, end: 581, track: 2, color: '#2B4766', founder: '宇文泰(奠基) / 周武帝宇文邕', desc: '宇文泰在关中立西魏，557年宇文氏代西魏建北周，以关中之地由弱变强，最终兼并北齐与巴蜀。', detail: '面对东魏压倒性优势，宇文泰任用苏绰推行“六条诏书”整顿吏治、革新文风，并创立兵农合一的“府兵制”与八柱国十二大将军体系，将鲜卑武人与关陇汉族豪强融合成“关陇集团”。周武帝宇文邕亲政后推行灭佛强国，于577年一举攻灭北齐统一北方，581年外戚杨坚代周建隋。', impact: '孕育出隋、唐两大帝国的统治核心——关陇集团与府兵制。' },
+
+      // 五代十国细分
+      { id: 'houliang', shortName: '梁', name: '后梁', period: '907—923', start: 907, end: 923, track: 0, color: '#7D5836', founder: '梁太祖朱温', desc: '907年朱温废唐哀帝称帝，国号大梁，定都开封，为五代之首。', detail: '朱温原为黄巢起义军将领，降唐后受封宣武军节度使，以开封为基地兼并中原，与盘踞河东（山西）的李克用、李存勖父子展开长达数十年的梁晋争霸，923年被李存勖奇袭开封攻灭。', impact: '正式开启以开封（汴梁）为全国政治漕运中心的时代。' },
+      { id: 'houtang', shortName: '唐', name: '后唐', period: '923—936', start: 923, end: 936, track: 0, color: '#8C6239', founder: '唐庄宗李存勖 / 明宗李嗣源', desc: '沙陀李存勖以复兴唐室为号召灭后梁建后唐，定都洛阳，是五代中疆域最广的朝代。', detail: '李存勖骁勇善战，灭后梁、平前蜀，威震南方诸国，但称帝后宠信伶人导致兵变身亡；其养兄唐明宗李嗣源即位后勤俭恤民，中原获得数年小康，并由宰相冯道主持用雕版刻印儒家《九经》。', impact: '官刻儒家《九经》推动了雕版印刷术的普及。' },
+      { id: 'houjin', shortName: '晋', name: '后晋', period: '936—947', start: 936, end: 947, track: 0, color: '#6E5A4F', founder: '晋高祖石敬瑭', desc: '河东节度使石敬瑭向契丹称臣割地、借兵灭后唐所建，定都开封。', detail: '936年石敬瑭为换取契丹太宗耶律德光发兵相助，自称“儿皇帝”并将幽、蓟、云、朔等燕云十六州割让契丹；石敬瑭死后，出帝石重贵提出“称孙不称臣”，引发契丹大举南下，947年开封陷落，后晋灭亡。', impact: '燕云十六州割让使中原门户洞开，成为此后北宋国防的最大隐患。' },
+      { id: 'houhan', shortName: '汉', name: '后汉', period: '947—951', start: 947, end: 951, track: 0, color: '#5A4A42', founder: '汉高祖刘知远', desc: '契丹灭后晋遭中原百姓反抗北撤后，河东节度使刘知远在太原称帝并收复开封，国祚仅四年。', detail: '刘知远建国次年即病逝，隐帝刘承祐猜忌辅政大臣，诛杀枢密使杨邠、史弘肇并密诏杀邺都留守郭威全家，引发郭威起兵入汴，后汉灭亡（其弟刘崇在太原建立十国之一的北汉）。', impact: '迅速结束了契丹铁骑入主中原造成的混乱。' },
+      { id: 'houzhou', shortName: '周', name: '后周', period: '951—960', start: 951, end: 960, track: 0, color: '#4A3B32', founder: '周太祖郭威 / 周世宗柴荣', desc: '郭威建立，经周世宗柴荣大刀阔斧改革，成为五代中最清明强盛的朝代。', detail: '郭威出身寒微，推行减轻赋税、废除苛法；养子周世宗柴荣即位后提出“十年开拓天下，十年养百姓，十年致太平”，高平之战亲冒矢石整肃禁军（殿前司），限制寺院括民户铸铜钱，三征南唐尽得江北十四州，北伐契丹四十二天收复莫、瀛、易三州与瓦桥三关，惜于北伐途中病逝。', impact: '为北宋统一天下训练了强大的殿前禁军并打下坚实基础。' },
+      { id: 'shiguo_1', shortName: '前蜀南唐', name: '十国(前蜀/后蜀/南吴/南唐)', period: '907—975年', start: 907, end: 975, track: 1, color: '#3E6E5E', founder: '王建 / 孟知祥 / 杨行密 / 李昪(李煜)', desc: '盘踞巴蜀与江淮江南的富庶政权，战乱较少，文化艺术极盛。', detail: '王建、孟知祥先后在成都建立前蜀、后蜀，花蕊夫人、黄筌花鸟画与《花间集》词派闻名天下；杨行密据扬州建南吴，徐知诰（李昪）代吴建南唐，定都金陵（南京），南唐中主李璟、后主李煜将五代词推向艺术巅峰，顾闳中绘传世名作《韩熙载夜宴图》。', impact: '巴蜀与江南成为当时中国文化的保存地与创新中心。' },
+      { id: 'shiguo_2', shortName: '吴越诸国', name: '十国(吴越/楚/闽/南汉/北汉)', period: '907—979年', start: 907, end: 979, track: 2, color: '#2F5E6E', founder: '钱镠 / 马殷 / 王审知 / 刘龑 / 刘崇', desc: '钱镠建立的吴越国及湖湘马楚、福建闽国、岭南南汉、河东北汉。', detail: '钱镠在杭州建立吴越国，奉行“保境安民”国策，筑钱塘江石塘海塘、疏浚太湖西湖，使两浙成为人间天堂，并于978年“纳土归宋”使江南百姓免遭兵燹；马殷在湖南鼓励茶商贸易，王审知开发福建福州与泉州海外贸易。', impact: '钱氏吴越修水利、重文教的传统造就了宋明清以来江浙人才辈出的盛况。' },
+
+      // 宋辽夏金并立
+      { id: 'beisong', shortName: '北宋', name: '北宋', period: '960—1127年', start: 960, end: 1127, track: 0, color: '#2C6E7A', founder: '宋太祖赵匡胤', desc: '定都东京开封，结束五代十国分裂，文治昌盛、科技商业空前繁荣，享国一百六十七年。', detail: '宋太祖、宋太宗采取“先南后北”方针相继平定荆湖、后蜀、南汉、南唐、吴越与北汉；内政上分割相权（二府三司制）、派文臣知州并设通判监督、设转运使收地方财权，彻底根除藩镇割据。仁宗、神宗时期范仲淹庆历新政与王安石变法相继推进，苏轼、欧阳修、司马光、张载、沈括等大师云集，张择端《清明上河图》定格了汴京百万人口的繁华盛景。', impact: '开创中国科举文官社会与市民商品经济的黄金时代。' },
+      { id: 'nansong', shortName: '南宋', name: '南宋', period: '1127—1279年', start: 1127, end: 1279, track: 0, color: '#367F8C', founder: '宋高宗赵构', desc: '北宋靖康之变后赵构南渡临安（杭州）建立，与金朝隔秦岭淮河对峙，后期抗击蒙古长达四十余年。', detail: '南宋初期岳飞、韩世忠、吴玠、刘锜等中兴四将多次挫败金军南侵，绍兴议和、隆兴和议后南北维持长期稳定；江南农业实现“苏湖熟，天下足”，泉州、广州、明州市舶司海外贸易收入占朝廷财政重要比重，朱熹集理学之大成，辛弃疾、陆游、李清照词作千古传唱。1234年联蒙灭金后独立抵抗蒙古大军，钓鱼城之战与襄阳保卫战震动世界，1279年崖山海战陆秀夫负少帝蹈海殉国。', impact: '正式完成中国古代经济与文化重心南移的历史进程，海上丝绸之路臻于极盛。' },
+      { id: 'liao', shortName: '辽', name: '辽朝(契丹)', period: '907—1125年', start: 907, end: 1125, track: 1, color: '#6E4C7A', founder: '辽太祖耶律阿保机', desc: '契丹族耶律阿保机建立的北方强盛王朝，全盛时疆域东起日本海、西至阿尔泰山、南达河北雁门关。', detail: '阿保机重用汉人韩延徽建城郭、创契丹大小字；辽太宗取得燕云十六州后，首创“北面官治宫帐部族属国，南面官治汉人州县租赋军马”的因俗而治制度，实行五京制与四时捺钵游动行政中心。1005年与北宋订立澶渊之盟，保持百余年和平互市，应县木塔等辽代建筑留存至今；1125年被新兴金朝攻灭（耶律大石西迁中亚建立西辽）。', impact: '促进整个中国北方草原与燕云地区的深度开发，“契丹(Cathay)”成为中世纪西方对中国的称呼。' },
+      { id: 'xixia', shortName: '西夏', name: '西夏(党项)', period: '1038—1227年', start: 1038, end: 1227, track: 2, color: '#9E5A24', founder: '夏景宗李元昊', desc: '党项族在西北宁夏、甘肃、青海及陕北一带建立的王朝，定都兴庆府（今银川），历十帝一百九十年。', detail: '党项拓跋氏唐末因助唐平黄巢受赐李姓；1038年李元昊正式称帝建大夏，创制结构繁复的西夏文字，仿唐宋官制设立中书省、枢密院，编译《天盛改旧新定律令》。西夏在好水川、三川口等战役击败宋军后形成宋、辽、夏三足鼎立，1227年被成吉思汗蒙古大军攻灭。', impact: '融合汉藏回鹘文化，留下了宏伟的西夏王陵、黑水城文献与莫高窟西夏壁画。' },
+      { id: 'jin_dynasty', shortName: '金', name: '金朝(女真)', period: '1115—1234年', start: 1115, end: 1234, track: 1, color: '#8C6D1F', founder: '金太祖完颜阿骨打', desc: '生女真完颜部在白山黑水间崛起建立，十年内连灭辽朝与北宋，统治中国北方百余年。', detail: '1115年完颜阿骨打在会宁府（黑龙江阿城）称帝建大金，推行猛安谋克兵农合一制；1153年海陵王完颜亮将都城迁至燕京并改称“中都”（今北京），首次开启北京作为王朝正式都城的历史；金世宗完颜雍与金章宗时期政治清明、文化繁荣，史称“大定明昌之治”，出现元好问等文学大家。1234年在蔡州被蒙宋联军攻灭。', impact: '确立北京作为大一统国家都城的历史起点，加速东北与中原的一体化融合。' },
+      { id: 'menggu', shortName: '蒙古', name: '大蒙古国', period: '1206—1271年', start: 1206, end: 1271, track: 2, color: '#395A7F', founder: '成吉思汗铁木真', desc: '1206年铁木真统一蒙古草原各部，在斡难河源忽里勒台大会上被推举为成吉思汗，建立大蒙古国。', detail: '成吉思汗创制怯薛军护卫与千户百户制，颁布《大扎撒》，先后发动西征并南下灭西夏；窝阔台汗时期于1234年灭金、1247年凉州会盟使吐蕃归附；蒙哥汗时期忽必烈率军平定云南大理国；1271年忽必烈遵用汉法改国号为“大元”。', impact: '打破欧亚大陆地理阻隔，为元朝大一统奠定基业。' }
+    ];
+
+    /********************************************************************
+     * 3. 重大历史事件数据
+     * - shortTitle: 专为竹简竖排设计的 4字凝练标题
+     * - title: 完整标题
+     * - desc: 核心摘要
+     * - detail: 历史背景、来龙去脉与细节扩展（支持向下深度阅读）
+     * - impact: 史家评述与历史遗产
+     ********************************************************************/
+    const HISTORICAL_EVENTS = [
+      { id: 'e1', year: -2070, period: '夏朝', shortTitle: '大禹建夏', title: '大禹治水与夏朝建立', category: '政治变革', figure: '大禹、姒启、伯益',
+        desc: '大禹改堵为疏平定黄河水患，受舜禅让；禹死后其子启击败伯益继承王位，废除禅让制，开创“家天下”的夏王朝。',
+        detail: '尧舜时期黄河流域洪水泛滥，禹之父鲧采用障水堵截法九年无功。大禹总结教训，耗时十三年“三过家门而不入”，率领各部落疏通九河、导水入海，并划分天下为九州、铸造九鼎象征王权。禹在钧台（今河南禹州）大会诸侯；及至启继位，在甘之战中击败有扈氏，正式确立父死子继、兄终弟及的王位世袭法则。',
+        impact: '公天下变为家天下，部落联盟正式演进为早期国家形态。' },
+      { id: 'e2', year: -1600, period: '商朝', shortTitle: '商汤灭夏', title: '鸣条之战商汤灭夏', category: '军事风云', figure: '商汤(子履)、伊尹、夏桀',
+        desc: '商部落首领汤任用贤相伊尹，整顿国政，联合各方诸侯于鸣条之战一举击溃夏桀主力，建立商朝。',
+        detail: '夏朝末代君主夏桀骄奢暴虐，自比天上太阳，百姓怨声载道（“时日曷丧，予及汝皆亡”）。商族在黄河下游积蓄力量，伊尹以“庖厨之道”借喻治国方略辅佐商汤，先剪除夏桀羽翼韦、顾、昆吾三小国，最终在鸣条（今山西运城夏县一带）展开决战。夏桀战败逃亡南巢而死，商汤在亳都建立商王朝，并作《汤诰》宣示革除夏弊。',
+        impact: '开创中国历史上第一次成功的王朝革政，奠定贵族贤相辅政传统。' },
+      { id: 'e3', year: -1300, period: '商朝', shortTitle: '盘庚迁殷', title: '盘庚迁殷与甲骨鼎盛', category: '文明盛世', figure: '商王盘庚、武丁、妇好',
+        desc: '商王盘庚力排众议将都城迁至殷（今河南安阳），结束商朝前期屡次迁都的动荡，开启殷商二百七十余年繁盛期。',
+        detail: '自商汤建国至盘庚即位前，商朝因水患与王室九世之乱先后五次迁都。盘庚决意渡河北迁至洹水之滨的殷地（《尚书·盘庚》三篇即记录此事），此后商朝又被称为“殷”或“殷商”。至商王武丁时期，商朝开疆拓土、百工兴旺，王后妇好曾亲自统率一万三千大军出征，安阳殷墟出土的甲骨卜辞与后母戊大方鼎集中展现了这一时期的辉煌文明。',
+        impact: '殷墟甲骨文与青铜礼器群成为中华三千余年信史的铁证。' },
+      { id: 'e4', year: -1046, period: '西周', shortTitle: '武王伐纣', title: '牧野之战与周公制礼', category: '政治变革', figure: '周武王姬发、姜尚、周公旦',
+        desc: '周武王趁商纣王主力远征东夷、朝歌空虚之际，率兵车三百乘、虎贲三千人东进，于牧野之战灭商建周。',
+        detail: '公元前1046年正月，周武王在太公望（姜子牙）、周公旦辅佐下于孟津会合庸、蜀、羌、髳等西方诸部，直扑商都朝歌郊外的牧野（今河南新乡）。商纣王临时武装大批奴隶与战俘迎战，阵前倒戈引周军入城，纣王于鹿台自焚。武王早逝后，周公旦摄政七年，东征平定管蔡与武庚叛乱，营建东都洛邑，推行分封制、宗法制并制礼作乐。',
+        impact: '确立“以德配天、敬天保民”的政治哲学与华夏宗法礼乐秩序。' },
+      { id: 'e5', year: -770, period: '东周', shortTitle: '平王东迁', title: '周平王东迁开启春秋', category: '政治变革', figure: '周平王姬宜臼、秦襄公、晋文侯',
+        desc: '西周幽王废申后与太子宜臼引发犬戎攻破镐京，周平王在晋、秦、郑、卫诸侯护卫下东迁洛邑，史称东周。',
+        detail: '前771年周幽王因宠爱褒姒“烽火戏诸侯”并废嫡立庶，申侯联合犬戎攻入宗周镐京，幽王被杀于骊山之下。次年（前770年），太子姬宜臼即位为周平王，因关中残破，遂将国都东迁至成周洛邑（今洛阳），并将岐丰故地封赐护驾有功的秦襄公。东迁后周王室直辖土地与兵力锐减，地位降至与中等诸侯相当。',
+        impact: '周天子天下共主权威旁落，正式拉开春秋五霸与战国七雄争霸兼并的序幕。' },
+      { id: 'e6', year: -500, period: '春秋', shortTitle: '百家争鸣', title: '孔子创私学与百家争鸣', category: '文明盛世', figure: '孔子、老子、墨子、孟子、庄子',
+        desc: '春秋战国之际“学在官府”格局打破，孔子首创私学提倡“有教无类”，诸子百家在思想舞台上争奇斗艳。',
+        detail: '鲁国孔子（前551—前479）提出以“仁”为核心、以“礼”为规范的儒家学说，整理《诗》《书》《礼》《易》《春秋》，门下弟子三千、贤者七十二；老子著《道德经》阐发“道法自然、无为而治”；墨子倡导“兼爱、非攻、尚贤、节用”；战国时期孟子倡仁政、荀子隆礼重法、庄子齐物逍遥、韩非集法家大成、孙武与孙膑奠定兵学圣典。',
+        impact: '与古希腊哲学、古印度佛教并称为人类文明“轴心时代”，塑造了中华民族的思维底色。' },
+      { id: 'e7', year: -403, period: '战国', shortTitle: '三家分晋', title: '三家分晋与田氏代齐', category: '政治变革', figure: '韩虔、赵籍、魏斯、田和',
+        desc: '公元前403年，周威烈王正式册命晋国大夫韩虔、赵籍、魏斯为诸侯，司马光《资治通鉴》以此作为战国时代开端。',
+        detail: '晋国自春秋中后期以来大权逐渐落入六卿（智、范、中行、韩、赵、魏）之手。前453年晋阳之战中，韩、赵、魏三家合谋反戈灭掉最强盛的智伯瑶，瓜分晋国疆土；前403年三家正式获周王室册封列为诸侯，随后齐国权臣田和亦取代姜姓齐国（田氏代齐），战国七雄并立格局完全定型。',
+        impact: '彻底宣告西周宗法分封旧秩序的崩解，开启各国实力竞争与变法图强的新纪元。' },
+      { id: 'e8', year: -356, period: '战国·秦', shortTitle: '商鞅变法', title: '商鞅变法秦国崛起', category: '政治变革', figure: '秦孝公、商鞅(公孙鞅)',
+        desc: '秦孝公发布《求贤令》，任用卫鞅（商鞅）于前356年和前350年先后两次推行全面变法，使秦国由弱变强。',
+        detail: '商鞅以“治世不一道，便国不法古”驳倒守旧贵族，城门立木取信于民。变法核心包括：废除井田制、承认土地私有并允许买卖；废除世卿世禄制、实行二十等军功爵制（宗室无军功不得列入属籍）；奖励农耕织帛、重农抑商；普遍推行县制（设三十一县）与什伍连坐法；统一度量衡（商鞅方升）并迁都咸阳。',
+        impact: '建立起战国时代最高效的耕战国家机器，为百年后秦统一六国奠定决定性基础。' },
+      { id: 'e9', year: -221, period: '秦朝', shortTitle: '秦扫六合', title: '秦王扫六合天下一统', category: '政治变革', figure: '秦始皇嬴政、李斯、王翦、蒙恬',
+        desc: '前230年至前221年，秦王嬴政先后攻灭韩、赵、魏、楚、燕、齐六国，建立中国历史上第一个大一统中央集权帝国。',
+        detail: '嬴政亲政后平定嫪毐之乱、罢免吕不韦，任用李斯、尉缭、王翦、王贲父子，采取“远交近攻、各个击破”战略，十年间吞并山东六国。统一后嬴政自认“德兼三皇，功过五帝”，首创“皇帝”尊号；采纳李斯建议废分封、设三十六郡；以小篆统一文字，以圆形方孔半两钱统一货币，修筑直道驰道与万里长城，派蒙恬北逐匈奴七百里。',
+        impact: '终结长达五百余年的诸侯割据，确立大一统中央集权与郡县官僚制度。' },
+      { id: 'e10', year: -202, period: '西汉', shortTitle: '刘邦建汉', title: '垓下之战与西汉建立', category: '军事风云', figure: '汉高祖刘邦、项羽、韩信、张良、萧何',
+        desc: '历经四年楚汉战争，刘邦联合韩信、彭越等于垓下合围西楚霸王项羽，随后在定陶称帝建立汉朝，定都长安。',
+        detail: '秦末大起义中，项羽在巨鹿之战破釜沉舟击溃秦军主力，刘邦则率军先入关中约法三章。鸿门宴后，刘邦拜韩信为大将，“明修栈道，暗度陈仓”重夺关中；韩信先后平定魏、代、赵、燕、齐，萧何坐镇关中保障粮饷，张良运筹帷幄。前202年楚军在垓下陷入“四面楚歌”绝境，项羽突围至乌江自刎，刘邦即皇帝位，开启大汉四百年基业。',
+        impact: '结束秦末战乱，汉初黄老休养生息政策迅速恢复了中原社会生机。' },
+      { id: 'e11', year: -138, period: '西汉', shortTitle: '张骞西域', title: '张骞凿空西域与北击匈奴', category: '对外开拓', figure: '汉武帝刘彻、张骞、卫青、霍去病',
+        desc: '汉武帝改变汉初和亲守势，派张骞于前138年与前119年两次出使西域，同时命卫青、霍去病北击匈奴，打通丝绸之路。',
+        detail: '张骞首次奉命出使大月氏，途中被匈奴扣留十余年仍持汉节不失，历尽艰辛抵达大宛、康居、大月氏、大夏，耗时十三载归汉，史称“凿空西域”。与此同时，卫青、霍去病率汉军铁骑发起漠南、河西、漠北三大战役，霍去病封狼居胥，河西走廊设立武威、张掖、酒泉、敦煌四郡。前60年汉宣帝正式设立西域都护府。',
+        impact: '新疆地区正式纳入中央版图，丝绸之路贯通长安与罗马，开启东西方文明大交流。' },
+      { id: 'e12', year: 25, period: '东汉', shortTitle: '光武中兴', title: '刘秀建东汉与光武中兴', category: '政治变革', figure: '汉光武帝刘秀、邓禹、冯异、马援',
+        desc: '西汉宗室刘秀在昆阳之战以少胜多击溃王莽主力，公元25年称帝定都洛阳，历时十余年削平群雄重归大一统。',
+        detail: '公元23年昆阳之战中，刘秀率数千敢死队冲破王莽四十二万大军。称帝后，刘秀先后平定赤眉、河北王郎、陇西隗嚣与巴蜀公孙述。天下既定，刘秀“善待功臣（云台二十八将）而不任以吏事”，先后九次下诏释放奴婢、禁止残害奴婢，将田租恢复为三十税一，裁并四百余县，精简官僚，使全国户口与经济迅速恢复。',
+        impact: '创造了中国历史上政权平稳重建与功臣善终的典范，史称“光武中兴”。' },
+      { id: 'e13', year: 105, period: '东汉', shortTitle: '蔡伦造纸', title: '蔡伦改进造纸术', category: '文明盛世', figure: '蔡伦',
+        desc: '元兴元年（105年），东汉尚方令蔡伦总结前人经验，采用树皮、麻头、破布、旧渔网造纸，奏报汉和帝后向全国推广。',
+        detail: '在造纸术普及之前，先秦两汉书写主要依赖笨重的竹木简牍或昂贵的丝织缣帛（西汉虽已出现早期麻纸但质地粗糙）。蔡伦主持宫廷手工作坊，通过挫、捣、抄、烘等系统工序，造出轻薄柔韧、洁白平滑且成本低廉的植物纤维纸，被天下誉为“蔡侯纸”。',
+        impact: '彻底革新了人类知识的记录与传播方式，对世界文明进步产生了不可估量的推动作用。' },
+      { id: 'e14', year: 208, period: '汉末三国', shortTitle: '赤壁之战', title: '赤壁之战奠定三分天下', category: '军事风云', figure: '周瑜、诸葛亮、曹操、孙权、刘备',
+        desc: '建安十三年（208年），孙权、刘备组成五万联军，在长江赤壁（今湖北赤壁）以黄盖诈降火攻大破曹操二十余万南下大军。',
+        detail: '曹操统一北方后挥师南下荆州，刘备败退夏口，派诸葛亮赴柴桑联吴。孙权听取鲁肃、周瑜与诸葛亮剖析，决意抗曹。曹军多北方士卒，不习水战且疾疫流行，将战船首尾铁索相连；周瑜采纳黄盖火攻之计，借东南风烈火烧毁曹军战船并水陆追击，曹操败走华容道退回北方。战后刘备据有荆州江南四郡并进而入主益州，孙权巩固江东。',
+        impact: '中国军事史上以少胜多的巅峰之战，直接奠定魏、蜀、吴三国鼎立战略格局。' },
+      { id: 'e15', year: 220, period: '三国·曹魏', shortTitle: '曹丕建魏', title: '曹丕受禅代汉建曹魏', category: '政治变革', figure: '魏文帝曹丕、汉献帝刘协、陈群',
+        desc: '延康元年（220年）十月，汉献帝刘协禅让帝位，魏王曹丕在繁阳筑受禅台正式称帝，国号大魏，改元黄初，定都洛阳。',
+        detail: '220年正月曹操在洛阳病逝，太子曹丕嗣位魏王、丞相。吏部尚书陈群提出“九品官人法”（九品中正制），在各州郡设大小中正官按家世与才能品评人才，赢得颍川、汝南等中原世家大族鼎力支持。同年十月曹丕三辞三让后登基称帝，封刘协为山阳公，东汉王朝正式落幕。',
+        impact: '标志中国历史正式进入三国时期，九品中正制深刻影响了此后三百余年的门阀政治。' },
+      { id: 'e16', year: 221, period: '三国·蜀汉', shortTitle: '刘备建蜀', title: '刘备成都称帝建蜀汉', category: '政治变革', figure: '汉昭烈帝刘备、诸葛亮、张飞、赵云',
+        desc: '章武元年（221年）四月，刘备在成都武担山之南即皇帝位，延续汉室国号，史称蜀汉，拜诸葛亮为丞相。',
+        detail: '曹丕代汉消息传至蜀中并伴随汉献帝遇害传闻，蜀中群臣劝进，刘备遂以汉室宗亲身份在成都称帝。同年刘备为夺回荆州、替关羽报仇，亲率大军东征孙权，于222年夷陵（猇亭）之战被东吴陆逊火攻击败，次年病逝于白帝城永安宫，临终向诸葛亮托孤。诸葛亮随后恢复吴蜀联盟、南征平定孟获，并于228年起北伐曹魏。',
+        impact: '保存汉家正朔旗帜，诸葛亮治蜀使巴蜀农桑与蜀锦经济高度发达。' },
+      { id: 'e17', year: 229, period: '三国·东吴', shortTitle: '孙权建吴', title: '孙权称帝定都建业', category: '政治变革', figure: '吴大帝孙权、陆逊、顾雍、卫温',
+        desc: '孙权于222年建年号黄武称吴王，229年在武昌正式称帝，国号大吴，同年迁都建业（今南京），与蜀汉盟约中分天下。',
+        detail: '父兄孙坚、孙策奠定江东六郡基业后，孙权在张昭、周瑜、鲁肃、吕蒙、陆逊、顾雍辅佐下深耕江南，吸纳江东大族（顾、陆、朱、张）参政，征服山越扩充户籍与兵源。230年（黄龙二年），孙权派遣将军卫温、诸葛直率领甲士万人乘大船队远航到达夷洲（今台湾），这是中国正史文献关于大陆与台湾官方往来的最早明确记载。',
+        impact: '开启南京“六朝古都”辉煌历史，大幅推进江南水网与东南沿海开发。' },
+      { id: 'e18', year: 263, period: '三国·灭蜀', shortTitle: '邓艾灭蜀', title: '邓艾偷渡阴平魏灭蜀汉', category: '军事风云', figure: '邓艾、钟会、姜维、诸葛瞻、刘禅',
+        desc: '景元四年（263年），曹魏掌权者司马昭发兵十八万三路伐蜀，邓艾率精兵偷渡阴平摩天岭直取成都，蜀汉灭亡。',
+        detail: '魏军统帅钟会率主力十余万进攻汉中，蜀汉大将军姜维退守剑阁天险阻击钟会大军，双方陷入僵持。曹魏征西将军邓艾则率精锐自阴平（今甘肃文县）出发，凿山通道七百里，以毡自裹滚下摩天岭悬崖，奇袭江油，在绵竹击杀诸葛亮之子诸葛瞻，兵临成都城下，后主刘禅开城出降，蜀汉立国四十三年而亡。',
+        impact: '持续四十余年的魏蜀吴三分天下格局被打破，全国统一进程全面提速。' },
+      { id: 'e19', year: 266, period: '西晋', shortTitle: '三国归晋', title: '司马炎建晋与灭吴统一', category: '政治变革', figure: '晋武帝司马炎、羊祜、杜预、王濬',
+        desc: '266年司马炎迫魏元帝禅让建立西晋；280年晋军六路南下，王濬楼船直取建业，东吴孙皓出降，“三国尽归司马氏”。',
+        detail: '司马懿、司马师、司马昭父子三代掌控曹魏大权后，司马炎于266年正式代魏建晋，定都洛阳。为平定东吴，羊祜镇守襄阳怀柔吴人、积蓄粮草，临终推荐杜预自代，王濬则在巴蜀督造巨型战船。279年冬杜预、王濬等水陆二十万大军顺江东下，铁锁横江被火炬熔断，“王濬楼船下益州，金陵王气黯然收”，三国乱世终归统一。',
+        impact: '结束东汉末年以来近百年的分裂战乱，开启短暂繁荣的西晋“太康之治”。' },
+      { id: 'e20', year: 311, period: '两晋十六国', shortTitle: '衣冠南渡', title: '永嘉之乱与东晋衣冠南渡', category: '政治变革', figure: '刘聪、司马睿、王导、祖逖',
+        desc: '八王之乱耗尽西晋国力，311年匈奴汉赵攻破洛阳俘晋怀帝（永嘉之乱）；317年司马睿在建康建立东晋，北方进入十六国时期。',
+        detail: '晋惠帝时期爆发长达十六年的“八王之乱”，内迁的匈奴、鲜卑、羯、氐、羌纷纷起兵（304年成汉李雄与汉赵刘渊建国）。永嘉五年（311年）刘聪遣石勒、王弥攻陷洛阳，316年长安亦陷落，西晋灭亡。琅琊王司马睿在北方大族王导、王敦兄弟辅佐下南渡建康（南京），联合江南顾、贺等士族重建晋廷，中原百万士庶随之举族南迁，并在江南设置侨州郡县。',
+        impact: '中国历史上第一次大规模北人南迁浪潮，江南由此从边鄙之地跃升为经济文化重镇。' },
+      { id: 'e21', year: 383, period: '东晋·前秦', shortTitle: '淝水之战', title: '淝水之战东晋破前秦', category: '军事风云', figure: '谢安、谢玄、谢石、苻坚、王猛',
+        desc: '太元八年（383年），统一北方的前秦天王苻坚率步骑八十余万南下伐晋，东晋宰相谢安命谢玄、谢石率八万北府兵于淝水大破秦军。',
+        detail: '前秦苻坚在汉臣王猛辅佐下统一北方后，急于灭晋完成全国统一，“投鞭足以断流”。东晋朝野震恐，谢安镇定指挥，派侄子谢玄率领由北方南迁流民组成的精锐“北府兵”迎战。刘牢之先于洛涧奇袭破敌，随后在淝水（今安徽寿县）隔岸对峙时，谢玄提议秦军稍退以便晋军渡河决战，苻坚企图半渡而击，不料秦军后撤时朱序高喊“秦军败矣”，北府兵乘势渡水猛攻，秦军溃不成军，“风声鹤唳，草木皆兵”。',
+        impact: '保住江南汉族政权与六朝文化免遭兵燹，北方再次分裂，为北魏崛起提供了契机。' },
+      { id: 'e22', year: 420, period: '南北朝', shortTitle: '南北对峙', title: '刘裕建宋与北魏统一北方', category: '政治变革', figure: '宋武帝刘裕、北魏太武帝拓跋焘',
+        desc: '420年东晋权臣刘裕代晋建立南朝宋，随后439年鲜卑北魏太武帝灭北凉统一北方，中国历史正式进入南北朝对峙时代。',
+        detail: '刘裕出身京口寒门，凭北府兵战功平定孙恩、桓玄之乱，先后北伐攻灭南燕、后秦，一度收复洛阳与长安，威震天下。420年刘裕受禅代晋建宋（刘宋），此后南方依次更替宋、齐、梁、陈四朝。与此同时，北方鲜卑拓跋珪于386年重建代国改称魏（北魏），至439年太武帝拓跋焘攻灭河西走廊的北凉，终结五胡十六国百余年混战。',
+        impact: '由十六国混战演进为南北两大政治集团长期对峙与竞争的格局。' },
+      { id: 'e23', year: 494, period: '北魏', shortTitle: '孝文汉化', title: '北魏孝文帝迁都洛阳汉化', category: '政治变革', figure: '北魏孝文帝元宏、冯太后',
+        desc: '太和十八年（494年），北魏孝文帝元宏借口“南伐”，力排鲜卑贵族阻挠，将都城从塞北平城（大同）南迁至中原洛阳，全面推行汉化。',
+        detail: '孝文帝自幼受汉文化熏陶，继冯太后推行均田制、三长制与整顿吏治后，认为平城偏北苦寒、“用武之地，非可文治”，遂亲率三十万大军冒秋雨南下洛阳，迫使随行鲜卑王公同意迁都。随后颁布一系列汉化诏令：朝廷禁止穿鲜卑胡服，改穿汉人冠服；三十岁以下朝臣禁止在朝堂说鲜卑语，改说汉语（中原正音）；改鲜卑复姓为单音汉姓（拓跋氏改姓元、独孤改刘、步六孤改陆）；定鲜卑八大贵族与汉族四姓门阀联姻，迁葬籍贯一律落户洛阳。',
+        impact: '中国民族融合史上最辉煌的篇章，直接为隋唐盛世注入胡汉交融的蓬勃生命力。' },
+      { id: 'e24', year: 534, period: '南北朝', shortTitle: '魏分东西', title: '北魏分裂与南朝侯景之乱', category: '军事风云', figure: '高欢、宇文泰、梁武帝萧衍、侯景',
+        desc: '534年北魏分裂为高欢掌控的东魏（后为北齐）与宇文泰掌控的西魏（后为北周）；548年南朝梁爆发侯景之乱，南北实力彻底易位。',
+        detail: '北魏末年北方六镇鲜卑戍兵起义，尔朱荣发动“河阴之乱”屠杀洛阳朝臣；534年孝武帝西奔长安投靠宇文泰（西魏），高欢则在邺城另立孝静帝（东魏）。547年东魏悍将侯景叛乱投降南朝梁武帝，次年侯景反叛围攻建康台城，梁武帝饿死宫中，江南最富庶的三吴地区惨遭洗劫，“千里绝烟，人迹罕见”。西魏、北周则乘机夺取巴蜀与江陵，形成北强南弱定局。',
+        impact: '西魏/北周关陇集团崛起并孕育隋唐，江南六朝门阀士族一蹶不振。' },
+      { id: 'e25', year: 589, period: '隋朝', shortTitle: '隋统天下', title: '隋灭陈统一与科举运河创立', category: '政治变革', figure: '隋文帝杨坚、隋炀帝杨广、高颎、韩擒虎',
+        desc: '581年杨坚代北周建隋，589年隋军南下灭陈，结束西晋永嘉之乱以来近三百年的南北分裂，开创科举制与京杭大运河。',
+        detail: '隋文帝杨坚在名相高颎辅佐下确立三省六部制（尚书、门下、内史三省与吏户礼兵刑工六部），颁布《开皇律》，废九品中正制；589年派晋王杨广、贺若弼、韩擒虎率五十一万大军渡江攻克建康灭陈。隋炀帝杨广即位后正式设进士科，开创以考试成绩选官的科举制；并动用百万民工开凿通济渠、永济渠、邗沟与江南河，连接海河、黄河、淮河、长江、钱塘江五大水系。',
+        impact: '三省六部制与科举制奠定此后一千三百年的制度框架，大运河将南北经济彻底融为一体。' },
+      { id: 'e26', year: 626, period: '唐朝', shortTitle: '贞观之治', title: '玄武门之变与贞观之治', category: '政治变革', figure: '唐太宗李世民、魏征、房玄龄、杜如晦、李靖',
+        desc: '618年李渊在长安建唐，626年秦王李世民经玄武门之变即位为唐太宗，开创政治清明、四夷宾服的“贞观之治”。',
+        detail: '李世民吸取隋亡教训，提出“水能载舟，亦能覆舟”，推行均田制与租庸调制轻徭薄赋；重用房玄龄、杜如晦（房谋杜断），鼓励魏征等谏臣犯颜直谏；命李靖、李勣北灭东突厥，西平高昌置安西都护府，文成公主入藏和亲松赞干布，西北各族共同尊奉唐太宗为“天可汗”，贞观年间出现夜不闭户、道不拾遗的升平景象。',
+        impact: '成为中国古代帝王开明治国的最高标杆，奠定大唐帝国两百余年强盛基业。' },
+      { id: 'e27', year: 690, period: '唐·武周', shortTitle: '武皇称帝', title: '武则天称帝改国号大周', category: '政治变革', figure: '武则天、狄仁杰、姚崇、宋璟',
+        desc: '天授元年（690年），武则天在神都洛阳正式登基称帝，改唐为周，成为中国历史上唯一得到正史承认的女皇帝。',
+        detail: '武则天自唐高宗时期参与朝政（二圣临朝），称帝后重用狄仁杰、娄师德、姚崇、宋璟等贤相，整顿农业生产（编撰《兆人本业记》）；在科举制度上首创皇帝亲自策问贡士的“殿试”与选拔武将的“武举”，大举提拔山东与江南寒门俊杰，进一步打破关陇贵族垄断。705年神龙政变后退位，唐朝国号恢复。',
+        impact: '“政启开元，治宏贞观”，通过科举改革推动唐代统治阶层向科举官僚全面转型。' },
+      { id: 'e28', year: 713, period: '唐朝', shortTitle: '开元盛世', title: '开元盛世与盛唐气象', category: '文明盛世', figure: '唐玄宗李隆基、姚崇、宋璟、李白、杜甫',
+        desc: '唐玄宗开元年间（713—741年），任用姚崇、宋璟、张九龄等贤相励精图治，大唐国力达到全盛巅峰，史称“开元盛世”。',
+        detail: '杜甫诗云：“忆昔开元全盛日，小邑犹藏万家室。稻米流脂粟米白，公私仓廪俱丰实。”当时全国人口突破五千万，长安城与洛阳城汇聚波斯、大食、天竺、新罗、日本使节与留学生（如阿倍仲麻吕），鉴真东渡日本弘扬佛法，李白、杜甫、王维、孟浩然、高适、岑参将唐诗推向千古绝唱，吴道子画作与张旭草书并称双绝。',
+        impact: '中华古典文明最具世界感召力的黄金时代。' },
+      { id: 'e29', year: 755, period: '唐朝', shortTitle: '安史之乱', title: '安史之乱大唐由盛转衰', category: '军事风云', figure: '安禄山、史思明、唐玄宗、郭子仪、李光弼',
+        desc: '天宝十四载（755年）冬，身兼平卢、范阳、河东三镇节度使的安禄山于幽州起兵反唐，战乱持续八年，大唐帝国由盛转衰。',
+        detail: '唐玄宗晚年倦政宠信杨贵妃与奸相李林甫、杨国忠，边疆节度使外重内轻。安禄山率十五万边军南下，连破洛阳、潼关与长安，玄宗逃往成都（马嵬驿兵变赐死杨贵妃），太子李亨在灵武即位为唐肃宗。朔方节度使郭子仪、李光弼率军浴血平叛，借回纥兵收复两京，至763年史朝义自缢叛乱方告平息，但河北三镇自此形成藩镇割据，均田制瓦解（780年杨炎改行“两税法”）。',
+        impact: '唐朝盛极而衰的历史拐点，同时促使大批北方人口南迁，江南财赋成为朝廷命脉（“赋出天下而江南居十九”）。' },
+      { id: 'e30', year: 907, period: '五代十国', shortTitle: '五代开启', title: '朱温建梁开启五代十国', category: '政治变革', figure: '朱温、李存勖、钱镠、李昪',
+        desc: '天祐四年（907年），宣武军节度使朱温废唐哀帝自立，建国号梁（后梁），定都开封，唐朝灭亡，五代十国时期正式开始。',
+        detail: '黄巢起义沉重打击了唐廷统治，降将朱温控制河南后诛杀宦官、迁都洛阳并制造“白马驿之祸”屠杀唐廷清流朝臣。907年朱温称帝后，中原在五十三年间走马灯式更替后梁、后唐、后晋、后汉、后周五个朝代；而在南方及山西，吴、南唐、吴越、前蜀、后蜀、楚、闽、南汉、荆南、北汉十个割据政权相继并立。',
+        impact: '唐代门阀世族彻底消亡，南方区域经济在十国割据开发下取得长足进步。' },
+      { id: 'e31', year: 936, period: '五代·辽', shortTitle: '割燕云州', title: '石敬瑭割让燕云十六州', category: '军事风云', figure: '石敬瑭、耶律德光、周世宗柴荣',
+        desc: '936年河东节度使石敬瑭为夺取帝位，向契丹太宗耶律德光称“儿皇帝”，并将北方长城沿线燕云十六州割让契丹。',
+        detail: '燕云十六州包括幽州（今北京）、蓟州、顺州、檀州、云州（今山西大同）、朔州、应州等战略要地，东西绵延千余里，涵盖了险峻的燕山与太行山北段长城关隘。契丹（辽）获得此地后兼具农耕财赋与铁骑优势；959年周世宗柴荣北伐虽收复莫、瀛、易三州与瓦桥三关，但幽云核心区仍由辽、金、元相继统治长达四百余年，直至1368年明军徐达北伐方才收复。',
+        impact: '使中原汉族王朝彻底失去北方天然地理屏障，直接导致北宋长期面临巨大国防压力。' },
+      { id: 'e32', year: 960, period: '北宋', shortTitle: '陈桥兵变', title: '陈桥兵变与杯酒释兵权', category: '政治变革', figure: '宋太祖赵匡胤、赵普、石守信',
+        desc: '建隆元年（960年）正月初，后周殿前都点检赵匡胤在陈桥驿被部将黄袍加身，回师开封受禅建立北宋，随后通过“杯酒释兵权”收回禁军大权。',
+        detail: '周世宗柴荣病逝后幼主柴宗训即位，赵匡胤借北汉联合契丹南下之机率禁军出征，行至开封东北陈桥驿发动兵变，兵不血刃接管政权。为彻底终结晚唐五代武人拥兵弑君夺位的恶性循环，赵匡胤采纳赵普“稍夺其权，制其钱谷，收其精兵”之策，在酒宴上劝说石守信、高怀德等禁军宿将交出兵权、回乡置办田宅安享富贵，确立文臣统兵与枢密院调兵、三衙统兵分权体制。',
+        impact: '兵不血刃终结五代战乱，确立两宋三百年“与士大夫共治天下”的文官政治格局。' },
+      { id: 'e33', year: 1005, period: '宋辽夏', shortTitle: '澶渊之盟', title: '澶渊之盟与西夏建国', category: '对外开拓', figure: '宋真宗、寇准、辽萧太后、李元昊',
+        desc: '1004年辽萧太后与辽圣宗率大军南下直抵黄河北岸澶州，北宋宰相寇准力劝宋真宗御驾亲征，次年正月双方订立“澶渊之盟”。',
+        detail: '宋真宗渡过黄河登上澶州北城楼，宋军士气大振，并以床子弩射杀辽军统帅萧挞凛。宋辽遂达成和议：宋辽结为兄弟之国（辽圣宗称宋真宗为兄），北宋每年予辽岁币银十万两、绢二十万匹，双方维持以白沟河为界并在雄州等地开设榷场互市。1038年党项族李元昊在西北称帝建立西夏，1044年宋夏亦达成“庆历和议”，形成宋、辽、西夏三足鼎立。',
+        impact: '换来宋辽之间长达一百二十年的边境和平与贸易繁荣。' },
+      { id: 'e34', year: 1044, period: '北宋', shortTitle: '活字变法', title: '毕昇活字印刷与王安石变法', category: '文明盛世', figure: '毕昇、沈括、王安石、司马光、苏轼',
+        desc: '北宋庆历年间毕昇发明胶泥活字印刷术，指南针用于航海、火药用于军事；1069年宋神宗任用王安石推行全面富国强兵变法。',
+        detail: '沈括在《梦溪笔谈》中详细记载了布衣毕昇创制胶泥活字排版印刷的全过程，“若止印三二本，未为简易；若印数十百千本，则极为神速”。与此同时，面对北宋“积贫积弱”与冗官、冗兵、冗费困局，王安石以“天变不足畏，祖宗不足法，人言不足恤”的气魄，推行青苗法、募役法、方田均税法、市易法、保甲法与将兵法，大幅增加朝廷财政收入并在熙河开边收复河湟之地。',
+        impact: '三大发明在宋代完成关键技术跨越，宋代科技、理学与文人书画臻于极境。' },
+      { id: 'e35', year: 1127, period: '南宋·金', shortTitle: '靖康南渡', title: '靖康之变与南宋岳飞抗金', category: '军事风云', figure: '完颜阿骨打、宋高宗赵构、岳飞、韩世忠',
+        desc: '1127年女真金军攻破北宋都城开封，掳走徽钦二帝（靖康之变）；康王赵构在南京应天府（后驻临安）建立南宋，岳飞等名将奋起抗金。',
+        detail: '女真完颜阿骨打于1115年建金，1125年灭辽后大举攻宋。1127年北宋灭亡，赵构南渡重建宋室。金兀术多次率军南下追击，韩世忠于黄天荡阻击金军，岳飞率“冻死不拆屋，饿死不掳掠”的岳家军收复襄阳六郡，并于1140年北伐在郾城、颍昌大破金军铁浮图与拐子马，进逼开封朱仙镇。但宋高宗与秦桧急于同金议和，以“莫须有”罪名杀害岳飞，1141年订立“绍兴和议”，宋金以秦岭—淮河为界南北对峙。',
+        impact: '岳飞精忠报国精神成为民族气节象征，大批中原人口再度南迁使江南成为全国绝对经济中心。' },
+      { id: 'e36', year: 1206, period: '大蒙古国', shortTitle: '铁木真兴', title: '成吉思汗统一草原建蒙古国', category: '军事风云', figure: '成吉思汗铁木真、木华黎、窝阔台',
+        desc: '1206年春，铁木真统一蒙古高原诸部，在斡难河源忽里勒台大会上被尊为“成吉思汗”，建立大蒙古国。',
+        detail: '铁木真早年历经部族离散磨难，凭借卓越军事统帅才能先后击败泰赤乌部、塔塔儿部、克烈部与乃蛮部，结束草原数百年混战。建国后创制千户军政合一制度，扩建一万怯薛军，命塔塔统阿以畏兀儿字创制蒙古文字，随后发动三次大规模西征并南下攻夏伐金（1227年灭西夏，1234年窝阔台联宋灭金）。',
+        impact: '建立起横跨欧亚大陆的空前版图，改写了13世纪的世界历史进程。' },
+      { id: 'e37', year: 1271, period: '元朝', shortTitle: '忽必烈元', title: '忽必烈建元与行省大一统', category: '政治变革', figure: '元世祖忽必烈、刘秉忠、伯颜、文天祥',
+        desc: '至元八年（1271年），忽必烈采纳汉臣刘秉忠建议，取《易经》“大哉乾元”定国号为大元，定都大都（北京），1279年灭南宋完成统一。',
+        detail: '忽必烈即汗位后重用汉儒，营建中统元宝交钞纸币体系与元大都城；1274年命伯颜统兵南下，1276年攻占临安（南宋丞相文天祥抗元被俘，写下“人生自古谁无死，留取丹心照汗青”），1279年崖山海战后全国一统。元朝在中央设中书省、枢密院、御史台与统辖吐蕃的宣政院，在地方首创岭北、辽阳、河南、陕西、四川、云南、江浙、江西、湖广、甘肃十大行中书省。',
+        impact: '行省制度成为中国省制的开端，西藏、台湾、云南与东北边疆纳入中央直接行政管辖。' },
+      { id: 'e38', year: 1368, period: '明朝', shortTitle: '洪武建明', title: '朱元璋建明与洪武之治', category: '政治变革', figure: '明太祖朱元璋、徐达、常遇春、刘基',
+        desc: '洪武元年（1368年）正月，朱元璋在应天府（南京）称帝，国号大明；同年徐达、常遇春北伐攻克大都，结束元朝在中原统治。',
+        detail: '朱元璋出身濠州贫苦农家，参加红巾军起义后采纳朱升“高筑墙，广积粮，缓称王”方略，在鄱阳湖水战击败陈友谅、平定张士诚与方国珍，首次实现“自南而北”统一中国。即位后借胡惟庸案废除实行千余年的丞相制度、由皇帝直统六部；设立锦衣卫与卫所军制；编造赋役黄册与鱼鳞图册，垦荒屯田、严惩贪官，颁布《大明律》，社会经济迅速恢复。',
+        impact: '重塑汉唐衣冠体制，奠定明清两代五百余年的中央集权政治架构。' },
+      { id: 'e39', year: 1405, period: '明朝', shortTitle: '郑和航海', title: '永乐迁都与郑和七下西洋', category: '对外开拓', figure: '明成祖朱棣、郑和、王景弘、姚广孝',
+        desc: '明成祖朱棣营建北京紫禁城并于1421年正式迁都北京；1405—1433年间派遣正使郑和率庞大船队七次远航西洋。',
+        detail: '永乐帝朱棣在位期间文治武功极盛：内命解缙、姚广孝召集两千余名学者编纂三亿七千万字的旷世类书《永乐大典》；北五次亲征漠北蒙古，在东北黑龙江流域设奴儿干都司，在西南设贵州布政使司。1405年6月，郑和率领船只二百余艘、将士两万七千八百余人从江苏太仓刘家港起航，历经二十八年七下西洋，遍访占城、爪哇、满剌加、古里、忽鲁谟斯及东非木骨都束、麻林迪等三十余国。',
+        impact: '比哥伦布、达·伽马航海早半个多世纪，是15世纪人类规模最宏大的和平航海壮举。' },
+      { id: 'e40', year: 1572, period: '明朝', shortTitle: '万历新政', title: '张居正改革与一条鞭法', category: '政治变革', figure: '张居正、戚继光、李成梁、潘季驯',
+        desc: '万历初年（1572—1582年），内阁首辅张居正主持推行“万历新政”，整顿吏治、清丈田亩、全面推行“一条鞭法”。',
+        detail: '面对明中期以来的政治腐败、土地兼并与边防危机，张居正创立“考成法”严明官员考核；命潘季驯“束水攻沙”治理黄河与漕运；任用名将戚继光镇守蓟州修筑长城空心敌台、李成梁镇守辽东、与蒙古俺答汗达成隆庆封贡。在清丈全国庄田豪强隐匿土地的基础上，于1581年向全国推行“一条鞭法”：将田赋、徭役及各项杂税合并为一，计亩征银，官收官解。',
+        impact: '实现中国赋役制度从实物劳役税向货币税的历史性跨越，极大释放了晚明商品经济活力。' },
+      { id: 'e41', year: 1644, period: '清朝', shortTitle: '清军入关', title: '甲申之变与清军入关定鼎', category: '军事风云', figure: '努尔哈赤、皇太极、李自成、多尔衮、顺治帝',
+        desc: '1644年春李自成大顺军攻入北京，明崇祯帝自缢煤山（甲申之变）；随后清摄政王多尔衮联合吴三桂在山海关击败李自成，清廷迁都北京。',
+        detail: '1616年努尔哈赤建立后金并创立八旗制度，1636年皇太极在盛京（沈阳）改族名为满洲、改国号为大清。1644年三月李自成率农民军攻克北京，明朝作为统一王朝覆灭。镇守山海关宁远防线的明将吴三桂开关迎清，多尔衮率八旗劲旅在一片石之战击溃大顺军，五月进入北京，十月顺治帝福临在北京颁诏定鼎天下。',
+        impact: '开启中国历史上最后一个封建王朝——清朝近二百七十年的全国统治。' },
+      { id: 'e42', year: 1683, period: '清朝', shortTitle: '康乾盛世', title: '统一台湾与康乾盛世疆域奠定', category: '文明盛世', figure: '康熙帝、雍正帝、乾隆帝、郑成功、施琅',
+        desc: '1662年郑成功驱逐荷兰殖民者收复台湾，1683年康熙帝命施琅平台并设台湾府；康雍乾三朝历时一百三十四年，奠定现代中国疆域。',
+        detail: '康熙帝少年智擒鳌拜，平定吴三桂等“三藩之乱”，1683年统一台湾隶属福建省；北击沙俄签订《尼布楚条约》划定东段边界；三征准噶尔噶尔丹。雍正帝设立军机处，推行“摊丁入亩（地丁银）”、“火耗归公”与“官绅一体当差纳粮”。乾隆帝平定准噶尔与大小和卓之乱，于1762年设伊犁将军统辖新疆全境，颁布《钦定藏内善后章程》二十九条，全国人口突破三亿，编纂《四库全书》。',
+        impact: '彻底巩固了北起萨彦岭、南至南海诸岛、西跨葱岭巴尔喀什湖、东括台湾库页岛的统一多民族国家版图。' },
+      { id: 'e43', year: 1840, period: '晚清', shortTitle: '鸦片战争', title: '虎门销烟与第一次鸦片战争', category: '军事风云', figure: '林则徐、关天培、陈化成、魏源',
+        desc: '1839年钦差大臣林则徐在广东虎门海滩当众销毁鸦片两万余箱；1840年6月英国发动侵略战争，中国被迫签订近代第一个不平等条约《南京条约》。',
+        detail: '为扭转对华贸易逆差，英国东印度公司向中国大肆走私鸦片，导致白银外流、军民体质败坏。道光帝派林则徐赴粤禁烟，虎门销烟彰显了中华民族反抗外来侵略的坚强意志。1840年英军坚船利炮封锁珠江口并北上攻陷定海、虎门（关天培殉国）、吴淞（陈化成殉国），直逼南京下关江面。1842年8月清廷被迫签约割让香港岛、赔款二千一百万银元、开放广州厦门福州宁波上海五口通商。林则徐、魏源编撰《海国图志》，首倡“师夷长技以制夷”。',
+        impact: '成为中国古代史与近代史的分水岭，救亡图存与近代化探索由此艰难起步。' },
+      { id: 'e44', year: 1911, period: '清末民初', shortTitle: '辛亥革命', title: '辛亥革命终结两千年帝制', category: '政治变革', figure: '孙中山、黄兴、宋教仁、蔡元培',
+        desc: '1911年10月10日武昌起义爆发，各省纷纷响应脱离清廷独立；1912年元旦孙中山在南京宣誓就任中华民国临时大总统，清帝退位。',
+        detail: '甲午战争与《辛丑条约》后民族危机空前深重，孙中山于1905年在东京联合兴中会、华兴会、光复会成立中国同盟会，提出“驱除鞑虏，恢复中华，创立民国，平均地权”三民主义纲领。1911年四川保路运动风起云涌，10月10日晚湖北新军工程营在武昌打响第一枪，短短月余全国十余省宣布独立。1912年2月12日清宣统帝溥仪正式颁布退位诏书，颁行《中华民国临时约法》。',
+        impact: '彻底推翻了自秦始皇以来延续两千一百三十二年的君主专制制度，打开了中国现代化的历史闸门。' }
+    ];
+
+    /********************************************************************
+     * 4. 连续无级比例尺引擎 (支持 20% ~ 220% 平滑缩放，80% 为事件展开/折叠阈值)
+     ********************************************************************/
+    const TIME_SEGMENTS = [
+      { start: -2100, end: -770, basePxPerYear: 0.44 }, // 夏商西周
+      { start: -770,  end: -221, basePxPerYear: 1.40 }, // 春秋战国
+      { start: -221,  end: 220,  basePxPerYear: 1.90 }, // 秦汉
+      { start: 220,   end: 589,  basePxPerYear: 3.70 }, // 三国、两晋十六国、南北朝
+      { start: 589,   end: 907,  basePxPerYear: 2.35 }, // 隋唐
+      { start: 907,   end: 979,  basePxPerYear: 5.60 }, // 五代十国
+      { start: 979,   end: 1368, basePxPerYear: 2.45 }, // 宋辽夏金元
+      { start: 1368,  end: 1920, basePxPerYear: 2.40 }  // 明清至民初
+    ];
+
+    const BASE_LEFT_PADDING = 220;
+    const BASE_RIGHT_PADDING = 240;
+
+    const MIN_SCALE = 0.20;  // 最低可缩放到 20%，一屏统筹中华上下五千年全貌
+    const MAX_SCALE = 2.20;  // 最高可放大到 220%，精细查看密集政权与事件
+    const EVENT_UNFOLD_THRESHOLD = 0.80; // 80% 阈值：>=80% 呈现事件，<80% 柔和折叠
+
+    let state = {
+      zoomScale: 1.00,       // 当前实时缩放比 (1.00 = 100%, 最低 0.20 = 20%)
+      scrollX: 0,
+      showEventsMaster: true,// 下方总开关是否开启
+      activeCategory: 'all',
+      selectedEventId: 'e15',
+      activeDynastyId: 'sanguo',
+      activeSubId: 'caowei',
+      isDragging: false,
+      dragStartX: 0,
+      dragStartScrollX: 0,
+      velocityX: 0,
+      lastMoveTime: 0,
+      lastMoveX: 0,
+      rafId: null,
+      zoomAnimId: null
+    };
+
+    function getLeftPadding(customScale = state.zoomScale) {
+      return Math.max(48, Math.round(BASE_LEFT_PADDING * Math.min(1, customScale + 0.15)));
+    }
+
+    function getRightPadding(customScale = state.zoomScale) {
+      return Math.max(48, Math.round(BASE_RIGHT_PADDING * Math.min(1, customScale + 0.15)));
+    }
+
+    // 年份 -> 画布X坐标转换（根据连续 zoomScale 计算）
+    function yearToX(year, customScale = state.zoomScale) {
+      let x = getLeftPadding(customScale);
+      for (const seg of TIME_SEGMENTS) {
+        if (year <= seg.start) break;
+        const clampedEnd = Math.min(year, seg.end);
+        const span = clampedEnd - seg.start;
+        if (span > 0) {
+          x += span * seg.basePxPerYear * customScale;
+        }
+      }
+      return x;
+    }
+
+    // 画布X坐标 -> 年份逆转换
+    function xToYear(x, customScale = state.zoomScale) {
+      let rem = x - getLeftPadding(customScale);
+      if (rem <= 0) return TIME_SEGMENTS[0].start;
+      for (const seg of TIME_SEGMENTS) {
+        const segWidth = (seg.end - seg.start) * seg.basePxPerYear * customScale;
+        if (rem <= segWidth) {
+          return Math.round(seg.start + rem / (seg.basePxPerYear * customScale));
+        }
+        rem -= segWidth;
+      }
+      return TIME_SEGMENTS[TIME_SEGMENTS.length - 1].end;
+    }
+
+    function getTotalCanvasWidth(customScale = state.zoomScale) {
+      return yearToX(1920, customScale) + getRightPadding(customScale);
+    }
+
+    function formatYearStr(year) {
+      return year < 0 ? `前${Math.abs(year)}年` : `公元${year}年`;
+    }
+
+    /********************************************************************
+     * 5. DOM 引用与缓存式高性能构建
+     ********************************************************************/
+    const viewportEl = document.getElementById('timeline-viewport');
+    const canvasEl = document.getElementById('timeline-canvas');
+    const ticksLayer = document.getElementById('ticks-layer');
+    const macroLayer = document.getElementById('macro-dynasty-layer');
+    const subLayer = document.getElementById('sub-regime-layer');
+    const eventsLayer = document.getElementById('events-layer');
+    const quickNavEl = document.getElementById('dynasty-quick-nav');
+    const centerEraBadge = document.getElementById('center-era-badge');
+    const centerYearDisplay = document.getElementById('center-year-display');
+    const zoomLabelEl = document.getElementById('zoom-label');
+    const eventStatusPill = document.getElementById('event-status-pill');
+
+    const domCache = {
+      ticks: [],
+      macros: [],
+      subs: [],
+      events: []
+    };
+
+    const TICK_YEARS = [
+      -2070, -1600, -1300, -1046, -770, -500, -350, -221, -100, 1, 100,
+      220, 280, 317, 383, 420, 494, 534, 589, 618, 700, 755, 820, 907,
+      960, 1038, 1127, 1206, 1271, 1368, 1450, 1550, 1644, 1735, 1840, 1912
+    ];
+
+    // 渲染顶部可左右滑动的全部16个朝代导航按钮
+    function renderQuickNav() {
+      quickNavEl.innerHTML = '';
+      MACRO_DYNASTIES.forEach(dyn => {
+        const btn = document.createElement('button');
+        btn.dataset.dynId = dyn.id;
+        btn.className = `dyn-nav-pill shrink-0 px-2.5 py-1 rounded text-xs font-black transition border ${
+          state.activeDynastyId === dyn.id
+            ? 'bg-[#B8332A] text-[#FAF6EE] border-[#8E241D] shadow-sm'
+            : 'bg-[#FAF6EE] text-[#1E1B18] border-[#C9B99B] hover:bg-[#EFE6D5]'
+        }`;
+        btn.textContent = dyn.name.replace('(春秋战国)', '');
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.activeDynastyId = dyn.id;
+          const midYear = Math.round((dyn.start + dyn.end) / 2);
+          centerOnYear(midYear, true);
+          showDynastyDetail(dyn, '大朝代总览');
+          updateActiveHighlights();
+          scrollActiveNavIntoView(dyn.id);
+        });
+        quickNavEl.appendChild(btn);
+      });
+    }
+
+    function scrollActiveNavIntoView(dynId) {
+      const targetBtn = quickNavEl.querySelector(`[data-dyn-id="${dynId}"]`);
+      if (!targetBtn) return;
+      const navRect = quickNavEl.getBoundingClientRect();
+      const btnRect = targetBtn.getBoundingClientRect();
+      const offset = (btnRect.left - navRect.left) - (navRect.width / 2) + (btnRect.width / 2);
+      quickNavEl.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+
+    function initNavDragScroll() {
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+
+      quickNavEl.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - quickNavEl.offsetLeft;
+        scrollLeft = quickNavEl.scrollLeft;
+      });
+      window.addEventListener('mouseup', () => { isDown = false; });
+      quickNavEl.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - quickNavEl.offsetLeft;
+        quickNavEl.scrollLeft = scrollLeft - (x - startX) * 1.5;
+      });
+
+      document.getElementById('nav-scroll-left').addEventListener('click', () => {
+        quickNavEl.scrollBy({ left: -180, behavior: 'smooth' });
+      });
+      document.getElementById('nav-scroll-right').addEventListener('click', () => {
+        quickNavEl.scrollBy({ left: 180, behavior: 'smooth' });
+      });
+    }
+
+    // 首次创建画布内所有节点
+    function buildCanvasElementsOnce() {
+      // 1. 刻度线
+      ticksLayer.innerHTML = '';
+      domCache.ticks = TICK_YEARS.map(yr => {
+        const tick = document.createElement('div');
+        tick.className = 'absolute top-0 flex flex-col items-center -translate-x-1/2';
+        tick.innerHTML = `
+          <span class="text-[10px] font-bold text-[#6E6254] font-mono leading-none mt-1">${yr < 0 ? '前' + Math.abs(yr) : yr}</span>
+          <div class="w-[1px] h-2 bg-[#A89882] mt-0.5"></div>
+        `;
+        ticksLayer.appendChild(tick);
+        return { yr, el: tick };
+      });
+
+      // 2. 大朝代块
+      macroLayer.innerHTML = '';
+      domCache.macros = MACRO_DYNASTIES.map(dyn => {
+        const block = document.createElement('div');
+        block.dataset.dynId = dyn.id;
+        block.className = 'macro-dynasty-block pointer-events-auto';
+        block.style.backgroundColor = dyn.bg;
+        block.style.border = `2px solid ${dyn.color}`;
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'font-black tracking-wide leading-tight truncate max-w-full';
+        nameEl.style.color = dyn.color;
+        nameEl.textContent = dyn.name;
+
+        const periodEl = document.createElement('div');
+        periodEl.className = 'mt-0.5 px-1.5 py-[1px] rounded text-[10px] font-bold text-[#FAF6EE] leading-tight truncate max-w-full';
+        periodEl.style.backgroundColor = dyn.color;
+        periodEl.textContent = dyn.period;
+
+        block.appendChild(nameEl);
+        block.appendChild(periodEl);
+
+        block.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.activeDynastyId = dyn.id;
+          state.activeSubId = null;
+          state.selectedEventId = null;
+          showDynastyDetail(dyn, '朝代总览');
+          updateActiveHighlights();
+          scrollActiveNavIntoView(dyn.id);
+        });
+
+        macroLayer.appendChild(block);
+        return { dyn, el: block, nameEl, periodEl };
+      });
+
+      // 3. 细分政权块
+      subLayer.innerHTML = '';
+      const sortedSubs = [...SUB_REGIMES].sort((a, b) => a.start - b.start);
+      domCache.subs = sortedSubs.map(sub => {
+        const el = document.createElement('div');
+        el.dataset.subId = sub.id;
+        el.className = 'sub-regime-block pointer-events-auto';
+        el.style.backgroundColor = sub.color;
+        el.style.color = '#FAF6EE';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'font-black leading-none truncate max-w-full';
+        nameSpan.textContent = sub.name;
+
+        const periodSpan = document.createElement('span');
+        periodSpan.className = 'font-bold leading-none truncate max-w-full';
+        periodSpan.textContent = sub.period;
+
+        el.appendChild(nameSpan);
+        el.appendChild(periodSpan);
+
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.activeSubId = sub.id;
+          state.selectedEventId = null;
+          showDynastyDetail(sub, '细分政权 / 并立国家');
+          updateActiveHighlights();
+        });
+
+        subLayer.appendChild(el);
+        return { sub, el, nameSpan, periodSpan };
+      });
+
+      // 4. 重大历史事件竹简节点
+      buildHistoricalEventElements();
+    }
+
+    function buildHistoricalEventElements() {
+      eventsLayer.innerHTML = '';
+      const catColorMap = {
+        '政治变革': '#B8332A',
+        '军事风云': '#2F4F6F',
+        '文明盛世': '#9E6224',
+        '对外开拓': '#2E6E5E'
+      };
+
+      const filtered = HISTORICAL_EVENTS.filter(ev =>
+        state.activeCategory === 'all' || ev.category === state.activeCategory
+      );
+
+      domCache.events = filtered.map(ev => {
+        const dotColor = catColorMap[ev.category] || '#B8332A';
+        const isSelected = state.selectedEventId === ev.id;
+        const shortYear = ev.year < 0 ? `前${Math.abs(ev.year)}` : `${ev.year}`;
+
+        const node = document.createElement('div');
+        node.dataset.eventId = ev.id;
+        node.className = `event-node pointer-events-auto ${isSelected ? 'selected' : ''}`;
+        node.style.top = `198px`; // 锚定在 204px 事件基线上
+
+        node.innerHTML = `
+          <div class="flex flex-col items-center">
+            <!-- 轴上圆点 -->
+            <div class="pulse-circle relative w-3.5 h-3.5 rounded-full border-2 border-[#FAF6EE] shadow"
+                 style="background-color: ${dotColor};"></div>
+            <!-- 柔和展开/折叠包装容器 -->
+            <div class="slip-fold-wrapper">
+              <div class="stem-line w-[1.5px] transition-all duration-300" style="background-color: ${dotColor}; opacity: 0.65;"></div>
+              <div class="vertical-bamboo-slip">
+                <span class="slip-year" style="background-color:${dotColor}18; color:${dotColor};">${shortYear}</span>
+                <span class="slip-title">${ev.shortTitle}</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const stemEl = node.querySelector('.stem-line');
+
+        node.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // 若当前处于 <80% 折叠态，点击圆点时自动柔和放大至 100% 展开事件并展示详情
+          if (state.zoomScale < EVENT_UNFOLD_THRESHOLD) {
+            animateZoomTo(1.00, ev.year);
+          }
+          selectHistoricalEvent(ev.id, true);
+        });
+
+        eventsLayer.appendChild(node);
+        return { ev, el: node, stemEl };
+      });
+    }
+
+    // 根据当前 state.zoomScale (0.20 ~ 2.20) 实时更新所有元素的坐标与宽度，并联动 80% 阈值折叠动画
+    function updateCanvasLayout() {
+      const totalW = getTotalCanvasWidth();
+      canvasEl.style.width = `${totalW}px`;
+
+      // 更新顶部百分比读数
+      const pct = Math.round(state.zoomScale * 100);
+      zoomLabelEl.textContent = `${pct}%`;
+      zoomLabelEl.className = `text-[10px] font-black px-1.5 font-mono min-w-[38px] text-center transition-colors ${
+        state.zoomScale >= EVENT_UNFOLD_THRESHOLD ? 'text-[#B8332A]' : 'text-[#6E6254]'
+      }`;
+
+      // 1) 更新刻度位置
+      const minTickGap = 34;
+      let lastTickX = -9999;
+      domCache.ticks.forEach(({ yr, el }) => {
+        const x = yearToX(yr);
+        el.style.left = `${x}px`;
+        if (x - lastTickX < minTickGap) {
+          el.style.opacity = '0';
+        } else {
+          el.style.opacity = '1';
+          lastTickX = x;
+        }
+      });
+
+      // 2) 更新大朝代位置与自适应简称（兼容 20% 极小全景缩放）
+      let prevMacroRight = -9999;
+      domCache.macros.forEach(({ dyn, el, nameEl, periodEl }) => {
+        let x1 = yearToX(dyn.start);
+        const x2 = yearToX(dyn.end);
+        if (x1 < prevMacroRight + 1.5) x1 = prevMacroRight + 1.5;
+        const minW = Math.max(16, Math.round(44 * state.zoomScale));
+        const width = Math.max(x2 - x1 - 1.5, minW);
+        prevMacroRight = x1 + width;
+
+        el.style.left = `${x1}px`;
+        el.style.width = `${width}px`;
+
+        if (width < 36) {
+          nameEl.textContent = dyn.shortName || dyn.name;
+          nameEl.style.fontSize = '11px';
+          periodEl.style.display = 'none';
+        } else if (width < 64) {
+          nameEl.textContent = dyn.shortName || dyn.name;
+          nameEl.style.fontSize = '13px';
+          periodEl.style.display = 'none';
+        } else if (width < 94) {
+          nameEl.textContent = dyn.name;
+          nameEl.style.fontSize = '14px';
+          periodEl.style.display = 'block';
+        } else {
+          nameEl.textContent = dyn.name;
+          nameEl.style.fontSize = '16px';
+          periodEl.style.display = 'block';
+        }
+      });
+
+      // 3) 更新三轨细分政权位置（支持 20% 全景比例下自动切换简写）
+      const trackTops = [84, 122, 160];
+      const trackLastRight = [-9999, -9999, -9999];
+      domCache.subs.forEach(({ sub, el, nameSpan, periodSpan }) => {
+        const t = sub.track || 0;
+        let x1 = yearToX(sub.start);
+        const x2 = yearToX(sub.end);
+        if (x1 < trackLastRight[t] + 1.5) x1 = trackLastRight[t] + 1.5;
+        const minSubW = Math.max(14, Math.round(50 * state.zoomScale));
+        const width = Math.max(x2 - x1 - 1.5, minSubW);
+        trackLastRight[t] = x1 + width;
+
+        el.style.left = `${x1}px`;
+        el.style.top = `${trackTops[t]}px`;
+        el.style.width = `${width}px`;
+
+        if (width < 32) {
+          el.className = 'sub-regime-block pointer-events-auto flex-col';
+          nameSpan.textContent = sub.shortName || sub.name.slice(0, 2);
+          nameSpan.className = 'text-[10px] font-black leading-none truncate max-w-full';
+          periodSpan.style.display = 'none';
+        } else if (width < 60) {
+          el.className = 'sub-regime-block pointer-events-auto flex-col';
+          nameSpan.textContent = sub.shortName || sub.name;
+          nameSpan.className = 'text-[11px] font-black leading-none truncate max-w-full';
+          periodSpan.style.display = 'none';
+        } else if (width < 112) {
+          el.className = 'sub-regime-block pointer-events-auto flex-col';
+          nameSpan.textContent = sub.name;
+          nameSpan.className = 'text-[12px] font-black leading-none truncate max-w-full';
+          periodSpan.style.display = 'inline';
+          periodSpan.className = 'text-[9px] font-bold opacity-90 leading-none mt-0.5 truncate max-w-full';
+        } else {
+          el.className = 'sub-regime-block pointer-events-auto gap-1.5';
+          nameSpan.textContent = sub.name;
+          nameSpan.className = 'text-[13px] font-black leading-none truncate';
+          periodSpan.style.display = 'inline';
+          periodSpan.className = 'text-[10px] font-bold px-1 py-[1px] rounded bg-black/25 leading-none shrink-0';
+        }
+      });
+
+      // 4) 更新重大历史事件位置 & 80% 缩放阈值自动展开/折叠控制
+      const isFoldedByZoom = state.zoomScale < EVENT_UNFOLD_THRESHOLD;
+      const rowLastRight = [-9999, -9999];
+      const rowStemHeights = [8, 24];
+      const slipWidth = 28;
+
+      domCache.events.forEach(({ ev, el, stemEl }) => {
+        const x = yearToX(ev.year);
+        const halfW = slipWidth / 2;
+
+        let chosenRow = 0;
+        if (x - halfW < rowLastRight[0] + 4) {
+          chosenRow = 1;
+        }
+        rowLastRight[chosenRow] = x + halfW;
+
+        el.style.left = `${x}px`;
+        stemEl.style.height = `${rowStemHeights[chosenRow]}px`;
+
+        el.classList.toggle('hidden-by-switch', !state.showEventsMaster);
+        el.classList.toggle('folded-by-zoom', state.showEventsMaster && isFoldedByZoom);
+      });
+
+      updateEventStatusBadge();
+      updateActiveHighlights();
+    }
+
+    function updateEventStatusBadge() {
+      const isFoldedByZoom = state.zoomScale < EVENT_UNFOLD_THRESHOLD;
+      if (!state.showEventsMaster) {
+        eventStatusPill.textContent = '已关闭';
+        eventStatusPill.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#A89882]/30 text-[#524B42] transition-colors';
+      } else if (isFoldedByZoom) {
+        eventStatusPill.textContent = '已折叠 (<80%)';
+        eventStatusPill.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#B8863B]/20 text-[#8C5818] transition-colors';
+      } else {
+        eventStatusPill.textContent = `展开 (${domCache.events.length})`;
+        eventStatusPill.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#B8332A]/15 text-[#B8332A] transition-colors';
+      }
+    }
+
+    /********************************************************************
+     * 6. 详情卡片联动
+     ********************************************************************/
+    function selectHistoricalEvent(eventId, centerView = false) {
+      const ev = HISTORICAL_EVENTS.find(item => item.id === eventId);
+      if (!ev) return;
+
+      state.selectedEventId = ev.id;
+      state.activeSubId = null;
+
+      const matchedDyn = MACRO_DYNASTIES.find(d => ev.year >= d.start && ev.year <= d.end);
+      if (matchedDyn) {
+        state.activeDynastyId = matchedDyn.id;
+        scrollActiveNavIntoView(matchedDyn.id);
+      }
+
+      animateDetailContentUpdate(() => {
+        document.getElementById('detail-badge-type').textContent = ev.category;
+        document.getElementById('detail-dynasty-tag').textContent = ev.period;
+        document.getElementById('detail-year-tag').textContent = formatYearStr(ev.year);
+        document.getElementById('detail-title').textContent = ev.title;
+        document.getElementById('detail-figure').textContent = `风云人物：${ev.figure}`;
+        document.getElementById('detail-desc').textContent = ev.desc;
+        document.getElementById('detail-extended-text').textContent = ev.detail || ev.desc;
+        document.getElementById('detail-impact').textContent = ev.impact;
+        document.getElementById('detail-scroll-container').scrollTop = 0;
+      });
+
+      if (centerView) {
+        centerOnYear(ev.year, true);
+      }
+      updateActiveHighlights();
+    }
+
+    function showDynastyDetail(item, badgeLabel) {
+      animateDetailContentUpdate(() => {
+        document.getElementById('detail-badge-type').textContent = badgeLabel;
+        document.getElementById('detail-dynasty-tag').textContent = item.name;
+        document.getElementById('detail-year-tag').textContent = item.period;
+        document.getElementById('detail-title').textContent = `${item.name}（${item.period}）`;
+        document.getElementById('detail-figure').textContent = `开创者 / 代表：${item.founder}${item.capital ? ' · 都城：' + item.capital : ''}`;
+        document.getElementById('detail-desc').textContent = item.desc;
+        document.getElementById('detail-extended-text').textContent = item.detail || item.desc;
+        document.getElementById('detail-impact').textContent = item.impact;
+        document.getElementById('detail-scroll-container').scrollTop = 0;
+      });
+    }
+
+    function animateDetailContentUpdate(updaterFn) {
+      const container = document.getElementById('detail-scroll-container');
+      container.classList.add('detail-fade-out');
+      setTimeout(() => {
+        updaterFn();
+        container.classList.remove('detail-fade-out');
+      }, 110);
+    }
+
+    function updateActiveHighlights() {
+      document.querySelectorAll('.dyn-nav-pill').forEach(btn => {
+        const active = btn.dataset.dynId === state.activeDynastyId;
+        btn.className = `dyn-nav-pill shrink-0 px-2.5 py-1 rounded text-xs font-black transition border ${
+          active
+            ? 'bg-[#B8332A] text-[#FAF6EE] border-[#8E241D] shadow-sm'
+            : 'bg-[#FAF6EE] text-[#1E1B18] border-[#C9B99B] hover:bg-[#EFE6D5]'
+        }`;
+      });
+
+      domCache.macros.forEach(({ dyn, el }) => {
+        el.classList.toggle('active-dynasty', dyn.id === state.activeDynastyId);
+      });
+
+      domCache.subs.forEach(({ sub, el }) => {
+        el.classList.toggle('active-sub', sub.id === state.activeSubId);
+      });
+
+      domCache.events.forEach(({ ev, el }) => {
+        el.classList.toggle('selected', ev.id === state.selectedEventId);
+      });
+    }
+
+    /********************************************************************
+     * 7. 单指惯性滑动 + 双指捏合无级缩放引擎 (20% ~ 220%)
+     ********************************************************************/
+    function clampScrollX(x) {
+      const vw = viewportEl.clientWidth;
+      const maxScroll = Math.max(0, getTotalCanvasWidth() - vw);
+      return Math.max(0, Math.min(x, maxScroll));
+    }
+
+    function applyScrollTransform() {
+      state.scrollX = clampScrollX(state.scrollX);
+      canvasEl.style.transform = `translate3d(${-state.scrollX}px, 0, 0)`;
+
+      const centerX = state.scrollX + viewportEl.clientWidth / 2;
+      const curYear = xToYear(centerX);
+      centerYearDisplay.textContent = formatYearStr(curYear);
+
+      const curDyn = MACRO_DYNASTIES.find(d => curYear >= d.start && curYear <= d.end);
+      if (curDyn) {
+        centerEraBadge.textContent = curDyn.name.replace('(春秋战国)', '');
+      }
+    }
+
+    // 以视口内某一点（默认为视口中心）为锚点调整缩放比例
+    function setZoomScaleAnchored(newScale, anchorViewportX = viewportEl.clientWidth / 2) {
+      const clampedScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+      const anchorCanvasXBefore = state.scrollX + anchorViewportX;
+      const anchorYear = xToYear(anchorCanvasXBefore, state.zoomScale);
+
+      state.zoomScale = clampedScale;
+      updateCanvasLayout();
+
+      const anchorCanvasXAfter = yearToX(anchorYear, state.zoomScale);
+      state.scrollX = clampScrollX(anchorCanvasXAfter - anchorViewportX);
+      applyScrollTransform();
+    }
+
+    // 柔和缩放动画（用于点击 ＋/－ 按钮或点击折叠态事件圆点）
+    function animateZoomTo(targetScale, focusYear = null) {
+      if (state.zoomAnimId) cancelAnimationFrame(state.zoomAnimId);
+
+      const startScale = state.zoomScale;
+      const clampedTarget = Math.max(MIN_SCALE, Math.min(MAX_SCALE, targetScale));
+      const startTime = performance.now();
+      const duration = 360;
+
+      const anchorViewportX = viewportEl.clientWidth / 2;
+      const anchorYear = focusYear !== null ? focusYear : xToYear(state.scrollX + anchorViewportX, startScale);
+
+      function step(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = 1 - Math.pow(1 - t, 3);
+        state.zoomScale = startScale + (clampedTarget - startScale) * ease;
+        updateCanvasLayout();
+
+        const newX = yearToX(anchorYear, state.zoomScale);
+        state.scrollX = clampScrollX(newX - anchorViewportX);
+        applyScrollTransform();
+
+        if (t < 1) {
+          state.zoomAnimId = requestAnimationFrame(step);
+        }
+      }
+      state.zoomAnimId = requestAnimationFrame(step);
+    }
+
+    function centerOnYear(year, smooth = true) {
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+      const targetX = clampScrollX(yearToX(year) - viewportEl.clientWidth / 2);
+      if (!smooth) {
+        state.scrollX = targetX;
+        applyScrollTransform();
+        return;
+      }
+      const startX = state.scrollX;
+      const diff = targetX - startX;
+      const startTime = performance.now();
+      const duration = 380;
+
+      function step(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = 1 - Math.pow(1 - t, 3);
+        state.scrollX = startX + diff * ease;
+        applyScrollTransform();
+        if (t < 1) {
+          state.rafId = requestAnimationFrame(step);
+        } else {
+          const curDyn = MACRO_DYNASTIES.find(d => year >= d.start && year <= d.end);
+          if (curDyn) {
+            state.activeDynastyId = curDyn.id;
+            updateActiveHighlights();
+            scrollActiveNavIntoView(curDyn.id);
+          }
+        }
+      }
+      state.rafId = requestAnimationFrame(step);
+    }
+
+    // 初始化单指拖拽与双指捏合缩放
+    function initTimelineTouchAndPinch() {
+      const activePointers = new Map();
+      let isPinching = false;
+      let pinchStartDist = 0;
+      let pinchStartScale = 1.0;
+
+      function getPinchDistanceAndCenter() {
+        const pts = Array.from(activePointers.values());
+        const dx = pts[0].x - pts[1].x;
+        const dy = pts[0].y - pts[1].y;
+        const dist = Math.hypot(dx, dy);
+        const rect = viewportEl.getBoundingClientRect();
+        const centerX = (pts[0].x + pts[1].x) / 2 - rect.left;
+        return { dist, centerX };
+      }
+
+      viewportEl.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button')) return;
+        if (state.rafId) cancelAnimationFrame(state.rafId);
+        if (state.zoomAnimId) cancelAnimationFrame(state.zoomAnimId);
+
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (activePointers.size === 2) {
+          isPinching = true;
+          state.isDragging = false;
+          const { dist } = getPinchDistanceAndCenter();
+          pinchStartDist = Math.max(dist, 20);
+          pinchStartScale = state.zoomScale;
+        } else if (activePointers.size === 1) {
+          isPinching = false;
+          state.isDragging = true;
+          state.dragStartX = e.clientX;
+          state.dragStartScrollX = state.scrollX;
+          state.velocityX = 0;
+          state.lastMoveX = e.clientX;
+          state.lastMoveTime = performance.now();
+        }
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!activePointers.has(e.pointerId)) return;
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (activePointers.size === 2 && isPinching) {
+          const { dist, centerX } = getPinchDistanceAndCenter();
+          const ratio = dist / pinchStartDist;
+          const nextScale = pinchStartScale * ratio;
+          setZoomScaleAnchored(nextScale, centerX);
+          return;
+        }
+
+        if (state.isDragging && activePointers.size === 1) {
+          const dx = e.clientX - state.dragStartX;
+          state.scrollX = state.dragStartScrollX - dx;
+          applyScrollTransform();
+
+          const now = performance.now();
+          const dt = now - state.lastMoveTime;
+          if (dt > 0) {
+            state.velocityX = (e.clientX - state.lastMoveX) / dt;
+            state.lastMoveX = e.clientX;
+            state.lastMoveTime = now;
+          }
+        }
+      });
+
+      function onPointerUpOrCancel(e) {
+        activePointers.delete(e.pointerId);
+
+        if (isPinching && activePointers.size < 2) {
+          isPinching = false;
+          if (activePointers.size === 1) {
+            const remaining = Array.from(activePointers.values())[0];
+            state.isDragging = true;
+            state.dragStartX = remaining.x;
+            state.dragStartScrollX = state.scrollX;
+            state.velocityX = 0;
+            state.lastMoveX = remaining.x;
+            state.lastMoveTime = performance.now();
+          } else {
+            syncNavAfterScroll();
+          }
+          return;
+        }
+
+        if (state.isDragging && activePointers.size === 0) {
+          state.isDragging = false;
+          let v = -state.velocityX * 16;
+          if (Math.abs(v) > 1.2) {
+            function inertia() {
+              v *= 0.92;
+              state.scrollX += v;
+              applyScrollTransform();
+              if (Math.abs(v) > 0.5) {
+                state.rafId = requestAnimationFrame(inertia);
+              } else {
+                syncNavAfterScroll();
+              }
+            }
+            state.rafId = requestAnimationFrame(inertia);
+          } else {
+            syncNavAfterScroll();
+          }
+        }
+      }
+
+      window.addEventListener('pointerup', onPointerUpOrCancel);
+      window.addEventListener('pointercancel', onPointerUpOrCancel);
+
+      // 桌面端滚轮：按住 Ctrl/Meta 或触控板捏合为缩放，普通滚轮为左右移动
+      viewportEl.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) {
+          const rect = viewportEl.getBoundingClientRect();
+          const cursorX = e.clientX - rect.left;
+          const zoomDelta = -e.deltaY * 0.004;
+          setZoomScaleAnchored(state.zoomScale + zoomDelta, cursorX);
+        } else {
+          state.scrollX += (e.deltaY || e.deltaX) * 0.9;
+          applyScrollTransform();
+        }
+      }, { passive: false });
+    }
+
+    function syncNavAfterScroll() {
+      const centerX = state.scrollX + viewportEl.clientWidth / 2;
+      const curYear = xToYear(centerX);
+      const curDyn = MACRO_DYNASTIES.find(d => curYear >= d.start && curYear <= d.end);
+      if (curDyn && curDyn.id !== state.activeDynastyId) {
+        state.activeDynastyId = curDyn.id;
+        updateActiveHighlights();
+        scrollActiveNavIntoView(curDyn.id);
+      }
+    }
+
+    /********************************************************************
+     * 8. 控制栏交互绑定
+     ********************************************************************/
+    function initControls() {
+      // 重大历史事件总开关
+      const toggleBtn = document.getElementById('toggle-events-btn');
+      const toggleKnob = document.getElementById('toggle-knob');
+      toggleBtn.addEventListener('click', () => {
+        state.showEventsMaster = !state.showEventsMaster;
+        toggleBtn.setAttribute('aria-checked', String(state.showEventsMaster));
+        toggleBtn.classList.toggle('bg-[#B8332A]', state.showEventsMaster);
+        toggleBtn.classList.toggle('bg-[#A89882]', !state.showEventsMaster);
+        toggleKnob.classList.toggle('translate-x-5', state.showEventsMaster);
+        toggleKnob.classList.toggle('translate-x-0', !state.showEventsMaster);
+
+        // 若用户开启事件总开关，但当前缩放比例小于 80%，自动柔和放大至 100% 让事件呈现
+        if (state.showEventsMaster && state.zoomScale < EVENT_UNFOLD_THRESHOLD) {
+          animateZoomTo(1.00);
+        } else {
+          updateCanvasLayout();
+        }
+      });
+
+      // 分类筛选按钮
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeCategory = btn.dataset.cat;
+          document.querySelectorAll('.cat-pill').forEach(b => {
+            const active = b.dataset.cat === state.activeCategory;
+            b.className = `cat-pill px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0 transition ${
+              active ? 'bg-[#1E1B18] text-[#FAF6EE]' : 'bg-[#DCD1BC] text-[#524B42]'
+            }`;
+          });
+          buildHistoricalEventElements();
+          updateCanvasLayout();
+        });
+      });
+
+      // 顶部 ＋ / － 按钮按 20% 步进柔和缩放（最低可至 20%）
+      document.getElementById('zoom-in-btn').addEventListener('click', () => {
+        const nextScale = Math.round((state.zoomScale + 0.20) * 20) / 20;
+        animateZoomTo(nextScale);
+      });
+
+      document.getElementById('zoom-out-btn').addEventListener('click', () => {
+        const nextScale = Math.round((state.zoomScale - 0.20) * 20) / 20;
+        animateZoomTo(nextScale);
+      });
+
+      // 上一节点 / 下一节点
+      document.getElementById('prev-event-btn').addEventListener('click', () => {
+        const list = HISTORICAL_EVENTS.filter(ev =>
+          state.activeCategory === 'all' || ev.category === state.activeCategory
+        );
+        if (!list.length) return;
+        const idx = list.findIndex(e => e.id === state.selectedEventId);
+        const prevIdx = idx > 0 ? idx - 1 : list.length - 1;
+        selectHistoricalEvent(list[prevIdx].id, true);
+      });
+
+      document.getElementById('next-event-btn').addEventListener('click', () => {
+        const list = HISTORICAL_EVENTS.filter(ev =>
+          state.activeCategory === 'all' || ev.category === state.activeCategory
+        );
+        if (!list.length) return;
+        const idx = list.findIndex(e => e.id === state.selectedEventId);
+        const nextIdx = idx < list.length - 1 ? idx + 1 : 0;
+        selectHistoricalEvent(list[nextIdx].id, true);
+      });
+
+      window.addEventListener('resize', () => {
+        applyScrollTransform();
+      });
+    }
+
+    // 启动初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      renderQuickNav();
+      initNavDragScroll();
+      buildCanvasElementsOnce();
+      updateCanvasLayout();
+      initTimelineTouchAndPinch();
+      initControls();
+
+      // 初始展示三国起点（曹丕建魏）
+      selectHistoricalEvent('e15', false);
+      centerOnYear(235, false);
+      scrollActiveNavIntoView('sanguo');
+    });
+  </script>
+</body>
+</html>

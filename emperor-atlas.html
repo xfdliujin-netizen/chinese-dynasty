@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>帝王图谱</title>
+<style>
+  :root {
+    --paper: #FAF6EE;
+    --paper-2: #F3ECE0;
+    --ink: #241F1A;
+    --ink-2: #4A423A;
+    --ink-3: #7A6A56;
+    --cinnabar: #B8332A;
+    --gold: #C09020;
+    --sep: rgba(120, 104, 84, 0.18);
+    --ios-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    --pad: 14px;
+    --sheet-h: 62dvh;
+  }
+
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    background:
+      radial-gradient(120% 80% at 50% 0%, #FFFCF5 0%, #FAF6EE 42%, #F2EADC 100%);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Songti SC", "Noto Serif SC", "PingFang SC", serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .atlas-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) var(--pad) 8px;
+    background: rgba(250, 246, 238, 0.86);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    backdrop-filter: blur(18px) saturate(1.6);
+    border-bottom: 1px solid var(--sep);
+    position: relative;
+    z-index: 30;
+  }
+  .bar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid rgba(120, 104, 84, 0.26);
+    border-radius: 999px;
+    background: rgba(255, 253, 247, 0.9);
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.16s ease, background 0.2s ease;
+  }
+  .bar-btn:active { transform: scale(0.95); background: #EDE4D3; }
+  .bar-title {
+    flex: 1 1 auto;
+    text-align: center;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-indent: 0.14em;
+    color: var(--ink);
+  }
+  .bar-seal {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    background: var(--cinnabar);
+    color: #FDF6EA;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 250, 240, 0.45);
+  }
+
+  /* ---------- 统计条 ---------- */
+  .atlas-stats {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 7px var(--pad) 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--sep);
+    background: rgba(250, 246, 238, 0.7);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .atlas-stats b { color: var(--cinnabar); font-weight: 900; font-size: 14px; }
+  .atlas-stats .sep { width: 1px; height: 12px; background: rgba(120, 104, 84, 0.28); }
+
+  /* ---------- 朝代导航 ---------- */
+  .dyn-rail {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 7px;
+    padding: 8px var(--pad) 9px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--sep);
+    background: rgba(250, 246, 238, 0.6);
+    scroll-behavior: smooth;
+  }
+  .dyn-rail::-webkit-scrollbar { display: none; }
+  .rail-pill {
+    flex: 0 0 auto;
+    height: 30px;
+    padding: 0 13px;
+    border-radius: 999px;
+    border: 1px solid rgba(120, 104, 84, 0.24);
+    background: rgba(255, 253, 247, 0.85);
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.16s ease;
+  }
+  .rail-pill:active { transform: scale(0.95); }
+  .rail-pill.active {
+    background: var(--cinnabar);
+    border-color: var(--cinnabar);
+    color: #FDF6EA;
+  }
+
+  /* ---------- 图谱主区 ---------- */
+  .atlas-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .atlas-scroll::-webkit-scrollbar { display: none; }
+
+  .atlas-track {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    height: 100%;
+    padding: 12px var(--pad) 10px;
+    width: max-content;
+  }
+
+  .dyn-col {
+    --dc: #8C6A4A;
+    flex: 0 0 244px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+  }
+  .dyn-col + .dyn-col::before {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 4px;
+    bottom: 4px;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(120, 104, 84, 0.22) 8%, rgba(120, 104, 84, 0.22) 92%, transparent);
+  }
+
+  .col-head {
+    flex: 0 0 auto;
+    padding: 0 4px 9px;
+    border-bottom: 2px solid var(--dc);
+  }
+  .ch-top { display: flex; align-items: baseline; gap: 8px; }
+  .col-name {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--dc);
+    line-height: 1.1;
+  }
+  .col-count {
+    margin-left: auto;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--ink-3);
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(255, 253, 247, 0.9);
+    border: 1px solid rgba(120, 104, 84, 0.2);
+  }
+  .col-years {
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .col-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 2px 24px;
+    scrollbar-width: none;
+  }
+  .col-body::-webkit-scrollbar { display: none; }
+
+  /* ---------- 帝王卡 ---------- */
+  .emp-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 10px 9px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(120, 104, 84, 0.2);
+    background: linear-gradient(180deg, #FFFDF7 0%, #FBF6EC 100%);
+    box-shadow: 0 1px 2px rgba(40, 30, 20, 0.05);
+    cursor: pointer;
+    transition: transform 0.18s var(--ios-ease), box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .emp-card::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin-left: -3px;
+    border-radius: 50%;
+    background: var(--dc);
+    box-shadow: 0 0 0 3px rgba(255, 253, 247, 0.95);
+    transform: translateY(-50%);
+  }
+  .emp-card:active { transform: scale(0.975); box-shadow: 0 0 0 2px rgba(184, 51, 42, 0.16); }
+
+  .emp-order {
+    flex: 0 0 auto;
+    width: 20px;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: rgba(120, 104, 84, 0.55);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .emp-main { flex: 1 1 auto; min-width: 0; }
+  .emp-name {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 16.5px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+  }
+  .emp-real {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-3);
+    letter-spacing: 0.02em;
+  }
+  .emp-reign {
+    margin-top: 2px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+  .emp-tag {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .tag-founder { background: rgba(184, 51, 42, 0.12); color: #A22C24; }
+  .tag-flourish { background: rgba(192, 144, 32, 0.16); color: #8A6413; }
+  .tag-hold { background: rgba(60, 110, 143, 0.13); color: #35607C; }
+  .tag-fall { background: rgba(90, 82, 74, 0.16); color: #4A423A; }
+  .tag-puppet { background: rgba(122, 90, 168, 0.13); color: #5F4685; }
+  .tag-empress { background: rgba(184, 51, 42, 0.16); color: #8E241D; }
+
+  /* 世系连线 */
+  .emp-link {
+    position: relative;
+    height: 15px;
+    margin-left: 24px;
+  }
+  .emp-link::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: rgba(140, 120, 92, 0.42);
+  }
+  .emp-link.rel-side::before {
+    background: repeating-linear-gradient(to bottom, rgba(140, 120, 92, 0.5) 0 3px, transparent 3px 6px);
+  }
+  .emp-link.rel-usurp::before {
+    background: repeating-linear-gradient(to bottom, rgba(184, 51, 42, 0.55) 0 3px, transparent 3px 6px);
+  }
+  .emp-link .rel-text {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9.5px;
+    font-weight: 800;
+    color: rgba(122, 106, 86, 0.75);
+    letter-spacing: 0.04em;
+    background: var(--paper);
+    padding: 0 3px;
+    border-radius: 3px;
+    line-height: 1.2;
+  }
+
+  /* ---------- 详情弹窗 ---------- */
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(24, 20, 16, 0.34);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  }
+  body.sheet-open .sheet-backdrop {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s;
+  }
+
+  .emp-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    height: var(--sheet-h);
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--pad) calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgba(250, 246, 238, 0.97);
+    -webkit-backdrop-filter: blur(24px) saturate(1.7);
+    backdrop-filter: blur(24px) saturate(1.7);
+    border-top: 1px solid var(--sep);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -18px 48px rgba(24, 20, 16, 0.26);
+    transform: translateY(102%);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.46s var(--ios-ease), opacity 0.3s ease, visibility 0s linear 0.46s;
+  }
+  body.sheet-open .emp-sheet {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.46s var(--ios-ease), opacity 0.24s ease, visibility 0s;
+  }
+
+  .sheet-grip {
+    flex: 0 0 auto;
+    width: 160px;
+    height: 22px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: ns-resize;
+    touch-action: none;
+  }
+  .sheet-grip span {
+    display: block;
+    width: 36px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(60, 60, 67, 0.3);
+  }
+
+  .sheet-card {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: #FAF6EE;
+    border: 1px solid var(--sep);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .sheet-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 50%;
+    background: rgba(60, 60, 67, 0.1);
+    color: #4A423A;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .sheet-close:active { background: rgba(60, 60, 67, 0.2); transform: scale(0.92); }
+
+  .sheet-head {
+    flex: 0 0 auto;
+    padding: 12px 46px 10px 14px;
+    background: #EFE7D6;
+    border-bottom: 1px solid #D8CBB3;
+  }
+  .sh-tags { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 7px; }
+  .sh-dyn {
+    font-size: 12.5px;
+    font-weight: 900;
+    color: #FDF6EA;
+    background: var(--cinnabar);
+    padding: 3px 9px;
+    border-radius: 5px;
+  }
+  .sh-role {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--ink-2);
+    background: #E2D8C0;
+    border: 1px solid #C5B698;
+    padding: 3px 9px;
+    border-radius: 5px;
+  }
+  .sh-name {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    line-height: 1.25;
+  }
+  .sh-name small {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-3);
+    margin-left: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .sheet-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 12px 14px 16px;
+  }
+  .sh-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .sh-meta div {
+    background: #F4EDDF;
+    border: 1px solid #E0D5BF;
+    border-radius: 9px;
+    padding: 7px 10px;
+  }
+  .sh-meta span {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+  .sh-meta b {
+    display: block;
+    margin-top: 2px;
+    font-size: 14.5px;
+    font-weight: 900;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .sh-body {
+    font-size: 16px;
+    line-height: 1.92;
+    color: #2C2621;
+    font-weight: 500;
+  }
+  .sh-body p { margin: 0 0 10px; }
+  .sh-nav {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .sh-nav button {
+    flex: 1 1 0;
+    min-height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(120, 104, 84, 0.24);
+    background: rgba(255, 253, 247, 0.9);
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .sh-nav button:active { background: #EDE4D3; }
+  .sh-nav button:disabled { opacity: 0.4; cursor: default; }
+
+  /* ---------- 小屏 ---------- */
+  @media (max-width: 380px) {
+    .dyn-col { flex-basis: 224px; }
+    .bar-title { font-size: 17px; letter-spacing: 0.1em; }
+  }
+  @media (min-width: 820px) {
+    :root { --pad: 22px; }
+    .dyn-col { flex-basis: 264px; }
+    :root { --sheet-h: 58dvh; }
+    .emp-sheet { border-radius: 20px 20px 0 0; }
+    .col-name { font-size: 27px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="atlas-bar">
+  <button class="bar-btn" id="back-btn">‹ 长卷</button>
+  <div class="bar-title">帝王图谱</div>
+  <div class="bar-seal">帝</div>
+</header>
+
+<div class="atlas-stats" id="atlas-stats"></div>
+
+<nav class="dyn-rail" id="dyn-rail"></nav>
+
+<main class="atlas-scroll" id="atlas-scroll">
+  <div class="atlas-track" id="track"></div>
+</main>
+
+<div class="sheet-backdrop" id="sheet-backdrop"></div>
+
+<aside class="emp-sheet" id="emp-sheet" aria-hidden="true">
+  <div class="sheet-grip" id="sheet-grip"><span></span></div>
+  <div class="sheet-card">
+    <button class="sheet-close" id="sheet-close" aria-label="关闭">✕</button>
+    <div class="sheet-head">
+      <div class="sh-tags">
+        <span class="sh-dyn" id="sh-dyn">—</span>
+        <span class="sh-role" id="sh-role">—</span>
+      </div>
+      <h2 class="sh-name" id="sh-name">—</h2>
+    </div>
+    <div class="sheet-scroll">
+      <div class="sh-meta" id="sh-meta"></div>
+      <div class="sh-body" id="sh-body"></div>
+      <div class="sh-nav">
+        <button id="sh-prev">‹ 上一位</button>
+        <button id="sh-next">下一位 ›</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+/* ============================================================
+   帝王图谱 · 数据
+   rel：与上一位皇帝的关系（子 / 弟 / 孙 / 侄 / 篡 / 复 / 立）
+   tag：开国 / 守成 / 中兴 / 亡国 / 傀儡 / 女主
+   ============================================================ */
+const DYNS = [
+  { id: 'qin', name: '秦', era: '前221 — 前206', color: '#7C2A22', emps: [
+    { n: '秦始皇', r: '嬴政', y: '前221–前210', life: '前259–前210', tag: '开国', tagName: '开国',
+      d: '并六国、废分封、行郡县，书同文车同轨，统一度量衡；筑长城、修驰道，也因严刑厚役埋下速亡之因。' },
+    { n: '秦二世', r: '胡亥', y: '前210–前207', life: '前230–前207', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '赵高专权，指鹿为马；陈胜吴广揭竿，六国旧族并起，秦祚止于三年。' },
+    { n: '秦王子婴', r: '子婴', y: '前207', life: '?–前206', rel: '侄', tag: '亡国', tagName: '降王',
+      d: '去帝号称王，诛赵高，在位四十六日即出降刘邦，秦亡。' },
+  ]},
+
+  { id: 'xihan', name: '西汉', era: '前202 — 公元8', color: '#8A3A2C', emps: [
+    { n: '汉高祖', r: '刘邦', y: '前202–前195', life: '前256–前195', tag: '开国', tagName: '开国',
+      d: '起于沛县亭长，楚汉相争五年而定天下；郡国并行，与民休息，奠四百年汉家基业。' },
+    { n: '汉惠帝', r: '刘盈', y: '前195–前188', life: '前210–前188', rel: '子', tag: '守成', tagName: '守成',
+      d: '仁弱，吕后临朝；曹参“萧规曹随”，黄老无为，民力得苏。' },
+    { n: '前少帝', r: '刘恭', y: '前188–前184', life: '?–前184', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '吕后所立幼主，因怨言被废杀。' },
+    { n: '后少帝', r: '刘弘', y: '前184–前180', life: '?–前180', rel: '弟', tag: '傀儡', tagName: '傀儡',
+      d: '吕后称制八年，诸吕封王；吕后崩，周勃、陈平平诸吕，迎立代王。' },
+    { n: '汉文帝', r: '刘恒', y: '前180–前157', life: '前203–前157', rel: '侄', tag: '中兴', tagName: '治世',
+      d: '轻徭薄赋、废肉刑，田租三十税一，与景帝并称“文景之治”。' },
+    { n: '汉景帝', r: '刘启', y: '前157–前141', life: '前188–前141', rel: '子', tag: '守成', tagName: '治世',
+      d: '平七国之乱，收诸侯王支郡，中央集权始固。' },
+    { n: '汉武帝', r: '刘彻', y: '前141–前87', life: '前156–前87', rel: '子', tag: '中兴', tagName: '雄主',
+      d: '罢黜百家、独尊儒术，北击匈奴、通西域、开河西，盐铁官营；晚年轮台罪己。' },
+    { n: '汉昭帝', r: '刘弗陵', y: '前87–前74', life: '前94–前74', rel: '子', tag: '守成', tagName: '守成',
+      d: '八岁即位，霍光辅政，轻徭薄赋，昭宣中兴之始。' },
+    { n: '汉宣帝', r: '刘询', y: '前74–前49', life: '前91–前49', rel: '孙', tag: '中兴', tagName: '中兴',
+      d: '起于民间，知稼穑艰难；设西域都护，匈奴呼韩邪单于来朝，史称“孝宣中兴”。' },
+    { n: '汉元帝', r: '刘奭', y: '前49–前33', life: '前75–前33', rel: '子', tag: '守成', tagName: '守成',
+      d: '柔仁好儒，宦官石显用事，外戚渐起。' },
+    { n: '汉成帝', r: '刘骜', y: '前33–前7', life: '前51–前7', rel: '子', tag: '守成', tagName: '衰象',
+      d: '沉酒色，赵飞燕姊妹入宫；王氏外戚秉政，王莽由此进身。' },
+    { n: '汉哀帝', r: '刘欣', y: '前7–前1', life: '前25–前1', rel: '侄', tag: '守成', tagName: '衰象',
+      d: '欲抑外戚而宠董贤，“断袖”之典出于此，国势愈颓。' },
+    { n: '汉平帝', r: '刘衎', y: '前1–5', life: '前9–5', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '九岁即位，王莽以大司马辅政，专权日甚。' },
+    { n: '孺子婴', r: '刘婴', y: '6–8', life: '5–25', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '两岁为皇太子，王莽摄政称“假皇帝”，三年后篡汉。' },
+  ]},
+
+  { id: 'xin', name: '新', era: '9 — 23', color: '#6E4B6B', emps: [
+    { n: '王莽', r: '王莽', y: '9–23', life: '前45–23', tag: '开国', tagName: '篡汉',
+      d: '以外戚篡汉建新，托古改制：王田私属、五均六筦，币制屡变，民不堪命；绿林赤眉并起，身死渐台。' },
+  ]},
+
+  { id: 'donghan', name: '东汉', era: '25 — 220', color: '#8E3B2E', emps: [
+    { n: '汉光武帝', r: '刘秀', y: '25–57', life: '前5–57', tag: '开国', tagName: '开国',
+      d: '昆阳一战以少胜多，重建汉室；退功臣进文吏，度田清户口，史称“光武中兴”。' },
+    { n: '汉明帝', r: '刘庄', y: '57–75', life: '28–75', rel: '子', tag: '守成', tagName: '守成',
+      d: '遵奉建武制度，吏治严明；遣班超使西域，佛教东传，建白马寺。' },
+    { n: '汉章帝', r: '刘炟', y: '75–88', life: '57–88', rel: '子', tag: '守成', tagName: '治世',
+      d: '宽厚好儒，白虎观会议定五经异同；与明帝并称“明章之治”。' },
+    { n: '汉和帝', r: '刘肇', y: '88–106', life: '79–106', rel: '子', tag: '中兴', tagName: '中兴',
+      d: '十岁即位，窦宪专权；十四岁诛窦氏，亲理万机，蔡伦改进造纸。' },
+    { n: '汉殇帝', r: '刘隆', y: '106', life: '105–106', rel: '子', tag: '傀儡', tagName: '幼帝',
+      d: '生百余日即位，在位八个月而夭。' },
+    { n: '汉安帝', r: '刘祜', y: '106–125', life: '94–125', rel: '侄', tag: '守成', tagName: '衰象',
+      d: '邓太后临朝十余年，亲政后宦官、外戚交争，西域复叛。' },
+    { n: '少帝懿', r: '刘懿', y: '125', life: '?–125', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '阎太后所立，在位二百余日而废。' },
+    { n: '汉顺帝', r: '刘保', y: '125–144', life: '115–144', rel: '子', tag: '守成', tagName: '衰象',
+      d: '宦官孙程等拥立，外戚梁冀渐盛。' },
+    { n: '汉冲帝', r: '刘炳', y: '144–145', life: '143–145', rel: '子', tag: '傀儡', tagName: '幼帝',
+      d: '两岁即位，梁太后临朝，未及一年而崩。' },
+    { n: '汉质帝', r: '刘缵', y: '145–146', life: '138–146', rel: '侄', tag: '傀儡', tagName: '幼帝',
+      d: '八岁即位，因称梁冀“跋扈将军”被鸩杀。' },
+    { n: '汉桓帝', r: '刘志', y: '146–168', life: '132–168', rel: '侄', tag: '守成', tagName: '衰象',
+      d: '诛梁冀而宦官专权，党锢之祸起，士林摧折。' },
+    { n: '汉灵帝', r: '刘宏', y: '168–189', life: '156–189', rel: '侄', tag: '亡国', tagName: '衰象',
+      d: '卖官鬻爵，黄巾起义；废史立牧，州牧割据之端。' },
+    { n: '少帝辩', r: '刘辩', y: '189', life: '176–190', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '在位五月，董卓入京废之，东汉名存实亡。' },
+    { n: '汉献帝', r: '刘协', y: '189–220', life: '181–234', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '九岁为董卓所立，辗转李傕、曹操之手，“挟天子以令诸侯”，禅位于曹丕。' },
+  ]},
+
+  { id: 'sanguo-wei', name: '曹魏', era: '220 — 265', color: '#3B5C7A', emps: [
+    { n: '魏文帝', r: '曹丕', y: '220–226', life: '187–226', tag: '开国', tagName: '开国',
+      d: '受汉禅称帝，定九品中正制，都洛阳；文采卓然，《典论·论文》为中国文论之始。' },
+    { n: '魏明帝', r: '曹叡', y: '226–239', life: '204–239', rel: '子', tag: '守成', tagName: '守成',
+      d: '拒诸葛亮北伐，平辽东公孙渊；大营宫室，役繁民困。' },
+    { n: '齐王芳', r: '曹芳', y: '239–254', life: '232–274', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '幼年即位，曹爽与司马懿争权，高平陵之变后司马氏专政。' },
+    { n: '高贵乡公', r: '曹髦', y: '254–260', life: '241–260', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '不堪坐受废辱，率僮仆讨司马昭，被成济弑于车下。' },
+    { n: '魏元帝', r: '曹奂', y: '260–265', life: '246–302', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '灭蜀之后，司马炎受禅代魏，魏亡。' },
+  ]},
+
+  { id: 'sanguo-shu', name: '蜀汉', era: '221 — 263', color: '#2F6B4F', emps: [
+    { n: '昭烈帝', r: '刘备', y: '221–223', life: '161–223', tag: '开国', tagName: '开国',
+      d: '三顾茅庐得诸葛，联吴抗曹，取荆益称帝成都；夷陵之败，白帝托孤。' },
+    { n: '后主', r: '刘禅', y: '223–263', life: '207–271', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '诸葛亮辅政，“鞠躬尽瘁”；后期宠黄皓，邓艾偷渡阴平，出降，乐不思蜀。' },
+  ]},
+
+  { id: 'sanguo-wu', name: '东吴', era: '229 — 280', color: '#3B6E7E', emps: [
+    { n: '吴大帝', r: '孙权', y: '229–252', life: '182–252', tag: '开国', tagName: '开国',
+      d: '承父兄基业据江东，赤壁破曹，夷陵拒蜀，称帝武昌后迁建业。' },
+    { n: '会稽王', r: '孙亮', y: '252–258', life: '243–260', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '十岁即位，诸葛恪辅政；亲政后谋诛孙綝，事泄被废。' },
+    { n: '吴景帝', r: '孙休', y: '258–264', life: '235–264', rel: '弟', tag: '守成', tagName: '守成',
+      d: '诛孙綝，兴学重农，然国势已衰。' },
+    { n: '吴末帝', r: '孙皓', y: '264–280', life: '243–284', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '暴虐嗜杀，晋军王濬楼船下益州，出降，三国归晋。' },
+  ]},
+
+  { id: 'xijin', name: '西晋', era: '265 — 316', color: '#5A5F86', emps: [
+    { n: '晋武帝', r: '司马炎', y: '265–290', life: '236–290', tag: '开国', tagName: '开国',
+      d: '受魏禅，灭吴统一；大封宗室、行占田制，为八王之乱埋根。' },
+    { n: '晋惠帝', r: '司马衷', y: '290–307', life: '259–307', rel: '子', tag: '亡国', tagName: '乱世',
+      d: '“何不食肉糜”，贾后乱政，八王之乱，五胡乘隙而起。' },
+    { n: '晋怀帝', r: '司马炽', y: '307–311', life: '284–313', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '永嘉之乱，匈奴刘曜破洛阳，帝被掳，史称“永嘉之祸”。' },
+    { n: '晋愍帝', r: '司马邺', y: '313–316', life: '300–318', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '长安陷落，出降汉赵，西晋亡；中原衣冠南渡。' },
+  ]},
+
+  { id: 'dongjin', name: '东晋', era: '317 — 420', color: '#6A6A8E', emps: [
+    { n: '晋元帝', r: '司马睿', y: '317–323', life: '276–323', tag: '开国', tagName: '开国',
+      d: '南渡建康，王导、王敦辅政，“王与马，共天下”。' },
+    { n: '晋明帝', r: '司马绍', y: '323–325', life: '299–325', rel: '子', tag: '守成', tagName: '守成',
+      d: '平王敦之乱，聪敏有断，惜在位三年而崩。' },
+    { n: '晋成帝', r: '司马衍', y: '325–342', life: '321–342', rel: '子', tag: '守成', tagName: '守成',
+      d: '幼年即位，庾亮辅政；苏峻之乱，建康几毁。' },
+    { n: '晋康帝', r: '司马岳', y: '342–344', life: '322–344', rel: '弟', tag: '守成', tagName: '守成',
+      d: '在位两年，庾冰、何充辅政，北伐无功。' },
+    { n: '晋穆帝', r: '司马聃', y: '344–361', life: '343–361', rel: '子', tag: '守成', tagName: '守成',
+      d: '两岁即位，桓温灭成汉、三次北伐，一度收复洛阳。' },
+    { n: '晋哀帝', r: '司马丕', y: '361–365', life: '341–365', rel: '子', tag: '守成', tagName: '守成',
+      d: '好方术，饵药求长生，中毒而崩。' },
+    { n: '废帝奕', r: '司马奕', y: '365–371', life: '342–386', rel: '弟', tag: '傀儡', tagName: '傀儡',
+      d: '被桓温以“不能人道”为辞废为海西公。' },
+    { n: '晋简文帝', r: '司马昱', y: '371–372', life: '320–372', rel: '祖孙', tag: '傀儡', tagName: '傀儡',
+      d: '桓温所立，拱手听命，在位八月而崩。' },
+    { n: '晋孝武帝', r: '司马曜', y: '372–396', life: '362–396', rel: '子', tag: '中兴', tagName: '中兴',
+      d: '淝水之战谢安却秦百万之师；后期沉酒，为宠妃所弑。' },
+    { n: '晋安帝', r: '司马德宗', y: '396–418', life: '382–419', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '不辨寒暑，孙恩、卢循起事，桓玄篡位，刘裕崛起。' },
+    { n: '晋恭帝', r: '司马德文', y: '418–420', life: '386–421', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '禅位于刘裕，东晋亡，南朝始。' },
+  ]},
+
+  { id: 'song', name: '刘宋', era: '420 — 479', color: '#4E6E5A', emps: [
+    { n: '宋武帝', r: '刘裕', y: '420–422', life: '363–422', tag: '开国', tagName: '开国',
+      d: '寒门出身，北伐灭南燕后秦，气吞万里如虎；代晋建宋。' },
+    { n: '宋少帝', r: '刘义符', y: '422–424', life: '406–424', rel: '子', tag: '傀儡', tagName: '废帝',
+      d: '游戏无度，被徐羡之等废杀。' },
+    { n: '宋文帝', r: '刘义隆', y: '424–453', life: '407–453', rel: '弟', tag: '中兴', tagName: '治世',
+      d: '元嘉之治，三十年无大战；三次北伐失利，北魏饮马长江。' },
+    { n: '宋孝武帝', r: '刘骏', y: '453–464', life: '430–464', rel: '子', tag: '守成', tagName: '守成',
+      d: '平刘劭之乱即位，集权抑宗室，然奢费无度。' },
+    { n: '前废帝', r: '刘子业', y: '464–465', life: '449–465', rel: '子', tag: '亡国', tagName: '暴君',
+      d: '淫虐乱伦，杀戮宗亲，被左右弑杀。' },
+    { n: '宋明帝', r: '刘彧', y: '465–472', life: '439–472', rel: '叔', tag: '守成', tagName: '守成',
+      d: '平刘子勋之乱，然猜忌宗室，淮北四州入于北魏。' },
+    { n: '后废帝', r: '刘昱', y: '472–477', life: '463–477', rel: '子', tag: '亡国', tagName: '暴君',
+      d: '十岁即位，顽劣嗜杀，被萧道成所弑。' },
+    { n: '宋顺帝', r: '刘准', y: '477–479', life: '467–479', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '禅位于萧道成，“愿生生世世，再不生帝王家”。' },
+  ]},
+
+  { id: 'qi', name: '南齐', era: '479 — 502', color: '#4C6E63', emps: [
+    { n: '齐高帝', r: '萧道成', y: '479–482', life: '427–482', tag: '开国', tagName: '开国',
+      d: '代宋建齐，节俭爱民，尝言“使我治天下十年，当使黄金与土同价”。' },
+    { n: '齐武帝', r: '萧赜', y: '482–493', life: '440–493', rel: '子', tag: '守成', tagName: '治世',
+      d: '永明之治，百姓丰乐，文风大盛，“永明体”诗开律诗先声。' },
+    { n: '郁林王', r: '萧昭业', y: '493–494', life: '473–494', rel: '孙', tag: '傀儡', tagName: '废帝',
+      d: '荒淫挥霍，被萧鸾废杀。' },
+    { n: '海陵王', r: '萧昭文', y: '494', life: '480–494', rel: '弟', tag: '傀儡', tagName: '傀儡',
+      d: '在位三月，被萧鸾所废。' },
+    { n: '齐明帝', r: '萧鸾', y: '494–498', life: '452–498', rel: '侄', tag: '守成', tagName: '守成',
+      d: '以旁支夺位，大杀高武子孙，北失沔北五郡。' },
+    { n: '东昏侯', r: '萧宝卷', y: '498–501', life: '483–501', rel: '子', tag: '亡国', tagName: '暴君',
+      d: '凿金为莲、宠潘妃，杀戮大臣，萧衍起兵襄阳。' },
+    { n: '齐和帝', r: '萧宝融', y: '501–502', life: '488–502', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '禅位于萧衍，南齐亡。' },
+  ]},
+
+  { id: 'liang', name: '南梁', era: '502 — 557', color: '#5A6E52', emps: [
+    { n: '梁武帝', r: '萧衍', y: '502–549', life: '464–549', rel: '', tag: '开国', tagName: '开国',
+      d: '在位四十八年，崇佛舍身同泰寺；侯景之乱，饿死台城，江南残破。' },
+    { n: '梁简文帝', r: '萧纲', y: '549–551', life: '503–551', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '侯景所立，“宫体诗”代表，终被废杀。' },
+    { n: '梁元帝', r: '萧绎', y: '552–555', life: '508–555', rel: '弟', tag: '守成', tagName: '守成',
+      d: '平侯景于江陵，城破前焚书十四万卷，江陵陷于西魏。' },
+    { n: '梁敬帝', r: '萧方智', y: '555–557', life: '543–558', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '禅位于陈霸先，梁亡。' },
+  ]},
+
+  { id: 'chen', name: '南陈', era: '557 — 589', color: '#5E6E4A', emps: [
+    { n: '陈武帝', r: '陈霸先', y: '557–559', life: '503–559', tag: '开国', tagName: '开国',
+      d: '出身寒微，平侯景、拒北齐，代梁建陈，江南稍安。' },
+    { n: '陈文帝', r: '陈蒨', y: '559–566', life: '522–566', rel: '侄', tag: '中兴', tagName: '治世',
+      d: '天嘉之治，轻徭薄赋，江南经济复苏。' },
+    { n: '陈废帝', r: '陈伯宗', y: '566–568', life: '554–570', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '幼弱，被叔父陈顼废黜。' },
+    { n: '陈宣帝', r: '陈顼', y: '569–582', life: '530–582', rel: '叔', tag: '守成', tagName: '守成',
+      d: '太建北伐，一度收复淮南，旋失于北周。' },
+    { n: '陈后主', r: '陈叔宝', y: '582–589', life: '553–604', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '《玉树后庭花》，隋军渡江，与张丽华匿于胭脂井，陈亡。' },
+  ]},
+
+  { id: 'beiwei', name: '北魏', era: '386 — 534', color: '#4A5F7A', emps: [
+    { n: '道武帝', r: '拓跋珪', y: '386–409', life: '371–409', tag: '开国', tagName: '开国',
+      d: '复代国改称魏，参合陂破后燕，定都平城，行离散诸部。' },
+    { n: '明元帝', r: '拓跋嗣', y: '409–423', life: '392–423', rel: '子', tag: '守成', tagName: '守成',
+      d: '北伐柔然，南取刘宋滑台，国势渐固。' },
+    { n: '太武帝', r: '拓跋焘', y: '423–452', life: '408–452', rel: '子', tag: '中兴', tagName: '雄主',
+      d: '灭胡夏、北燕、北凉，统一北方；太武灭佛，三武一宗之一。' },
+    { n: '文成帝', r: '拓跋濬', y: '452–465', life: '440–465', rel: '孙', tag: '守成', tagName: '守成',
+      d: '复兴佛法，开凿云冈石窟。' },
+    { n: '献文帝', r: '拓跋弘', y: '465–471', life: '454–476', rel: '子', tag: '守成', tagName: '守成',
+      d: '好黄老浮屠，禅位幼子，自为太上皇。' },
+    { n: '孝文帝', r: '元宏', y: '471–499', life: '467–499', rel: '子', tag: '中兴', tagName: '改革',
+      d: '迁都洛阳，改汉姓、易汉服、通婚汉族，北魏汉化最深远的一步。' },
+    { n: '宣武帝', r: '元恪', y: '499–515', life: '483–515', rel: '子', tag: '守成', tagName: '守成',
+      d: '扩建洛阳，佛教极盛；然宽纵宗室，吏治渐坏。' },
+    { n: '孝明帝', r: '元诩', y: '515–528', life: '510–528', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '胡太后临朝，六镇起义，河阴之变；帝被太后鸩杀。' },
+    { n: '孝庄帝', r: '元子攸', y: '528–530', life: '507–530', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '诛尔朱荣于殿上，旋被尔朱氏所杀。' },
+    { n: '节闵帝', r: '元恭', y: '531–532', life: '498–532', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '尔朱氏所立，高欢入洛后废之。' },
+    { n: '孝武帝', r: '元修', y: '532–534', life: '510–534', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '西奔关中依宇文泰，高欢另立东魏，北魏分裂。' },
+  ]},
+
+  { id: 'dongwei', name: '东魏', era: '534 — 550', color: '#57708C', emps: [
+    { n: '孝静帝', r: '元善见', y: '534–550', life: '524–552', tag: '傀儡', tagName: '傀儡',
+      d: '高欢所立，都邺，政由高氏；禅位于高洋，东魏亡。' },
+  ]},
+
+  { id: 'xiwei', name: '西魏', era: '535 — 556', color: '#5C6E8A', emps: [
+    { n: '西魏文帝', r: '元宝炬', y: '535–551', life: '507–551', tag: '傀儡', tagName: '傀儡',
+      d: '宇文泰所立，行府兵制、六官制，关陇集团自此成形。' },
+    { n: '西魏废帝', r: '元钦', y: '551–554', life: '525–554', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '谋诛宇文泰事泄，被废杀。' },
+    { n: '西魏恭帝', r: '元廓', y: '554–556', life: '537–557', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '禅位于宇文觉，西魏亡，北周立。' },
+  ]},
+
+  { id: 'beiqi', name: '北齐', era: '550 — 577', color: '#6A5578', emps: [
+    { n: '齐文宣帝', r: '高洋', y: '550–559', life: '526–559', tag: '开国', tagName: '开国',
+      d: '代东魏建齐，击柔然、破山胡；后期酗酒狂暴，人称“英雄天子”与“疯子”并存。' },
+    { n: '齐废帝', r: '高殷', y: '559–560', life: '545–561', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '在位一年，被叔父高演废黜。' },
+    { n: '齐孝昭帝', r: '高演', y: '560–561', life: '535–561', rel: '弟', tag: '守成', tagName: '守成',
+      d: '勤政纳谏，惜在位仅一年余。' },
+    { n: '齐武成帝', r: '高湛', y: '561–565', life: '537–569', rel: '弟', tag: '守成', tagName: '守成',
+      d: '宠信和士开，国政日坏；禅位太子，自为太上皇。' },
+    { n: '齐后主', r: '高纬', y: '565–577', life: '556–577', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '杀斛律光，自毁长城；《兰陵王入阵曲》背后的昏君，北周破邺被俘。' },
+    { n: '齐幼主', r: '高恒', y: '577', life: '570–578', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '八岁即位，二十余日而亡。' },
+  ]},
+
+  { id: 'beizhou', name: '北周', era: '557 — 581', color: '#4F6070', emps: [
+    { n: '周孝闵帝', r: '宇文觉', y: '557', life: '542–557', tag: '开国', tagName: '开国',
+      d: '宇文泰之子，受西魏禅；谋诛宇文护，反被废杀。' },
+    { n: '周明帝', r: '宇文毓', y: '557–560', life: '534–560', rel: '兄', tag: '守成', tagName: '守成',
+      d: '好学有识，被宇文护毒杀。' },
+    { n: '周武帝', r: '宇文邕', y: '560–578', life: '543–578', rel: '弟', tag: '中兴', tagName: '雄主',
+      d: '诛宇文护亲政，建德毁佛、府兵扩员，灭北齐统一北方，为隋统奠基。' },
+    { n: '周宣帝', r: '宇文赟', y: '578–579', life: '559–580', rel: '子', tag: '守成', tagName: '昏君',
+      d: '荒淫暴虐，五后并立，禅位幼子，二十二岁而崩。' },
+    { n: '周静帝', r: '宇文阐', y: '579–581', life: '573–581', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '七岁即位，杨坚辅政，禅位后北周亡。' },
+  ]},
+
+  { id: 'sui', name: '隋', era: '581 — 619', color: '#6B4A2F', emps: [
+    { n: '隋文帝', r: '杨坚', y: '581–604', life: '541–604', tag: '开国', tagName: '开国',
+      d: '代周建隋，灭陈统一；创三省六部、开科举、行均田，开皇之治，府库充盈。' },
+    { n: '隋炀帝', r: '杨广', y: '604–618', life: '569–618', rel: '子', tag: '亡国', tagName: '暴君',
+      d: '开大运河、营洛阳、三征高丽，民力竭而天下叛；江都兵变，缢死扬州。' },
+    { n: '隋恭帝', r: '杨侑', y: '618–619', life: '605–619', rel: '孙', tag: '傀儡', tagName: '傀儡',
+      d: '李渊所立，旋禅位，隋亡。' },
+  ]},
+
+  { id: 'tang', name: '唐', era: '618 — 907', color: '#A5352A', emps: [
+    { n: '唐高祖', r: '李渊', y: '618–626', life: '566–635', tag: '开国', tagName: '开国',
+      d: '晋阳起兵入长安，建唐；玄武门之变后退为太上皇。' },
+    { n: '唐太宗', r: '李世民', y: '626–649', life: '598–649', rel: '子', tag: '中兴', tagName: '治世',
+      d: '贞观之治，纳谏如流；破东突厥、平高昌，被尊“天可汗”，《贞观政要》为后世治国范本。' },
+    { n: '唐高宗', r: '李治', y: '649–683', life: '628–683', rel: '子', tag: '守成', tagName: '守成',
+      d: '永徽之政，灭西突厥、百济、高丽，版图极盛；晚年武后预政。' },
+    { n: '唐中宗', r: '李显', y: '684 / 705–710', life: '656–710', rel: '子', tag: '傀儡', tagName: '复位',
+      d: '两度在位，复位后纵容韦后与安乐公主，终被毒杀。' },
+    { n: '唐睿宗', r: '李旦', y: '684–690 / 710–712', life: '662–716', rel: '弟', tag: '傀儡', tagName: '复位',
+      d: '两度为帝，皆非实权；传位李隆基，开元之世由此开。' },
+    { n: '武则天', r: '武曌', y: '690–705', life: '624–705', rel: '篡', tag: 'empress', tagName: '女帝',
+      d: '中国唯一正统女皇帝，改国号周；开殿试、设武举，任用酷吏亦重用狄仁杰，上承贞观下启开元。' },
+    { n: '少帝重茂', r: '李重茂', y: '710', life: '695–714', rel: '侄', tag: '傀儡', tagName: '傀儡',
+      d: '韦后所立，在位不足一月，唐隆政变后废。' },
+    { n: '唐玄宗', r: '李隆基', y: '712–756', life: '685–762', rel: '侄', tag: '中兴', tagName: '盛世',
+      d: '开元盛世，万国来朝；天宝后期宠杨贵妃、任李林甫，安史之乱起，盛唐转衰。' },
+    { n: '唐肃宗', r: '李亨', y: '756–762', life: '711–762', rel: '子', tag: '守成', tagName: '中兴',
+      d: '灵武即位，借回纥兵平乱，收复两京；藩镇、宦官之祸自此始。' },
+    { n: '唐代宗', r: '李豫', y: '762–779', life: '727–779', rel: '子', tag: '守成', tagName: '守成',
+      d: '平定安史之乱，然河北藩镇割据成形，吐蕃一度攻入长安。' },
+    { n: '唐德宗', r: '李适', y: '779–805', life: '742–805', rel: '子', tag: '守成', tagName: '守成',
+      d: '锐意削藩，泾原兵变仓皇出奔；后行两税法，转趋保守。' },
+    { n: '唐顺宗', r: '李诵', y: '805', life: '761–806', rel: '子', tag: '傀儡', tagName: '短祚',
+      d: '永贞革新一百四十六日，宦官逼其禅位。' },
+    { n: '唐宪宗', r: '李纯', y: '805–820', life: '778–820', rel: '子', tag: '中兴', tagName: '中兴',
+      d: '元和中兴，削平淮西、淄青诸镇，河朔暂服；晚年服丹暴崩。' },
+    { n: '唐穆宗', r: '李恒', y: '820–824', life: '795–824', rel: '子', tag: '守成', tagName: '衰象',
+      d: '销兵裁镇，河朔复叛；牛李党争渐起。' },
+    { n: '唐敬宗', r: '李湛', y: '824–826', life: '809–826', rel: '子', tag: '傀儡', tagName: '昏君',
+      d: '好击球夜猎，被宦官所弑。' },
+    { n: '唐文宗', r: '李昂', y: '826–840', life: '809–840', rel: '弟', tag: '傀儡', tagName: '傀儡',
+      d: '甘露之变谋诛宦官失败，此后“天下事皆决于北司”。' },
+    { n: '唐武宗', r: '李炎', y: '840–846', life: '814–846', rel: '弟', tag: '中兴', tagName: '中兴',
+      d: '会昌中兴，击回鹘、平泽潞；会昌毁佛，铜像铸钱。' },
+    { n: '唐宣宗', r: '李忱', y: '846–859', life: '810–859', rel: '叔', tag: '中兴', tagName: '中兴',
+      d: '“小太宗”，大中之治，收复河湟；然未立制度之基。' },
+    { n: '唐懿宗', r: '李漼', y: '859–873', life: '833–873', rel: '子', tag: '守成', tagName: '衰象',
+      d: '崇佛奢靡，迎佛骨，庞勋兵变起于徐泗。' },
+    { n: '唐僖宗', r: '李儇', y: '873–888', life: '862–888', rel: '子', tag: '亡国', tagName: '乱世',
+      d: '十二岁即位，黄巢入长安，两度出奔；藩镇与宦官共天下。' },
+    { n: '唐昭宗', r: '李晔', y: '888–904', life: '867–904', rel: '弟', tag: '傀儡', tagName: '傀儡',
+      d: '有志中兴而受制于朱温，被弑于洛阳。' },
+    { n: '唐哀帝', r: '李柷', y: '904–907', life: '892–908', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '十三岁为朱温所立，禅位后唐亡，五代十国始。' },
+  ]},
+
+  { id: 'houliang', name: '后梁', era: '907 — 923', color: '#7A4A2E', emps: [
+    { n: '梁太祖', r: '朱温', y: '907–912', life: '852–912', tag: '开国', tagName: '开国',
+      d: '黄巢降将，挟唐称帝；与晋王李存勖夹河苦战，被亲子所弑。' },
+    { n: '朱友珪', r: '朱友珪', y: '912–913', life: '885–913', rel: '子', tag: '傀儡', tagName: '弑父',
+      d: '弑父夺位，八个月后为弟朱友贞所杀。' },
+    { n: '梁末帝', r: '朱友贞', y: '913–923', life: '888–923', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '用将非人，杨刘、德胜屡败；李存勖破开封，自刎而亡。' },
+  ]},
+
+  { id: 'houtang', name: '后唐', era: '923 — 936', color: '#6E4A3A', emps: [
+    { n: '唐庄宗', r: '李存勖', y: '923–926', life: '885–926', rel: '', tag: '开国', tagName: '开国',
+      d: '灭梁称帝，三矢之誓终成大业；宠伶人、疏功臣，兴教门之变被杀。' },
+    { n: '唐明宗', r: '李嗣源', y: '926–933', life: '867–933', rel: '养子', tag: '守成', tagName: '治世',
+      d: '革除弊政，减赋省刑，“小康”之世；然不识字，难制藩镇。' },
+    { n: '唐闵帝', r: '李从厚', y: '933–934', life: '914–934', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '削藩逼反李从珂，出奔被弑。' },
+    { n: '唐末帝', r: '李从珂', y: '934–936', life: '885–936', rel: '养子', tag: '亡国', tagName: '亡国',
+      d: '举兵夺位；石敬瑭引契丹南下，携传国玺登玄武楼自焚。' },
+  ]},
+
+  { id: 'houjin', name: '后晋', era: '936 — 947', color: '#6B5540', emps: [
+    { n: '晋高祖', r: '石敬瑭', y: '936–942', life: '892–942', tag: '开国', tagName: '儿皇帝',
+      d: '割燕云十六州、称契丹为父，借兵灭后唐；中原屏障自此尽失。' },
+    { n: '晋出帝', r: '石重贵', y: '942–947', life: '914–974', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '称孙不称臣，契丹三度南下，汴梁陷落，后晋亡。' },
+  ]},
+
+  { id: 'houhan', name: '后汉', era: '947 — 951', color: '#5E4A38', emps: [
+    { n: '汉高祖', r: '刘知远', y: '947–948', life: '895–948', tag: '开国', tagName: '开国',
+      d: '契丹北撤时称帝太原，收复中原；在位不足一年。' },
+    { n: '汉隐帝', r: '刘承祐', y: '948–951', life: '931–951', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '诛杀功臣，逼反郭威；兵败被杀，后汉三世而终。' },
+  ]},
+
+  { id: 'houzhou', name: '后周', era: '951 — 960', color: '#4E5A46', emps: [
+    { n: '周太祖', r: '郭威', y: '951–954', life: '904–954', tag: '开国', tagName: '开国',
+      d: '起于行伍，革除苛敛、废营田，一改五代武夫治国之弊。' },
+    { n: '周世宗', r: '柴荣', y: '954–959', life: '921–959', rel: '养子', tag: '中兴', tagName: '雄主',
+      d: '高平之战立威，整军理财、抑佛毁寺，三征南唐、北伐契丹，三十九岁病逝，天不假年。' },
+    { n: '周恭帝', r: '柴宗训', y: '959–960', life: '953–973', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '七岁即位，陈桥兵变，赵匡胤黄袍加身，后周亡。' },
+  ]},
+
+  { id: 'shiguo', name: '十国', era: '902 — 979', color: '#4C6A6A', emps: [
+    { n: '吴·杨行密', r: '杨行密', y: '902–905', life: '852–905', tag: '开国', tagName: '吴',
+      d: '据淮南，阻朱温南下，保江淮一隅之安。' },
+    { n: '南唐烈祖', r: '李昪', y: '937–943', life: '888–943', tag: '开国', tagName: '南唐',
+      d: '代吴建南唐，休养生息，江淮富庶甲于诸国。' },
+    { n: '南唐元宗', r: '李璟', y: '943–961', life: '916–961', rel: '子', tag: '守成', tagName: '南唐',
+      d: '词家天子，失淮南十四州，去帝号称国主。' },
+    { n: '南唐后主', r: '李煜', y: '961–975', life: '937–978', rel: '子', tag: '亡国', tagName: '词帝',
+      d: '“问君能有几多愁”，被俘汴京，封违命侯，终被赐药。' },
+    { n: '吴越武肃王', r: '钱镠', y: '907–932', life: '852–932', tag: '开国', tagName: '吴越',
+      d: '筑捍海石塘、兴修水利，“上有天堂下有苏杭”之基；临终嘱“善事中国”。' },
+    { n: '前蜀高祖', r: '王建', y: '907–918', life: '847–918', tag: '开国', tagName: '前蜀',
+      d: '据蜀称帝，保境安民，蜀中文艺一时之盛。' },
+    { n: '后蜀高祖', r: '孟知祥', y: '934', life: '874–934', tag: '开国', tagName: '后蜀',
+      d: '据两川称帝，在位七月；其子孟昶降宋，花蕊夫人作《述国亡诗》。' },
+    { n: '南汉高祖', r: '刘龑', y: '917–942', life: '889–942', tag: '开国', tagName: '南汉',
+      d: '据岭南称帝，海上贸易兴盛，然刑政酷烈。' },
+    { n: '闽王', r: '王审知', y: '909–925', life: '862–925', tag: '开国', tagName: '闽',
+      d: '开甘棠港通海贸，招抚流亡，闽地得以开发。' },
+    { n: '楚王', r: '马殷', y: '907–930', life: '852–930', tag: '开国', tagName: '楚',
+      d: '据湖南，以茶马互市富国，铸铅铁钱以固商利。' },
+    { n: '荆南武信王', r: '高季兴', y: '924–929', life: '858–929', tag: '开国', tagName: '荆南',
+      d: '据江陵弹丸之地，四向称臣、截留贡赋，人称“高赖子”。' },
+    { n: '北汉世祖', r: '刘崇', y: '951–954', life: '895–954', tag: '开国', tagName: '北汉',
+      d: '后汉宗室，依辽自立，为十国中最后灭亡者（979）。' },
+  ]},
+
+  { id: 'beisong', name: '北宋', era: '960 — 1127', color: '#3E5E7E', emps: [
+    { n: '宋太祖', r: '赵匡胤', y: '960–976', life: '927–976', tag: '开国', tagName: '开国',
+      d: '陈桥兵变黄袍加身，杯酒释兵权；先南后北，终结五代武人乱政，然重文抑武遗患后世。' },
+    { n: '宋太宗', r: '赵光义', y: '976–997', life: '939–997', rel: '弟', tag: '守成', tagName: '守成',
+      d: '灭北汉，两次北伐燕云皆败；“烛影斧声”之谜，兴文教、扩科举。' },
+    { n: '宋真宗', r: '赵恒', y: '997–1022', life: '968–1022', rel: '子', tag: '守成', tagName: '治世',
+      d: '澶渊之盟以岁币换百年和平；东封西祀，天书封禅，虚耗国力。' },
+    { n: '宋仁宗', r: '赵祯', y: '1022–1063', life: '1010–1063', rel: '子', tag: '中兴', tagName: '治世',
+      d: '仁宗盛治，名臣辈出（范仲淹、包拯、欧阳修）；庆历新政旋废，西夏独立。' },
+    { n: '宋英宗', r: '赵曙', y: '1063–1067', life: '1032–1067', rel: '侄', tag: '守成', tagName: '守成',
+      d: '濮议之争，在位四年；司马光始编《资治通鉴》。' },
+    { n: '宋神宗', r: '赵顼', y: '1067–1085', life: '1048–1085', rel: '子', tag: '中兴', tagName: '变法',
+      d: '任用王安石熙宁变法，青苗、免役、保甲诸法争议千载；五路伐夏失利。' },
+    { n: '宋哲宗', r: '赵煦', y: '1085–1100', life: '1077–1100', rel: '子', tag: '守成', tagName: '守成',
+      d: '亲政后绍述新法，打击旧党；河湟开边，西夏渐弱。' },
+    { n: '宋徽宗', r: '赵佶', y: '1100–1126', life: '1082–1135', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '瘦金体、花石纲，艺术家而非皇帝；联金灭辽引狼入室，靖康之变被掳北去。' },
+    { n: '宋钦宗', r: '赵桓', y: '1126–1127', life: '1100–1156', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '在位一年余，汴京陷落，与父同被掳，北宋亡。' },
+  ]},
+
+  { id: 'nansong', name: '南宋', era: '1127 — 1279', color: '#4A6E86', emps: [
+    { n: '宋高宗', r: '赵构', y: '1127–1162', life: '1107–1187', tag: '开国', tagName: '开国',
+      d: '南渡临安，用秦桧主和，杀岳飞、订绍兴和议；偏安之局自此定。' },
+    { n: '宋孝宗', r: '赵昚', y: '1162–1189', life: '1127–1194', rel: '养子', tag: '中兴', tagName: '中兴',
+      d: '为岳飞平反，隆兴北伐失利后专意内政，乾淳之治，南宋最有为之君。' },
+    { n: '宋光宗', r: '赵惇', y: '1189–1194', life: '1147–1200', rel: '子', tag: '守成', tagName: '昏君',
+      d: '惧内多病，与父失和，绍熙内禅被迫退位。' },
+    { n: '宋宁宗', r: '赵扩', y: '1194–1224', life: '1168–1224', rel: '子', tag: '守成', tagName: '守成',
+      d: '庆元党禁、开禧北伐；韩侂胄、史弥远相继专权。' },
+    { n: '宋理宗', r: '赵昀', y: '1224–1264', life: '1205–1264', rel: '侄', tag: '守成', tagName: '守成',
+      d: '联蒙灭金，端平入洛失败；理学定为官学，国势日蹙。' },
+    { n: '宋度宗', r: '赵禥', y: '1264–1274', life: '1240–1274', rel: '侄', tag: '守成', tagName: '衰象',
+      d: '贾似道专权，襄阳围城六年而不知，南宋危局已定。' },
+    { n: '宋恭帝', r: '赵㬎', y: '1274–1276', life: '1271–1323', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '四岁即位，临安出降；后被遣往西藏为僧。' },
+    { n: '宋端宗', r: '赵昰', y: '1276–1278', life: '1269–1278', rel: '兄', tag: '亡国', tagName: '流亡',
+      d: '海上流亡政权，病殁于碙洲。' },
+    { n: '宋末帝', r: '赵昺', y: '1278–1279', life: '1272–1279', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '崖山海战，陆秀夫负帝投海，十万军民殉国，宋亡。' },
+  ]},
+
+  { id: 'liao', name: '辽', era: '916 — 1125', color: '#4E5E6E', emps: [
+    { n: '辽太祖', r: '耶律阿保机', y: '916–926', life: '872–926', tag: '开国', tagName: '开国',
+      d: '统一契丹八部，创契丹文字，灭渤海；草原帝国之基。' },
+    { n: '辽太宗', r: '耶律德光', y: '926–947', life: '902–947', rel: '子', tag: '中兴', tagName: '雄主',
+      d: '助石敬瑭得燕云十六州，灭后晋入汴，改国号“辽”。' },
+    { n: '辽世宗', r: '耶律阮', y: '947–951', life: '918–951', rel: '侄', tag: '守成', tagName: '守成',
+      d: '察割之乱中被杀，辽初皇位之争频仍。' },
+    { n: '辽穆宗', r: '耶律璟', y: '951–969', life: '931–969', rel: '弟', tag: '守成', tagName: '昏君',
+      d: '嗜酒嗜杀，号“睡王”，为近侍所弑。' },
+    { n: '辽景宗', r: '耶律贤', y: '969–982', life: '948–982', rel: '侄', tag: '守成', tagName: '守成',
+      d: '承天太后萧燕燕辅政，辽势复振。' },
+    { n: '辽圣宗', r: '耶律隆绪', y: '982–1031', life: '972–1031', rel: '子', tag: '中兴', tagName: '盛世',
+      d: '澶渊之盟定南北百年和平，辽进入全盛，称“圣宗之治”。' },
+    { n: '辽兴宗', r: '耶律宗真', y: '1031–1055', life: '1016–1055', rel: '子', tag: '守成', tagName: '守成',
+      d: '逼宋增岁币，然征西夏屡败，国力渐耗。' },
+    { n: '辽道宗', r: '耶律洪基', y: '1055–1101', life: '1032–1101', rel: '子', tag: '守成', tagName: '衰象',
+      d: '信佞臣耶律乙辛，杀皇后与太子，辽政始坏。' },
+    { n: '辽天祚帝', r: '耶律延禧', y: '1101–1125', life: '1075–1128', rel: '孙', tag: '亡国', tagName: '亡国',
+      d: '女真起兵，五京尽失，逃亡中被俘，辽亡（西辽延续至1218）。' },
+  ]},
+
+  { id: 'jin', name: '金', era: '1115 — 1234', color: '#5A4E42', emps: [
+    { n: '金太祖', r: '完颜阿骨打', y: '1115–1123', life: '1068–1123', tag: '开国', tagName: '开国',
+      d: '起兵反辽，出河店、护步答冈以少胜多，创猛安谋克，建金。' },
+    { n: '金太宗', r: '完颜吴乞买', y: '1123–1135', life: '1075–1135', rel: '弟', tag: '中兴', tagName: '雄主',
+      d: '灭辽、破汴京，掳徽钦二帝；推行汉制，国势鼎盛。' },
+    { n: '金熙宗', r: '完颜亶', y: '1135–1150', life: '1119–1150', rel: '侄', tag: '守成', tagName: '守成',
+      d: '废勃极烈、行三省，绍兴和议；晚年酗酒滥杀，被弑。' },
+    { n: '海陵王', r: '完颜亮', y: '1149–1161', life: '1122–1161', rel: '篡', tag: '守成', tagName: '暴君',
+      d: '迁都燕京，正隆官制；南侵采石大败，为部下所杀。' },
+    { n: '金世宗', r: '完颜雍', y: '1161–1189', life: '1123–1189', rel: '篡', tag: '中兴', tagName: '盛世',
+      d: '“小尧舜”，大定之治，与宋隆兴和议，金国最安定之世。' },
+    { n: '金章宗', r: '完颜璟', y: '1189–1208', life: '1168–1208', rel: '孙', tag: '守成', tagName: '守成',
+      d: '文治极盛，然黄河屡决、蒙古崛起，边患自此不休。' },
+    { n: '卫绍王', r: '完颜永济', y: '1208–1213', life: '?–1213', rel: '叔', tag: '傀儡', tagName: '傀儡',
+      d: '野狐岭一战丧师四十万，中都戒严，被弑。' },
+    { n: '金宣宗', r: '完颜珣', y: '1213–1223', life: '1163–1223', rel: '侄', tag: '守成', tagName: '衰象',
+      d: '南迁汴京，北失中都；“取偿于宋”反致腹背受敌。' },
+    { n: '金哀宗', r: '完颜守绪', y: '1223–1234', life: '1198–1234', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '苦撑危局，蔡州城破自缢，金亡。' },
+  ]},
+
+  { id: 'xixia', name: '西夏', era: '1038 — 1227', color: '#6A5A3E', emps: [
+    { n: '夏景宗', r: '李元昊', y: '1038–1048', life: '1003–1048', tag: '开国', tagName: '开国',
+      d: '称帝建大夏，创西夏文，三川口、好水川连败宋军。' },
+    { n: '夏毅宗', r: '李谅祚', y: '1048–1067', life: '1047–1067', rel: '子', tag: '守成', tagName: '守成',
+      d: '一岁即位，亲政后改行汉礼，与宋议和。' },
+    { n: '夏惠宗', r: '李秉常', y: '1067–1086', life: '1061–1086', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '母党梁氏专权，永乐城之战宋军大败。' },
+    { n: '夏崇宗', r: '李乾顺', y: '1086–1139', life: '1083–1139', rel: '子', tag: '中兴', tagName: '守成',
+      d: '亲政后依附金国，取河西之地，西夏疆域极盛。' },
+    { n: '夏仁宗', r: '李仁孝', y: '1139–1193', life: '1124–1193', rel: '子', tag: '中兴', tagName: '盛世',
+      d: '崇儒兴学、定科举，西夏文化最盛之世，在位五十四年。' },
+    { n: '夏桓宗', r: '李纯祐', y: '1193–1206', life: '1177–1206', rel: '子', tag: '守成', tagName: '衰象',
+      d: '蒙古初侵，国势转弱，被堂弟李安全废黜。' },
+    { n: '夏襄宗', r: '李安全', y: '1206–1211', life: '1170–1211', rel: '篡', tag: '傀儡', tagName: '傀儡',
+      d: '附金抗蒙，然屡战屡败，被废。' },
+    { n: '夏神宗', r: '李遵顼', y: '1211–1223', life: '1163–1226', rel: '侄', tag: '守成', tagName: '衰象',
+      d: '联蒙攻金，四面树敌，国力耗竭。' },
+    { n: '夏献宗', r: '李德旺', y: '1223–1226', life: '1181–1226', rel: '子', tag: '亡国', tagName: '亡国',
+      d: '欲联金抗蒙，为时已晚，忧悸而卒。' },
+    { n: '夏末帝', r: '李睍', y: '1226–1227', life: '?–1227', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '中兴府被围半年，出降后被杀，西夏亡。' },
+  ]},
+
+  { id: 'yuan', name: '元', era: '1271 — 1368', color: '#4A5570', emps: [
+    { n: '元世祖', r: '忽必烈', y: '1260–1294', life: '1215–1294', tag: '开国', tagName: '开国',
+      d: '建元中统，灭南宋统一天下；行省制度、纸币交钞，马可·波罗笔下的汗八里。' },
+    { n: '元成宗', r: '铁穆耳', y: '1294–1307', life: '1265–1307', rel: '孙', tag: '守成', tagName: '守成',
+      d: '守成之君，停止征日征安南，与西北诸汗国息兵。' },
+    { n: '元武宗', r: '海山', y: '1307–1311', life: '1281–1311', rel: '侄', tag: '守成', tagName: '守成',
+      d: '滥赏滥封，财政败坏；立弟为皇太子（兄终弟及之约）。' },
+    { n: '元仁宗', r: '爱育黎拔力八达', y: '1311–1320', life: '1285–1320', rel: '弟', tag: '中兴', tagName: '中兴',
+      d: '恢复科举，重用汉儒，编《大元通制》，元朝最重文治之君。' },
+    { n: '元英宗', r: '硕德八剌', y: '1320–1323', life: '1302–1323', rel: '子', tag: '守成', tagName: '守成',
+      d: '推行新政，裁汰冗官，南坡之变被铁失所弑。' },
+    { n: '泰定帝', r: '也孙铁木儿', y: '1323–1328', life: '1293–1328', rel: '堂侄', tag: '守成', tagName: '守成',
+      d: '守成无为，天灾频仍，两都之战前夜。' },
+    { n: '天顺帝', r: '阿速吉八', y: '1328', life: '1320–1328', rel: '子', tag: '傀儡', tagName: '幼帝',
+      d: '九岁即位上都，月余兵败，不知所终。' },
+    { n: '元文宗', r: '图帖睦尔', y: '1328–1332', life: '1304–1332', rel: '堂兄', tag: '守成', tagName: '守成',
+      d: '两度即位，设奎章阁学士院，编《经世大典》；毒兄明宗之举成污点。' },
+    { n: '元明宗', r: '和世㻋', y: '1329', life: '1300–1329', rel: '兄', tag: '傀儡', tagName: '短祚',
+      d: '自漠北南归即位，八个月后暴崩于王忽察都。' },
+    { n: '元宁宗', r: '懿璘质班', y: '1332', life: '1326–1332', rel: '弟', tag: '傀儡', tagName: '幼帝',
+      d: '七岁即位，四十三日而夭。' },
+    { n: '元惠宗', r: '妥懽帖睦尔', y: '1333–1370', life: '1320–1370', rel: '兄', tag: '亡国', tagName: '亡国',
+      d: '即元顺帝，至正新政终告失败；红巾军起，弃大都北走上都，元亡。' },
+  ]},
+
+  { id: 'ming', name: '明', era: '1368 — 1644', color: '#9C3527', emps: [
+    { n: '明太祖', r: '朱元璋', y: '1368–1398', life: '1328–1398', tag: '开国', tagName: '开国',
+      d: '布衣天子，驱逐胡虏、恢复中华；废丞相、设锦衣卫，洪武之治与胡蓝大狱并存。' },
+    { n: '明惠帝', r: '朱允炆', y: '1398–1402', life: '1377–?', rel: '孙', tag: '守成', tagName: '守成',
+      d: '建文削藩，靖难之役四年，宫城火起，下落成千古之谜。' },
+    { n: '明成祖', r: '朱棣', y: '1402–1424', life: '1360–1424', rel: '叔', tag: '中兴', tagName: '雄主',
+      d: '迁都北京、五征漠北、设内阁、修《永乐大典》，遣郑和七下西洋。' },
+    { n: '明仁宗', r: '朱高炽', y: '1424–1425', life: '1378–1425', rel: '子', tag: '守成', tagName: '治世',
+      d: '在位十月，平反冤狱、停郑和下西洋，仁厚宽和。' },
+    { n: '明宣宗', r: '朱瞻基', y: '1425–1435', life: '1399–1435', rel: '子', tag: '守成', tagName: '治世',
+      d: '仁宣之治，国力鼎盛；然设内书堂教宦官识字，埋下阉祸。' },
+    { n: '明英宗', r: '朱祁镇', y: '1435–1449 / 1457–1464', life: '1427–1464', rel: '子', tag: '守成', tagName: '复位',
+      d: '土木堡之变被瓦剌俘虏；夺门复辟，杀于谦，为一生之憾。' },
+    { n: '明代宗', r: '朱祁钰', y: '1449–1457', life: '1428–1457', rel: '弟', tag: '守成', tagName: '守成',
+      d: '北京保卫战用于谦，挽社稷于既倒；夺门之变后被废，死因成疑。' },
+    { n: '明宪宗', r: '朱见深', y: '1464–1487', life: '1447–1487', rel: '子', tag: '守成', tagName: '守成',
+      d: '专宠万贵妃，设西厂；然初年平反于谦、荆襄流民安置得力。' },
+    { n: '明孝宗', r: '朱祐樘', y: '1487–1505', life: '1470–1505', rel: '子', tag: '中兴', tagName: '治世',
+      d: '弘治中兴，一夫一妻的皇帝，勤政纳谏，明中期最清朗的十八年。' },
+    { n: '明武宗', r: '朱厚照', y: '1505–1521', life: '1491–1521', rel: '子', tag: '守成', tagName: '荒君',
+      d: '建豹房、自封“威武大将军”，应州之战亲征却捷；无子而崩。' },
+    { n: '明世宗', r: '朱厚熜', y: '1521–1566', life: '1507–1567', rel: '堂弟', tag: '守成', tagName: '守成',
+      d: '大礼议定皇统，二十余年不上朝而乾纲独断；严嵩专权，庚戌之变。' },
+    { n: '明穆宗', r: '朱载坖', y: '1566–1572', life: '1537–1572', rel: '子', tag: '守成', tagName: '守成',
+      d: '隆庆开关、俺答封贡，海禁始弛，银钱流通天下。' },
+    { n: '明神宗', r: '朱翊钧', y: '1572–1620', life: '1563–1620', rel: '子', tag: '守成', tagName: '怠政',
+      d: '张居正改革十年，万历三大征皆捷；而后三十年不朝，矿税流毒。' },
+    { n: '明光宗', r: '朱常洛', y: '1620', life: '1582–1620', rel: '子', tag: '傀儡', tagName: '短祚',
+      d: '在位一月，“红丸案”暴崩，明末三案由此起。' },
+    { n: '明熹宗', r: '朱由校', y: '1620–1627', life: '1605–1627', rel: '子', tag: '傀儡', tagName: '昏君',
+      d: '木匠皇帝，魏忠贤与客氏专权，辽东尽失。' },
+    { n: '明思宗', r: '朱由检', y: '1627–1644', life: '1611–1644', rel: '弟', tag: '亡国', tagName: '亡国',
+      d: '十七岁铲除阉党，勤政节俭而刚愎多疑；内忧外患交迫，自缢煤山，遗诏“任贼分裂，勿伤百姓”。' },
+  ]},
+
+  { id: 'nanming', name: '南明', era: '1644 — 1662', color: '#8E4A3A', emps: [
+    { n: '弘光帝', r: '朱由崧', y: '1644–1645', life: '1607–1646', tag: '开国', tagName: '流亡',
+      d: '南京称帝，马士英、阮大铖用事；“联虏平寇”之策误国，一年而亡。' },
+    { n: '隆武帝', r: '朱聿键', y: '1645–1646', life: '1602–1646', rel: '侄', tag: '守成', tagName: '流亡',
+      d: '福州即位，赐国姓于郑成功；受制于郑芝龙，汀州被俘殉国。' },
+    { n: '绍武帝', r: '朱聿鐭', y: '1646', life: '1605–1647', rel: '弟', tag: '傀儡', tagName: '流亡',
+      d: '广州称帝四十日，清军破城自缢。' },
+    { n: '永历帝', r: '朱由榔', y: '1646–1662', life: '1623–1662', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '转战西南十六年，依孙可望、李定国；入缅被执，于昆明遇害，明祚终。' },
+  ]},
+
+  { id: 'qing', name: '清', era: '1616 — 1912', color: '#6E3A2E', emps: [
+    { n: '清太祖', r: '努尔哈赤', y: '1616–1626', life: '1559–1626', tag: '开国', tagName: '开国',
+      d: '十三副遗甲起兵，统一女真，创八旗、满文，萨尔浒大破明军，建后金。' },
+    { n: '清太宗', r: '皇太极', y: '1626–1643', life: '1592–1643', rel: '子', tag: '中兴', tagName: '雄主',
+      d: '改国号大清、族名满洲；松锦之战俘洪承畴，入关前夜而崩。' },
+    { n: '清世祖', r: '福临', y: '1643–1661', life: '1638–1661', rel: '子', tag: '开国', tagName: '入关',
+      d: '六岁登极，多尔衮摄政入关定鼎；亲政后励精图治，二十四岁早逝。' },
+    { n: '清圣祖', r: '玄烨', y: '1661–1722', life: '1654–1722', rel: '子', tag: '中兴', tagName: '盛世',
+      d: '在位六十一年：平三藩、收台湾、抗沙俄、三征噶尔丹，编《康熙字典》，开盛世之基。' },
+    { n: '清世宗', r: '胤禛', y: '1722–1735', life: '1678–1735', rel: '子', tag: '中兴', tagName: '改革',
+      d: '摊丁入亩、耗羡归公、设军机处，雍正十三年承前启后，勤政至极。' },
+    { n: '清高宗', r: '弘历', y: '1735–1796', life: '1711–1799', rel: '子', tag: '中兴', tagName: '盛世',
+      d: '十全武功、修《四库全书》；六下江南，晚年和珅专权，盛世之顶亦是转折。' },
+    { n: '清仁宗', r: '颙琰', y: '1796–1820', life: '1760–1820', rel: '子', tag: '守成', tagName: '守成',
+      d: '诛和珅、禁鸦片，然白莲教、天理教起事，清运始衰。' },
+    { n: '清宣宗', r: '旻宁', y: '1820–1850', life: '1782–1850', rel: '子', tag: '守成', tagName: '衰象',
+      d: '鸦片战争败，签《南京条约》，中国近代史由此开端。' },
+    { n: '清文宗', r: '奕詝', y: '1850–1861', life: '1831–1861', rel: '子', tag: '亡国', tagName: '乱世',
+      d: '太平天国、第二次鸦片战争，圆明园被焚；避暑山庄崩，辛酉政变起。' },
+    { n: '清穆宗', r: '载淳', y: '1861–1875', life: '1856–1875', rel: '子', tag: '傀儡', tagName: '傀儡',
+      d: '同治中兴、洋务运动，两宫垂帘；十九岁崩，死因成谜。' },
+    { n: '清德宗', r: '载湉', y: '1875–1908', life: '1871–1908', rel: '堂弟', tag: '傀儡', tagName: '傀儡',
+      d: '戊戌变法一百零三日，被慈禧幽禁瀛台；甲午、庚子之乱接踵。' },
+    { n: '宣统帝', r: '溥仪', y: '1908–1912', life: '1906–1967', rel: '侄', tag: '亡国', tagName: '亡国',
+      d: '三岁登极，辛亥革命起，1912 年退位，两千年帝制终结；后为伪满傀儡，终成公民。' },
+  ]},
+];
+
+/* ============================================================
+   渲染
+   ============================================================ */
+const TAG_CLASS = { 开国: 'founder', 守成: 'hold', 中兴: 'flourish', 亡国: 'fall', 傀儡: 'puppet', empress: 'empress' };
+const SIDE_RELS = new Set(['弟', '兄', '侄', '叔', '堂兄', '堂弟', '堂侄', '祖孙', '养子', '孙', '婶']);
+
+const trackEl = document.getElementById('track');
+const railEl = document.getElementById('dyn-rail');
+const scrollEl = document.getElementById('atlas-scroll');
+const statsEl = document.getElementById('atlas-stats');
+
+const FLAT = []; // { dyn, emp, di, ei }
+
+function empCardHTML(dyn, emp, di, ei) {
+  const cls = TAG_CLASS[emp.tag] || 'hold';
+  const order = String(ei + 1).padStart(2, '0');
+  let link = '';
+  if (ei > 0) {
+    const rel = (emp.rel || '').trim();
+    const mod = rel === '篡' ? 'rel-usurp' : (rel ? 'rel-side' : '');
+    link = `<div class="emp-link ${mod}">${rel ? `<span class="rel-text">${rel}</span>` : ''}</div>`;
+  }
+  return `${link}
+    <article class="emp-card" data-di="${di}" data-ei="${ei}">
+      <span class="emp-order">${order}</span>
+      <div class="emp-main">
+        <div class="emp-name">${emp.n}<span class="emp-real">${emp.r || ''}</span></div>
+        <div class="emp-reign">${emp.y}</div>
+      </div>
+      <span class="emp-tag tag-${cls}">${emp.tagName || ''}</span>
+    </article>`;
+}
+
+function build() {
+  let total = 0;
+  DYNS.forEach((dyn, di) => {
+    total += dyn.emps.length;
+
+    const pill = document.createElement('button');
+    pill.className = 'rail-pill';
+    pill.dataset.di = di;
+    pill.textContent = dyn.name;
+    railEl.appendChild(pill);
+
+    const col = document.createElement('section');
+    col.className = 'dyn-col';
+    col.dataset.di = di;
+    col.style.setProperty('--dc', dyn.color);
+    col.innerHTML = `
+      <header class="col-head">
+        <div class="ch-top">
+          <h2 class="col-name">${dyn.name}</h2>
+          <span class="col-count">${dyn.emps.length} 帝</span>
+        </div>
+        <div class="col-years">${dyn.era}</div>
+      </header>
+      <div class="col-body" data-di="${di}">
+        ${dyn.emps.map((e, ei) => empCardHTML(dyn, e, di, ei)).join('')}
+      </div>`;
+    trackEl.appendChild(col);
+
+    dyn.emps.forEach((emp, ei) => FLAT.push({ dyn, emp, di, ei }));
+  });
+
+  statsEl.innerHTML =
+    `<span><b>${DYNS.length}</b> 个政权</span><i class="sep"></i>` +
+    `<span><b>${total}</b> 位帝王</span><i class="sep"></i>` +
+    `<span>前 221 — 1912 · 两千一百余年</span>`;
+}
+
+/* ---------- 弹窗 ---------- */
+const sheetEl = document.getElementById('emp-sheet');
+const backdropEl = document.getElementById('sheet-backdrop');
+let current = null;
+let sheetOpen = false;
+
+function renderSheet(item) {
+  const { dyn, emp, di, ei } = item;
+  document.getElementById('sh-dyn').textContent = dyn.name;
+  document.getElementById('sh-role').textContent = emp.tagName || '帝王';
+  document.getElementById('sh-name').innerHTML = `${emp.n}${emp.r ? `<small>${emp.r}</small>` : ''}`;
+
+  const rows = [
+    ['在位', emp.y],
+    ['生卒', emp.life || '史阙'],
+    ['继位', ei === 0 ? '开国之君' : (emp.rel || '承继')],
+    ['政权', dyn.name + ' · ' + dyn.era],
+  ];
+  document.getElementById('sh-meta').innerHTML = rows
+    .map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('');
+
+  document.getElementById('sh-body').innerHTML = `<p>${emp.d}</p>`;
+
+  document.getElementById('sh-prev').disabled = ei === 0;
+  document.getElementById('sh-next').disabled = ei === dyn.emps.length - 1;
+}
+
+function openSheet(item) {
+  current = item;
+  renderSheet(item);
+  sheetOpen = true;
+  document.body.classList.add('sheet-open');
+  sheetEl.setAttribute('aria-hidden', 'false');
+}
+
+function closeSheet() {
+  if (!sheetOpen) return;
+  sheetOpen = false;
+  document.body.classList.remove('sheet-open');
+  sheetEl.setAttribute('aria-hidden', 'true');
+}
+
+document.getElementById('sh-prev').addEventListener('click', () => {
+  if (!current || current.ei === 0) return;
+  const i = FLAT.findIndex((f) => f.di === current.di && f.ei === current.ei);
+  if (i > 0) openSheet(FLAT[i - 1]);
+});
+document.getElementById('sh-next').addEventListener('click', () => {
+  if (!current || current.ei === current.dyn.emps.length - 1) return;
+  const i = FLAT.findIndex((f) => f.di === current.di && f.ei === current.ei);
+  if (i >= 0 && i < FLAT.length - 1) openSheet(FLAT[i + 1]);
+});
+
+/* ---------- 事件 ---------- */
+trackEl.addEventListener('click', (e) => {
+  const card = e.target.closest('.emp-card');
+  if (!card) return;
+  const di = +card.dataset.di;
+  const ei = +card.dataset.ei;
+  const dyn = DYNS[di];
+  openSheet({ dyn, emp: dyn.emps[ei], di, ei });
+});
+
+railEl.addEventListener('click', (e) => {
+  const pill = e.target.closest('.rail-pill');
+  if (!pill) return;
+  const col = trackEl.children[+pill.dataset.di];
+  if (!col) return;
+  const box = scrollEl.getBoundingClientRect();
+  const target = scrollEl.scrollLeft + col.getBoundingClientRect().left - box.left - 14;
+  scrollEl.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+});
+
+document.getElementById('sheet-close').addEventListener('click', closeSheet);
+backdropEl.addEventListener('click', closeSheet);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+/* ---------- 弹窗拖动缩放（15% ~ 90%） ---------- */
+(function initResize() {
+  const grip = document.getElementById('sheet-grip');
+  let startY = 0, startH = 0, curH = 0, dragging = false, hitMin = false;
+
+  grip.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    startY = e.clientY;
+    startH = curH = sheetEl.getBoundingClientRect().height;
+    hitMin = false;
+    sheetEl.style.transition = 'none';
+    grip.setPointerCapture && grip.setPointerCapture(e.pointerId);
+  });
+  grip.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dy = e.clientY - startY;
+    const minH = window.innerHeight * 0.15;
+    const maxH = window.innerHeight * 0.90;
+    curH = Math.min(maxH, Math.max(minH, startH - dy));
+    if (curH <= minH + 1 && dy > 0) hitMin = true;
+    sheetEl.style.height = curH + 'px';
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    sheetEl.style.transition = '';
+    sheetEl.style.height = '';
+    document.documentElement.style.setProperty('--sheet-h', curH.toFixed(0) + 'px');
+    if (hitMin && curH <= window.innerHeight * 0.16) closeSheet();
+  };
+  grip.addEventListener('pointerup', end);
+  grip.addEventListener('pointercancel', end);
+})();
+
+/* ---------- 横向滚动高亮当前朝代 ---------- */
+let rafId = null;
+scrollEl.addEventListener('scroll', () => {
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => {
+    rafId = null;
+    const box = scrollEl.getBoundingClientRect();
+    const mid = box.left + box.width / 2;
+    let best = 0, bestD = Infinity;
+    [...trackEl.children].forEach((col, i) => {
+      const r = col.getBoundingClientRect();
+      const d = Math.abs(r.left + r.width / 2 - mid);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    railEl.querySelectorAll('.rail-pill').forEach((p, i) => p.classList.toggle('active', i === best));
+    const activePill = railEl.children[best];
+    if (activePill) {
+      const target = activePill.offsetLeft - railEl.clientWidth / 2 + activePill.offsetWidth / 2;
+      railEl.scrollTo({ left: target, behavior: 'smooth' });
+    }
+  });
+});
+
+/* ---------- 返回（原型阶段） ---------- */
+document.getElementById('back-btn').addEventListener('click', () => {
+  const tip = document.createElement('div');
+  tip.className = 'fig-toast';
+  tip.textContent = '融入主程序后，此处返回「华夏历史长卷」';
+  tip.style.cssText = 'position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:200;padding:9px 16px;border-radius:999px;background:rgba(40,34,28,.9);color:#FAF6EE;font-size:13.5px;font-weight:700;letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none';
+  document.body.appendChild(tip);
+  setTimeout(() => tip.remove(), 1900);
+});
+
+build();
+railEl.querySelector('.rail-pill').classList.add('active');
+</script>
+</body>
+</html>
