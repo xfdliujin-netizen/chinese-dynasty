@@ -342,7 +342,7 @@
     }
     .tick-label {
       margin-top: calc(3px * var(--v));
-      font-size: calc(10px * var(--v));
+      font-size: max(9px, calc(10px * var(--v)));
       font-weight: 700;
       line-height: 1;
       color: #6E6254;
@@ -654,6 +654,16 @@
       font-size: 12px; font-weight: 800; color: #B8332A;
       background: rgba(184, 51, 42, 0.09); border-radius: 6px; padding: 2px 6px;
     }
+    /* 类型徽章：事件 / 人物 / 文豪 / 盛世 */
+    .as-item .as-type {
+      flex: 0 0 auto; min-width: 34px; text-align: center;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.06em;
+      border-radius: 6px; padding: 2.5px 7px;
+    }
+    .as-type.as-t-ev  { color: #B8332A; background: rgba(184, 51, 42, 0.10); }
+    .as-type.as-t-fg  { color: #3E6480; background: rgba(103, 141, 166, 0.14); }
+    .as-type.as-t-lit { color: #6A5686; background: rgba(174, 156, 196, 0.16); }
+    .as-type.as-t-era { color: #8A6A1C; background: rgba(192, 154, 62, 0.16); }
     .as-item .as-title { font-size: 15px; font-weight: 700; color: #33291E; }
     .as-item .as-sub {
       margin-left: auto; flex: 0 1 auto; font-size: 11.5px; color: #9A8B74;
@@ -707,33 +717,63 @@
       animation: pulse-ring 1.7s infinite;
     }
 
-    /* ================= 控制栏 ================= */
+    /* ================= 图层开关：左下角悬浮胶囊 =================
+       竖屏竖向排列 / 横屏横向排列；原铺底控制栏已取消 */
     .app-controls {
-      flex: 0 0 auto;
-      z-index: 20;
-      background: rgba(234, 225, 208, 0.72);
-      -webkit-backdrop-filter: blur(16px) saturate(1.6);
-      backdrop-filter: blur(16px) saturate(1.6);
-      border-bottom: 1px solid var(--sep);
-      padding: 6px var(--page-pad);
+      position: fixed;
+      left: calc(env(safe-area-inset-left, 0px) + 12px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      padding: 8px 10px;
+      border-radius: 20px;
+      background: rgba(250, 246, 238, 0.72);
+      -webkit-backdrop-filter: blur(24px) saturate(1.8);
+      backdrop-filter: blur(24px) saturate(1.8);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 10px 30px rgba(30, 27, 24, 0.18), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+      max-width: calc(100vw - 24px);
     }
     .controls-row {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
     }
     .layer-switches {
       display: flex;
-      align-items: center;
-      gap: 2px;
-      flex: 0 1 auto;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
       min-width: 0;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
     }
-    .layer-switches::-webkit-scrollbar { display: none; }
+    .app-controls .layer-count {
+      align-self: flex-start;
+      padding-left: 3px;
+      margin-top: 2px;
+    }
+    /* 横屏（中宽以上）：改为一行横向排列，用短名 + 隐藏计数，避免碰到居中的主导航 */
+    @media (orientation: landscape) and (min-width: 700px) {
+      .app-controls {
+        flex-direction: row;
+        align-items: center;
+        gap: 3px;
+        padding: 6px 12px 6px 8px;
+      }
+      .controls-row { flex-direction: row; align-items: center; gap: 3px; }
+      .layer-switches { flex-direction: row; gap: 0; }
+      .layer-switch { gap: 5px; padding: 3px 8px 3px 3px; }
+      .app-controls .layer-switch .full { display: none; }
+      .app-controls .layer-switch .short { display: inline; }
+      .app-controls .layer-count { display: none; }
+    }
+    /* 手机竖屏：底部中间是主导航，图层胶囊抬到其上方左侧 */
+    @media (orientation: portrait) and (max-width: 560px) {
+      .app-controls { bottom: calc(env(safe-area-inset-bottom, 0px) + 82px); }
+    }
 
     /* 整块「开关 + 标签」即按钮：触控区更大，符合 iOS 习惯 */
     .layer-switch {
@@ -1230,9 +1270,9 @@
     /* ---------- 画卷内的“点击竹简”提示 ---------- */
     .band-hint {
       position: absolute;
-      left: 50%;
-      bottom: 10px;
-      transform: translateX(-50%);
+      right: calc(env(safe-area-inset-right, 0px) + 16px);
+      bottom: 12px;
+      transform: none;
       z-index: 42;
       display: flex;
       align-items: center;
@@ -1308,6 +1348,79 @@
       overflow: hidden;
       padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
     }
+    /* 长卷：底部胶囊悬浮在卷轴上，画布可以一直延伸到屏幕底 */
+    body[data-view="scroll"] .app-main { padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
+
+    /* 长卷沉浸模式：隐藏顶部栏，改用悬浮品牌 + 悬浮搜索 */
+    body[data-view="scroll"] .app-header { display: none; }
+
+    /* 悬浮品牌：无底色融入纸面；与卷轴信息冲突时变淡，搜索面板打开时隐去 */
+    .scroll-float-brand {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      left: calc(env(safe-area-inset-left, 0px) + 12px);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 7px;
+      border-radius: 14px;
+      pointer-events: none;
+      opacity: 0.96;
+      transition: opacity 0.4s ease;
+      /* 纸面光晕：与年份刻度/朝代带叠加时仍可读，又不破坏“贴在背景上”的观感 */
+      background: radial-gradient(85% 90% at 42% 50%, rgba(247, 241, 228, 0.94) 30%, rgba(247, 241, 228, 0.72) 62%, rgba(247, 241, 228, 0) 100%);
+    }
+    .scroll-float-brand .seal {
+      width: 26px; height: 26px;
+      border-radius: 5px;
+      background: rgba(184, 51, 42, 0.88);
+      font-size: 16px;
+      box-shadow: 0 1px 4px rgba(142, 36, 29, 0.3);
+    }
+    .scroll-float-brand .app-title {
+      font-size: clamp(13px, 1.5vw, 17px);
+      text-shadow: 0 1px 0 rgba(245, 240, 230, 0.9), 0 0 8px rgba(245, 240, 230, 0.85);
+    }
+    .scroll-float-brand .app-sub { font-size: clamp(8.5px, 0.9vw, 10.5px); text-shadow: 0 1px 0 rgba(245, 240, 230, 0.9); }
+    .scroll-float-brand.brand-dim { opacity: 0.38; }
+    .scroll-float-brand.brand-hidden { opacity: 0; }
+
+    /* 悬浮搜索：静默半透明，拖动卷轴时淡出 */
+    .scroll-float-search {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      right: calc(env(safe-area-inset-right, 0px) + 14px);
+      z-index: 62;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      height: 38px;
+      padding: 0 16px 0 13px;
+      border: 1px solid rgba(197, 182, 152, 0.55);
+      border-radius: 999px;
+      background: rgba(251, 247, 238, 0.72);
+      -webkit-backdrop-filter: blur(16px) saturate(1.6);
+      backdrop-filter: blur(16px) saturate(1.6);
+      color: #6B5B48;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      opacity: 0.55;
+      transition: opacity 0.45s ease, transform 0.15s ease, background 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .scroll-float-search:hover, .scroll-float-search:focus-visible { opacity: 1; }
+    .scroll-float-search:active { transform: scale(0.95); background: rgba(247, 240, 226, 0.92); }
+    body.canvas-dragging .scroll-float-search { opacity: 0; pointer-events: none; }
+    body.search-open .scroll-float-search { opacity: 0; pointer-events: none; }
+
+    /* 悬浮层只在长卷出现 */
+    .scroll-float-brand, .scroll-float-search { display: none; }
+    body[data-view="scroll"] .scroll-float-brand { display: flex; }
+    body[data-view="scroll"] .scroll-float-search { display: flex; }
 
     .view {
       display: none;
@@ -1851,36 +1964,38 @@
     .detail-nav { flex-wrap: wrap; justify-content: flex-end; }
 
     /* ============================================================
-       底部标签栏：iOS UITabBar 原生风格
-       全宽半透明材质 + 顶部 hairline + 图标文字上下排布
+       底部标签栏：悬浮胶囊（毛玻璃 · 不铺满宽度，卷轴展示区更大）
        ============================================================ */
     .bottom-tabs {
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      left: 50%;
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
       z-index: 90;
       display: flex;
       align-items: stretch;
-      justify-content: space-around;
-      padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px));
-      background: rgba(248, 244, 235, 0.82);
-      -webkit-backdrop-filter: blur(20px) saturate(1.8);
-      backdrop-filter: blur(20px) saturate(1.8);
-      border-top: 1px solid var(--sep);
-      box-shadow: 0 -0.5px 0 rgba(60, 60, 67, 0.12);
+      gap: 2px;
+      padding: 5px 8px;
+      border-radius: 26px;
+      background: rgba(250, 246, 238, 0.68);
+      -webkit-backdrop-filter: blur(24px) saturate(1.8);
+      backdrop-filter: blur(24px) saturate(1.8);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 10px 34px rgba(30, 27, 24, 0.20), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+      max-width: calc(100vw - 24px);
     }
     .bottom-tabs .view-tab {
       position: relative;
-      flex: 1 1 0;
-      max-width: 200px;
+      flex: 0 0 auto;
+      min-width: 66px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 3px;
-      padding: 3px 8px 2px;
+      padding: 4px 13px 3px;
       border: none;
+      border-radius: 20px;
       background: transparent;
       color: var(--gray-label);
       font-family: inherit;
@@ -1890,14 +2005,14 @@
       cursor: pointer;
       white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
-      transition: color 0.2s ease, transform 0.15s ease;
+      transition: color 0.2s ease, transform 0.15s ease, background 0.2s ease;
     }
     .bottom-tabs .view-tab svg {
       width: 24px; height: 24px;
       flex: 0 0 auto;
       transition: transform 0.3s var(--ios-ease);
     }
-    .bottom-tabs .view-tab.active { color: var(--tint); }
+    .bottom-tabs .view-tab.active { color: var(--tint); background: rgba(255, 255, 255, 0.78); }
     .bottom-tabs .view-tab.active svg { transform: scale(1.06); }
     .bottom-tabs .view-tab:not(.active):active { transform: scale(0.94); color: #6D6D72; }
 
@@ -2412,6 +2527,23 @@
       animation: mepSpin 0.9s linear infinite;
     }
     @keyframes mepSpin { to { transform: rotate(360deg); } }
+    /* 伪进度条：前 85% 缓步推进，加载完成由骨架整体淡出接管 */
+    .mep-bar {
+      width: min(58vw, 240px);
+      height: 4px;
+      border-radius: 999px;
+      background: #E2D7C0;
+      overflow: hidden;
+    }
+    .mep-bar i {
+      display: block;
+      height: 100%;
+      width: 8%;
+      border-radius: 999px;
+      background: #A5702E;
+      animation: mepBar 9s var(--ios-ease) forwards;
+    }
+    @keyframes mepBar { 0% { width: 8%; } 55% { width: 58%; } 100% { width: 86%; } }
     .map-skel p {
       margin: 2px 0 0;
       font-size: clamp(13px, 3.4vw, 14.5px);
@@ -2476,39 +2608,49 @@
         </div>
       </div>
 
-      <div class="header-tools scroll-only">
-        <div class="year-badge">
-          <span id="center-era-badge">三国</span>
-          <span id="center-year-display">公元220年</span>
-        </div>
-        <button id="axis-search-btn" class="axis-search-btn" type="button" aria-label="搜索当前图层">
-          <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-        </button>
-        <div class="zoom-box">
-          <button id="zoom-out-btn" class="zoom-btn" type="button" aria-label="缩小">－</button>
-          <span id="zoom-label">100%</span>
-          <button id="zoom-in-btn" class="zoom-btn" type="button" aria-label="放大">＋</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="axis-search-panel" class="axis-search-panel" hidden>
-      <div class="as-box">
-        <div class="as-input-row">
-          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-          <input id="axis-search-input" type="search" enterkeyhint="search" autocomplete="off" placeholder="搜索本图层：事件 / 人物 / 文豪 / 盛世…" />
-          <button id="axis-search-close" class="as-close" type="button" aria-label="关闭搜索">✕</button>
-        </div>
-        <div class="as-hint" id="axis-search-hint">当前图层：重大事件</div>
-        <div class="as-results" id="axis-search-results"></div>
+      <!-- 顶部工具已移入长卷悬浮层；以下隐形桩仅为保留 JS 引用的 ID -->
+      <div class="header-tools scroll-only" hidden aria-hidden="true">
+        <span id="center-era-badge">—</span>
+        <span id="center-year-display">—</span>
+        <span id="zoom-label">100%</span>
+        <button id="zoom-out-btn" type="button" tabindex="-1"></button>
+        <button id="zoom-in-btn" type="button" tabindex="-1"></button>
       </div>
     </div>
   </header>
+
+  <!-- 长卷搜索面板（挂在 body 下，长卷专属） -->
+  <div id="axis-search-panel" class="axis-search-panel" hidden>
+    <div class="as-box">
+      <div class="as-input-row">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <input id="axis-search-input" type="search" enterkeyhint="search" autocomplete="off" placeholder="搜索：事件 / 人物 / 文豪 / 盛世…" />
+        <button id="axis-search-close" class="as-close" type="button" aria-label="关闭搜索">✕</button>
+      </div>
+      <div class="as-hint" id="axis-search-hint">全库搜索：重大事件 · 重要人物 · 文学大家 · 各朝盛世</div>
+      <div class="as-results" id="axis-search-results"></div>
+    </div>
+  </div>
 
   <main class="app-main">
 
     <!-- ============ 视图一：时间轴长卷 ============ -->
     <section id="view-scroll" class="view active">
+      <!-- 悬浮品牌（融入纸面，卷轴信息冲突时自动变淡） -->
+      <div id="scroll-brand" class="scroll-float-brand">
+        <div class="seal font-calligraphy">史</div>
+        <div class="brand-text">
+          <h1 class="app-title">华夏千年历史长卷</h1>
+          <p class="app-sub">五千年 · 长卷 · 帝王 · 事件</p>
+        </div>
+      </div>
+
+      <!-- 悬浮搜索（静默半透明，拖动卷轴时隐去） -->
+      <button id="axis-search-btn" class="scroll-float-search" type="button" aria-label="搜索长卷">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <span>搜索长卷</span>
+      </button>
+
       <div id="timeline-viewport" class="timeline-band">
         <div class="edge-fade edge-fade-l"></div>
         <div class="edge-fade edge-fade-r"></div>
@@ -2688,7 +2830,8 @@
         <div class="map-skel" id="map-embed-ph" role="status" aria-live="polite">
           <div class="mep-seal font-calligraphy">舆</div>
           <div class="mep-spin"></div>
-          <p id="map-embed-ph-text">正在展开疆域图谱…<br /><span>首次载入约 1 秒，之后常驻秒开</span></p>
+          <p id="map-embed-ph-text">正在展开疆域图谱…<br /><span>首次载入约 2 秒，之后常驻秒开</span></p>
+          <div class="mep-bar" aria-hidden="true"><i></i></div>
           <button class="map-retry" id="map-embed-load" type="button" hidden>重新载入</button>
         </div>
 
@@ -4993,7 +5136,7 @@
 
     function recomputeGeometry() {
       const bandH = Math.max(180, viewportEl.clientHeight || 300);
-      // 设计基准：轴线 204 + 竹简区块约 139 = 348（几何恒定，开关切换不再改变朝代带大小）
+      // 设计基准：轴线 204 + 卡片区约 139 = 348（几何恒定，卡片引线短档贴轴，不再多行深垂）
       const v = Math.min(1.45, Math.max(0.60, (bandH - 8) / 348));
       GEOM.v = v;
 
@@ -5007,11 +5150,13 @@
       GEOM.stems = [px(8), px(22), px(36), px(50)];
 
       const contentH = GEOM.axisY + px(139);
-      GEOM.offsetY = Math.max(0, Math.round((bandH - contentH) / 2));
+      // 顶部净空 52px：避开悬浮品牌与搜索胶囊；其余空间适度下移、视觉居中偏上
+      const topFree = 52;
+      GEOM.offsetY = Math.max(topFree, Math.round((bandH - contentH) * 0.45));
 
-      // 折叠态（仅朝代，无事件）内容高度：三轨细分底缘 + 呼吸空间 → 用于折叠时重新居中
+      // 折叠态（仅朝代，无事件）内容高度：三轨细分底缘 + 呼吸空间 → 折叠时重新定位
       const foldedH = GEOM.subTops[2] + GEOM.subH + px(18);
-      GEOM.foldedOffsetY = Math.max(0, Math.round((bandH - foldedH) / 2));
+      GEOM.foldedOffsetY = Math.max(topFree, Math.round((bandH - foldedH) / 2));
 
       // 字号档位缓存失效（v 变化后必须重测文本宽度）
       domCache.macros.forEach((m) => { m.el.__tier = -1; });
@@ -5566,83 +5711,55 @@
         }
       });
 
-      // 4) 轴线节点排布
-      //    事件：一维防遮压（拥挤处沿轴右移），竹简细窄，可全部顺排
-      //    人物 / 文豪 / 盛世：竖卡单轨顺延 + 引线两档交替，形成上下错落的简牍节奏
+      // 4) 轴线节点排布（回归经典排版）
+      //    节点一律钉在真实年份上，绝不水平顺延 —— 密集处只留圆点，放大后标签自动补全。
+      //    引线采用短档循环（最深 50 设计单位），卡片紧贴轴线、上下错落，不再多行深垂。
       const isFoldedByZoom = state.zoomScale < EVENT_UNFOLD_THRESHOLD;
       const nodeTop = GEOM.axisY - Math.round(6 * v);
       const isCardLayer = !!CARD_LAYERS[state.axisLayer];
 
-      // 轴下可用高度（设计单位）：据此决定能排几行
-      const availH = Math.max(0, (canvasEl.clientHeight || 600) - GEOM.offsetY - GEOM.axisY) / v - 16;
-      const maxLanes = isFoldedByZoom ? 2 : 5;
-
-      /* 逐张铺轨：优先放在最靠上的空位；所有行都占满时只留圆点、收起标签。
-         圆点永远钉在真实年份上，绝不做水平顺延 —— 放大后标签自动补全。
-         这样无论时间轴多密，都不会出现"人被推到别的朝代" */
-      function placeNodes(items, lanes, gap, apply) {
-        const slots = new Array(lanes).fill(-Infinity);
-        items.forEach((item) => {
+      /* 统一水平避让池：与左侧已放节点间距不足 gap 时降级为纯圆点 */
+      function placeNodes(items, gap, apply) {
+        let lastX = -Infinity;
+        items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
           const forced = item.el.classList.contains('selected');
-          let row = -1;
-          for (let i = 0; i < lanes; i += 1) {
-            if (x - slots[i] >= gap) { row = i; break; }
+          if (x - lastX < gap && !forced) {
+            item.el.classList.add('label-hidden');
+            item.x = x;
+            item.row = -1;
+            item.el.style.left = `${x}px`;
+            item.el.style.top = `${nodeTop}px`;
+            item.stemEl.style.height = '0px';
+            return;
           }
-          if (row < 0) {
-            if (!forced) {
-              item.el.classList.add('label-hidden');
-              item.x = x;
-              item.row = -1;
-              item.el.style.left = `${x}px`;
-              item.el.style.top = `${nodeTop}px`;
-              item.stemEl.style.height = '0px';
-              return;
-            }
-            row = 0;
-          }
-          slots[row] = x;
+          lastX = x;
           item.el.classList.remove('label-hidden');
-          apply(item, x, row);
+          apply(item, x, idx);
         });
       }
 
       if (!isCardLayer) {
-        let slipH = 0;
-        domCache.events.forEach((it) => {
-          const s = it.el.querySelector('.vertical-bamboo-slip');
-          if (s) slipH = Math.max(slipH, s.offsetHeight);
-        });
-        slipH = Math.max(slipH, Math.round(72 * v));
-        const rowStep = slipH + Math.round(8 * v);
-        const lanes = Math.max(1, Math.min(maxLanes, Math.floor((availH * v) / rowStep) + 1));
-        const laneStems = Array.from({ length: lanes }, (_, i) => Math.round(6 * v) + i * rowStep);
         const halfW = eventPackHalfW();
-
-        placeNodes(domCache.events, lanes, halfW * 2 + 6, (item, x, row) => {
+        placeNodes(domCache.events, halfW * 2 + 6, (item, x, idx) => {
           const { el, stemEl } = item;
           item.x = x;
-          item.row = row;
+          item.row = 0;
           el.style.left = `${x}px`;
           el.style.top = `${nodeTop}px`;
-          stemEl.style.height = `${laneStems[row]}px`;
+          stemEl.style.height = `${GEOM.stems[idx % GEOM.stems.length]}px`;
           el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
         });
       } else {
         const cardW = CARD_W * v;
-        const halfCard = cardW / 2;
-        const cardH = Math.round(64 * v);
-        const step = cardH + Math.round(10 * v);
-        const lanes = Math.max(1, Math.min(maxLanes, Math.floor((availH * v - Math.round(4 * v)) / step) + 1));
-        const stemRows = Array.from({ length: lanes }, (_, i) => Math.round(4 * v) + i * step);
-
-        placeNodes(domCache.events, lanes, cardW + 6, (item, x, row) => {
+        const stemRows = [Math.round(4 * v), Math.round(32 * v)];
+        placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
           const { el, stemEl } = item;
           item.x = x;
-          item.row = row;
+          item.row = 0;
           el.style.left = `${x}px`;
           el.style.top = `${nodeTop}px`;
-          stemEl.style.height = `${stemRows[row]}px`;
+          stemEl.style.height = `${stemRows[idx % 2]}px`;
           el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
         });
       }
@@ -5828,15 +5945,21 @@
       updateActiveHighlights();
     }
 
-    /* ---------------- 长卷图层搜索（跟随下方图层开关） ---------------- */
+    /* ---------------- 长卷全库搜索（事件 / 人物 / 文豪 / 盛世，混合结果再点选） ---------------- */
     (function initAxisSearch() {
-      const LAYER_NAMES = { events: '重大事件', figures: '重要人物', literati: '文学大家', eras: '各朝盛世' };
+      const SOURCES = [
+        { layer: 'events',   items: HISTORICAL_EVENTS, name: '事件', cls: 'as-t-ev'  },
+        { layer: 'figures',  items: FIGURE_AXIS,       name: '人物', cls: 'as-t-fg'  },
+        { layer: 'literati', items: LITERATI_AXIS,     name: '文豪', cls: 'as-t-lit' },
+        { layer: 'eras',     items: ERA_AXIS,          name: '盛世', cls: 'as-t-era' },
+      ];
       const btn = document.getElementById('axis-search-btn');
       const panel = document.getElementById('axis-search-panel');
       const input = document.getElementById('axis-search-input');
       const closeBtn = document.getElementById('axis-search-close');
       const resultsEl = document.getElementById('axis-search-results');
       const hintEl = document.getElementById('axis-search-hint');
+      const brand = document.getElementById('scroll-brand');
       if (!btn || !panel || !input) return;
       let debounce = 0;
 
@@ -5861,17 +5984,17 @@
       function search(q) {
         const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
         if (!words.length) { resultsEl.innerHTML = ''; return; }
-        const layer = state.axisLayer || 'events';
         const hits = [];
-        for (const it of getAxisItems()) {
-          const title = it.shortTitle || it.n || '';
-          let score = fuzzy(title, words);
-          if (score < 100 && it.dyn) score = Math.max(score, fuzzy(it.dyn, words) - 24);
-          if (score > 0) hits.push({ it, score, title });
-          if (hits.length > 60) break;
+        for (const src of SOURCES) {
+          for (const it of src.items) {
+            const title = it.shortTitle || it.n || '';
+            let score = fuzzy(title, words);
+            if (score < 100 && it.dyn) score = Math.max(score, fuzzy(it.dyn, words) - 24);
+            if (score > 0) hits.push({ it, src, score, title });
+          }
         }
         hits.sort((a, b) => b.score - a.score || a.it.year - b.it.year);
-        render(hits.slice(0, 9), layer);
+        render(hits.slice(0, 14));
       }
 
       function yearTag(y) {
@@ -5879,11 +6002,12 @@
         return y < 0 ? '前' + Math.abs(y) : String(y);
       }
 
-      function render(hits, layer) {
+      function render(hits) {
         if (!hits.length) { resultsEl.innerHTML = '<div class="as-empty">没有找到，换个关键词试试</div>'; return; }
-        resultsEl.innerHTML = hits.map(({ it, title }) => {
-          const sub = layer === 'events' ? (it.period || it.dyn || '') : (it.dyn || it.life || '');
+        resultsEl.innerHTML = hits.map(({ it, src }) => {
+          const sub = src.layer === 'events' ? (it.period || it.dyn || '') : (it.dyn || it.life || '');
           return '<button class="as-item" type="button">' +
+            '<span class="as-type ' + src.cls + '">' + src.name + '</span>' +
             '<span class="as-year">' + yearTag(it.year) + '</span>' +
             '<span class="as-title"></span>' +
             '<span class="as-sub">' + sub + '</span></button>';
@@ -5891,33 +6015,46 @@
         const btns = resultsEl.querySelectorAll('.as-item');
         btns.forEach((el, i) => {
           el.querySelector('.as-title').textContent = hits[i].title;
-          el.addEventListener('click', () => goto(hits[i].it, layer));
+          el.addEventListener('click', () => goto(hits[i].it, hits[i].src.layer));
         });
       }
 
       function goto(it, layer) {
         close();
-        if (layer === 'events') selectHistoricalEvent(it.id, true);
-        else selectPersonItem(it, true);
+        if (layer === 'events') {
+          if (state.axisLayer !== 'events') setAxisLayer('events', { silentSelect: true });
+          selectHistoricalEvent(it.id, true);
+        } else {
+          selectPersonItem(it, true);
+        }
       }
 
       function open() {
         panel.hidden = false;
         requestAnimationFrame(() => panel.classList.add('on'));
-        hintEl.textContent = '当前图层：' + (LAYER_NAMES[state.axisLayer] || '重大事件');
+        hintEl.textContent = '全库搜索：重大事件 · 重要人物 · 文学大家 · 各朝盛世';
         input.value = '';
         resultsEl.innerHTML = '';
+        document.body.classList.add('search-open');
+        if (brand) brand.classList.add('brand-hidden');
         setTimeout(() => input.focus(), 80);
       }
       function close() {
         panel.classList.remove('on');
+        document.body.classList.remove('search-open');
+        if (brand) brand.classList.remove('brand-hidden');
         setTimeout(() => { panel.hidden = true; }, 210);
         input.blur();
       }
 
       btn.addEventListener('click', open);
       closeBtn.addEventListener('click', close);
-      panel.addEventListener('click', (e) => { if (e.target === panel) close(); });
+      // 点搜索框以外的任意区域关闭（面板遮罩 / 长卷 / 其他控件）
+      document.addEventListener('pointerdown', (e) => {
+        if (panel.hidden) return;
+        if (e.target.closest('.as-box') || e.target.closest('#axis-search-btn')) return;
+        close();
+      }, true);
       input.addEventListener('input', () => {
         clearTimeout(debounce);
         debounce = setTimeout(() => search(input.value), 160);
@@ -6534,6 +6671,9 @@
       const offsetY = Math.round(GEOM.offsetY + ((GEOM.foldedOffsetY || GEOM.offsetY) - GEOM.offsetY) * (state.foldT || 0));
       canvasEl.style.transform = `translate3d(${pad - state.scrollX}px, ${offsetY}px, 0)`;
 
+      // 悬浮品牌与朝代带文字重叠时自动变淡（节流 220ms）
+      updateBrandConflict();
+
       const centerX = state.scrollX + viewportEl.clientWidth / 2 - pad;
       const curYear = xToYear(centerX);
       centerYearDisplay.textContent = formatYearStr(curYear);
@@ -6644,6 +6784,24 @@
     /********************************************************************
      * 12. 单指惯性滑动 + 双指捏合 + 双击放大（iPad 触屏优化）
      ********************************************************************/
+    /* 悬浮品牌冲突检测：朝代带文字滑入品牌区域 → 品牌变半透明 */
+    let brandCheckAt = 0;
+    function updateBrandConflict() {
+      const brandEl = document.getElementById('scroll-brand');
+      if (!brandEl || brandEl.classList.contains('brand-hidden')) return;
+      const now = performance.now();
+      if (now - brandCheckAt < 220) return;
+      brandCheckAt = now;
+      const br = brandEl.getBoundingClientRect();
+      let hit = false;
+      const bands = canvasEl.querySelectorAll('.macro-dynasty-block, .sub-regime-block');
+      for (const b of bands) {
+        const r = b.getBoundingClientRect();
+        if (r.left < br.right && r.right > br.left && r.top < br.bottom && r.bottom > br.top) { hit = true; break; }
+      }
+      brandEl.classList.toggle('brand-dim', hit);
+    }
+
     function initTimelineGestures() {
       const pointers = new Map();
       let pinching = false;
@@ -6685,6 +6843,7 @@
         if (e.target.closest('button')) return;
         stopAnimations();
         pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        document.body.classList.add('canvas-dragging');   // 拖动卷轴时淡出悬浮搜索
 
         if (pointers.size === 2) {
           pinching = true;
@@ -6736,6 +6895,7 @@
       function onPointerEnd(e) {
         if (!pointers.has(e.pointerId)) return;
         pointers.delete(e.pointerId);
+        if (pointers.size === 0) document.body.classList.remove('canvas-dragging');
 
         // 捏合结束
         if (pinching && pointers.size < 2) {
@@ -7209,7 +7369,7 @@
       clearTimeout(MAP_EMBED.failTimer);
       MAP_EMBED.failTimer = setTimeout(() => {
         if (MAP_EMBED.ready) return;
-        setSkelText('地图未能就绪<br /><span>请确认 jiangshan-atlas.html 与本文件在同一文件夹</span>');
+        setSkelText('地图未能就绪<br /><span>请确认 jiangshan-atlas.html 与 4 个 atlas-* 文件都和本文件在同一文件夹</span>');
         if (retry) retry.hidden = false;
       }, 20000);
       frame.src = MAP_LOCAL_PAGE + buildJiangshanQuery(year, key);
@@ -7267,14 +7427,35 @@
       if (!MAP_EMBED.booted) mapEmbedBoot(Number(state.lastMapYear) || 1800, null);
     }
 
-    /* 空闲预载：应用启动后地图在后台悄悄就绪，切到地图页秒开 */
+    /* 后台预载：先让长卷首屏站稳（load + 4 秒 + 空闲），再悄悄载地图；
+       极弱网（2G）或省流量模式下不打扰 */
     function scheduleMapPreload() {
       if (MAP_EMBED.booted) return;
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const mode = conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''));
+      if (mode) return;
       const start = () => {
         if (!MAP_EMBED.booted) mapEmbedBoot(Number(state.lastMapYear) || 1800, null);
       };
-      if (typeof requestIdleCallback === 'function') requestIdleCallback(start, { timeout: 4000 });
-      else setTimeout(start, 2600);
+      const arm = () => {
+        setTimeout(() => {
+          if (MAP_EMBED.booted) return;
+          if (document.hidden) {
+            document.addEventListener('visibilitychange', function once() {
+              document.removeEventListener('visibilitychange', once);
+              if (!MAP_EMBED.booted && !document.hidden) {
+                if (typeof requestIdleCallback === 'function') requestIdleCallback(start, { timeout: 6000 });
+                else setTimeout(start, 400);
+              }
+            }, { once: true });
+            return;
+          }
+          if (typeof requestIdleCallback === 'function') requestIdleCallback(start, { timeout: 6000 });
+          else setTimeout(start, 600);
+        }, 4000);
+      };
+      if (document.readyState === 'complete') arm();
+      else window.addEventListener('load', arm, { once: true });
     }
 
     function initMapView() {
