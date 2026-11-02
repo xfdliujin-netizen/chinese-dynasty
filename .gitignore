@@ -1,0 +1,13 @@
+# ===== 工作区内部数据（不上传）=====
+.workbuddy/
+
+# ===== 系统垃圾文件 =====
+Thumbs.db
+desktop.ini
+~$*
+*.tmp
+*.crdownload
+
+# ===== Python 运行残留 =====
+__pycache__/
+*.pyc

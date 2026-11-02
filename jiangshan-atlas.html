@@ -5274,6 +5274,206 @@ body.atlas-embed #scrubber-dock { border-top: 1px solid rgba(120, 100, 70, 0.13)
 body.atlas-embed .round-btn,
 body.atlas-embed .play-speed-btn,
 body.atlas-embed .step-nav-btn { border-radius: 10px; }
+
+/* ================= 沉浸版式：地图铺满，其余全部悬浮玻璃卡 ================= */
+body.atlas-embed { overflow: hidden; overscroll-behavior: none; }
+body.atlas-embed #atlas-shell { display: block; height: 100vh; height: 100dvh; }
+body.atlas-embed #workspace-body {
+  display: grid;
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+body.atlas-embed #viewport-frame { border-right: none; }
+
+/* 顶部工具条 → 悬浮胶囊 */
+body.atlas-embed #nav-bar {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  z-index: 72;
+  width: auto;
+  max-width: calc(100vw - 24px);
+  padding: 5px 9px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: linear-gradient(180deg, rgba(252, 249, 242, 0.72), rgba(246, 240, 229, 0.60));
+  -webkit-backdrop-filter: blur(28px) saturate(1.9);
+  backdrop-filter: blur(28px) saturate(1.9);
+  box-shadow: 0 10px 28px rgba(30, 27, 24, 0.16), 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  transition: opacity 0.35s ease;
+}
+
+/* 详情面板：宽屏悬浮右侧玻璃卡 */
+@media (min-width: 901px) {
+  body.atlas-embed #chronicle-pane {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 62px);
+    right: 12px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 190px);
+    width: min(330px, 30vw);
+    z-index: 62;
+    margin: 0;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: linear-gradient(180deg, rgba(252, 249, 242, 0.80), rgba(246, 240, 229, 0.70));
+    -webkit-backdrop-filter: blur(26px) saturate(1.8);
+    backdrop-filter: blur(26px) saturate(1.8);
+    box-shadow: 0 14px 36px rgba(30, 27, 24, 0.18);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+}
+/* 窄屏：详情面板变底部悬浮卡，整体叠在地图之上（不再占布局空间） */
+@media (max-width: 900px) {
+  body.atlas-embed #workspace-body,
+  body.atlas-embed #workspace-body.is-pane-collapsed,
+  body.atlas-embed #workspace-body.is-mobile-chronicle-open {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr 0px !important;
+  }
+  body.atlas-embed #chronicle-pane {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 184px);
+    height: auto !important;
+    max-height: min(46vh, 340px);
+    z-index: 62;
+    border-radius: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: linear-gradient(180deg, rgba(252, 249, 242, 0.86), rgba(246, 240, 229, 0.76));
+    -webkit-backdrop-filter: blur(26px) saturate(1.8);
+    backdrop-filter: blur(26px) saturate(1.8);
+    box-shadow: 0 12px 30px rgba(30, 27, 24, 0.18);
+    opacity: 1;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane { max-height: none; }
+  /* 竖屏：图例叠在朝代横幅上方，互不压叠；展开史志卡时隐藏图例 */
+  body.atlas-embed #map-key {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 244px);
+    max-height: 40vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  body.atlas-embed #workspace-body.is-mobile-chronicle-open #map-key { display: none; }
+}
+
+/* 时间轴：悬浮玻璃胶囊，让开主程序底部导航（约 62px）+ 安全区 */
+body.atlas-embed #scrubber-dock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  z-index: 66;
+  width: min(880px, calc(100vw - 20px));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(252, 249, 242, 0.74), rgba(246, 240, 229, 0.62));
+  -webkit-backdrop-filter: blur(26px) saturate(1.8);
+  backdrop-filter: blur(26px) saturate(1.8);
+  box-shadow: 0 12px 32px rgba(30, 27, 24, 0.2);
+  transition: opacity 0.35s ease;
+}
+/* 时间轴触摸拖动：交给指针事件，避免被浏览器手势抢走 */
+body.atlas-embed #scrubber-track { touch-action: none; }
+
+/* 触碰地图：悬浮面板淡到 75%；拖动/滚轮缩放地图：全部降到 15%，松手恢复 */
+body.atlas-embed.ui-recede #nav-bar,
+body.atlas-embed.ui-recede #scrubber-dock,
+body.atlas-embed.ui-recede #chronicle-pane,
+body.atlas-embed.ui-recede #map-key,
+body.atlas-embed.ui-recede #canvas-br-dock,
+body.atlas-embed.ui-recede #act-toggle-pane { opacity: 0.75; }
+
+body.atlas-embed #map-key,
+body.atlas-embed #canvas-br-dock { transition: opacity 0.3s ease, transform 0.28s ease; }
+
+body.atlas-embed.ui-move #nav-bar,
+body.atlas-embed.ui-move #scrubber-dock,
+body.atlas-embed.ui-move #chronicle-pane,
+body.atlas-embed.ui-move #map-key,
+body.atlas-embed.ui-move #canvas-br-dock,
+body.atlas-embed.ui-move #act-toggle-pane {
+  opacity: 0.15;
+  transition-duration: 0.18s;
+}
+
+/* 详情卡收起/展开手柄：贴在卡片左缘，收起后滑到屏幕右缘 */
+body.atlas-embed #act-toggle-pane {
+  position: fixed;
+  top: 50%;
+  right: calc(min(330px, 30vw) + 20px);
+  transform: translateY(-50%);
+  z-index: 64;
+  width: auto;
+  min-height: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 15px;
+  background: linear-gradient(180deg, rgba(252, 249, 242, 0.84), rgba(246, 240, 229, 0.72));
+  -webkit-backdrop-filter: blur(22px) saturate(1.8);
+  backdrop-filter: blur(22px) saturate(1.8);
+  box-shadow: 0 8px 22px rgba(30, 27, 24, 0.18), 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  transition: right 0.32s ease, opacity 0.3s ease, background 0.15s ease;
+}
+body.atlas-embed #act-toggle-pane .tp-arrow { font-size: 15px; line-height: 1; }
+body.atlas-embed #act-toggle-pane .tp-label {
+  writing-mode: horizontal-tb;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+body.atlas-embed #workspace-body.is-pane-collapsed #act-toggle-pane { right: 14px; }
+body.atlas-embed #act-toggle-pane:hover {
+  width: auto;
+  background: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(250, 246, 238, 0.88));
+}
+
+/* 左下角图例：抬到时间轴胶囊上方，避免重叠；禁原生拖拽/选区（防 dragstart 劫持滑动手势） */
+@media (min-width: 901px) {
+  body.atlas-embed #map-key {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 198px);
+    max-height: calc(100vh - 268px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+body.atlas-embed #map-key {
+  user-select: none;
+  -webkit-user-select: none;
+}
+body.atlas-embed #map-key * { -webkit-user-drag: none; user-drag: none; }
+
+/* 左下角图例：底部提示左右滑动 */
+body.atlas-embed #map-key::after {
+  content: '‹ 左右滑动 · 同步时间轴 ›';
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: 1px dashed rgba(120, 100, 70, 0.22);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: #9A8A74;
+}
+
+/* 文字光晕：用描边代替 SVG 滤镜（iPad 上省掉大量 filter 重绘） */
+body.atlas-embed #atlas-svg text[filter] {
+  filter: none !important;
+  paint-order: stroke fill;
+  stroke: #F7F2E6;
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+}
 </style>
   <link rel="preload" href="atlas-app.js" as="script" />
   <link rel="preload" href="atlas-dynasty.js" as="script" />
@@ -5647,6 +5847,25 @@ body.atlas-embed .step-nav-btn { border-radius: 10px; }
    上行：__atlasReady / __atlasAck / __atlasState / __atlasExit
    下行：{ __atlas:1, year, person, token } / { __atlas:1, __atlasQuery:1 }
    原则：只发消息，绝不重载文档，保证地图内部状态连续 */
+/* iOS：锁整页上下滑动（overflow:hidden 在 iOS Safari 上仍会出现橡皮筋滚动）。
+   触摸落在真实可滚动的容器（面板内容、史志窗格等）内时放行，其余一律拦截。 */
+(function () {
+  var isScrollable = function (el, axis) {
+    var s = getComputedStyle(el);
+    var ov = axis === 'x' ? s.overflowX : s.overflowY;
+    return (ov === 'auto' || ov === 'scroll') &&
+      (axis === 'x' ? el.scrollWidth : el.scrollHeight) >
+      (axis === 'x' ? el.clientWidth : el.clientHeight) + 1;
+  };
+  document.addEventListener('touchmove', function (e) {
+    var t = e.target;
+    while (t && t.nodeType === 1 && t !== document.documentElement) {
+      if (isScrollable(t, 'y') || isScrollable(t, 'x')) return;
+      t = t.parentElement;
+    }
+    e.preventDefault();
+  }, { passive: false });
+})();
 (function () {
   var EMBED = false;
   try { EMBED = !!(window.parent && window.parent !== window); } catch (e) { EMBED = false; }
@@ -5753,6 +5972,86 @@ body.atlas-embed .step-nav-btn { border-radius: 10px; }
       clearInterval(timer);
     }
   }, 60);
+})();
+</script>
+<script id="atlas-float-ui">
+/* 悬浮 UI 状态：触碰地图 → 75%；拖动 / 滚轮缩放地图 → 15%；松手恢复 */
+(function () {
+  function boot() {
+    var body = document.body;
+    var viewport = document.getElementById('viewport-frame');
+    var dock = document.getElementById('scrubber-dock');
+    if (!viewport || !dock) { setTimeout(boot, 120); return; }
+    var restoreTimer = 0;
+    var moveTimer = 0;
+    function recede(on) {
+      clearTimeout(restoreTimer);
+      if (on) body.classList.add('ui-recede');
+      else restoreTimer = setTimeout(function () { body.classList.remove('ui-recede'); }, 160);
+    }
+    function moving(on) {
+      clearTimeout(moveTimer);
+      if (on) body.classList.add('ui-move');
+      else moveTimer = setTimeout(function () { body.classList.remove('ui-move'); }, 220);
+    }
+    var dragging = false;
+    viewport.addEventListener('pointerdown', function () {
+      dragging = true; recede(true); moving(false);
+    }, { passive: true });
+    window.addEventListener('pointermove', function (e) {
+      if (dragging && ((e.buttons && e.buttons > 0) || (e.touches && e.touches.length > 0))) moving(true);
+    }, { passive: true });
+    window.addEventListener('wheel', function () { moving(true); }, { passive: true });
+    function endDrag() { dragging = false; moving(false); recede(false); }
+    window.addEventListener('pointerup', endDrag, { passive: true });
+    window.addEventListener('pointercancel', endDrag, { passive: true });
+
+    ['nav-bar', 'scrubber-dock', 'chronicle-pane', 'map-key', 'canvas-br-dock'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('pointerdown', function () { recede(false); moving(false); dragging = false; }, { passive: true });
+    });
+
+    /* 左下角图例：左右滑动 = 时间轴上一站 / 下一站 */
+    var key = document.getElementById('map-key');
+    if (key) {
+      key.addEventListener('dragstart', function (e) { e.preventDefault(); });
+      var sx = 0, sy = 0, dx = 0, active = false, horiz = false;
+      key.addEventListener('pointerdown', function (e) {
+        if (e.button && e.button !== 0) return;
+        e.stopPropagation();               /* 不当作地图触摸，也不触发地图拖拽 */
+        active = true; horiz = false; dx = 0;
+        sx = e.clientX; sy = e.clientY;
+      }, { passive: true });
+      window.addEventListener('pointermove', function (e) {
+        if (!active) return;
+        if (e.pointerType === 'mouse' && e.buttons === 0) { settle(); return; }  /* 兜底：pointerup 丢失 */
+        dx = e.clientX - sx;
+        var dy = e.clientY - sy;
+        if (!horiz) {
+          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+          horiz = Math.abs(dx) > Math.abs(dy);
+          if (!horiz) { active = false; return; }
+        }
+        var off = Math.max(-44, Math.min(44, dx / 2.4));
+        key.style.transition = 'none';
+        key.style.transform = 'translateX(' + off.toFixed(1) + 'px)';
+      }, { passive: true });
+      function settle() {
+        if (!active) return;
+        active = false;
+        key.style.transition = '';
+        key.style.transform = '';
+        if (horiz && Math.abs(dx) > 36) {
+          var btn = document.getElementById(dx < 0 ? 'act-step-next' : 'act-step-prev');
+          if (btn) btn.click();
+        }
+        horiz = false;
+      }
+      window.addEventListener('pointerup', settle, { passive: true });
+      window.addEventListener('pointercancel', settle, { passive: true });
+    }
+  }
+  boot();
 })();
 </script>
 </body>
