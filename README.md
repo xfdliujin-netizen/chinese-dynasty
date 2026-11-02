@@ -1,1 +1,2 @@
-# chinese-dynasty
+# chinese-dynasty自动同步测试 2026-11-02 15:04
+端到端测试 2 15:05:36
