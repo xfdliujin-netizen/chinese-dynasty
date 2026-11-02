@@ -1,5 +1,8 @@
 # ===== 工作区内部数据（不上传）=====
 .workbuddy/
+_h/
+_r/
+_t/
 
 # ===== 系统垃圾文件 =====
 Thumbs.db
@@ -7,7 +10,25 @@ desktop.ini
 ~$*
 *.tmp
 *.crdownload
+.DS_Store
 
 # ===== Python 运行残留 =====
 __pycache__/
 *.pyc
+*.log
+
+# ===== 敏感信息（令牌/密钥/凭据，一律不上传）=====
+.env
+.env.*
+*.token
+*.secret
+*.pem
+*.key
+id_rsa*
+credentials*.json
+serviceAccount*.json
+oauth*.json
+ghp_*.txt
+github_token*
+*token*.txt
+*token*.json
