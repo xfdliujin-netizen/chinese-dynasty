@@ -264,12 +264,12 @@ body.atlas-embed #nav-bar {
   body.atlas-embed #workspace-body.is-mobile-chronicle-open #map-key { display: none; }
 }
 
-/* 时间轴：悬浮玻璃胶囊，让开主程序底部导航（约 62px）+ 安全区 */
+/* 时间轴：靠近底部主导航，保留 4px 视觉间隙 + 安全区 */
 body.atlas-embed #scrubber-dock {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 70px);
   z-index: 66;
   width: min(880px, calc(100vw - 20px));
   border: 1px solid rgba(255, 255, 255, 0.6);

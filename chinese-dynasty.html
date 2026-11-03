@@ -1996,12 +1996,11 @@
       gap: 2px;
       padding: 5px 8px;
       border-radius: 26px;
-      /* 磨砂玻璃：双层渐变 + 强模糊 + 高光描边，透出底下的卷轴与疆域图 */
-      background:
-        linear-gradient(180deg, rgba(255, 253, 248, 0.66), rgba(246, 240, 229, 0.50));
-      -webkit-backdrop-filter: blur(38px) saturate(2.05) brightness(1.06);
-      backdrop-filter: blur(38px) saturate(2.05) brightness(1.06);
-      border: 1px solid rgba(255, 255, 255, 0.62);
+      /* 不透明纸色底，避免透出下层内容 */
+      background: #F6F0E5;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      border: 1px solid #D8CBB6;
       box-shadow:
         0 14px 42px rgba(30, 27, 24, 0.24),
         0 2px 6px rgba(30, 27, 24, 0.08),
@@ -2010,16 +2009,11 @@
       max-width: calc(100vw - 24px);
       isolation: isolate;
     }
-    /* 玻璃顶部一道柔光，模拟磨砂表面的环境反光 */
-    .bottom-tabs::before {
-      content: '';
-      position: absolute;
-      inset: 1px 1px auto;
-      height: 46%;
-      border-radius: 25px 25px 40% 40% / 25px 25px 14px 14px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0));
-      pointer-events: none;
-      z-index: 0;
+    /* 不透明样式不叠加玻璃高光 */
+    .bottom-tabs::before { display: none; }
+    /* 地图页：主导航与时间轴一起靠近屏幕底部，二者保留少量间隙 */
+    body[data-view="map"] .bottom-tabs {
+      bottom: calc(6px + env(safe-area-inset-bottom, 0px));
     }
     .bottom-tabs .view-tab {
       position: relative;
