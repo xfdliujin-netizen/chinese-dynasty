@@ -5417,22 +5417,32 @@ body.atlas-embed #act-toggle-pane:hover {
   background: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(250, 246, 238, 0.88));
 }
 
-/* 左下角图例与右下角比例尺同步下移，紧贴在沉底时间轴上方 8px 处 */
+/* 将右下角的复位视图按钮和比例尺移动到屏幕右上角（避开右侧的史志/溯源弹窗） */
   @media (min-width: 901px) {
-    body.atlas-embed #map-key {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 82px) !important;
-      max-height: calc(100dvh - 150px) !important;
-    }
     body.atlas-embed #canvas-br-dock {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 82px) !important;
+      position: fixed !important;
+      top: calc(env(safe-area-inset-top, 0px) + 68px) !important;
+      right: 14px !important;
+      bottom: auto !important;
+      left: auto !important;
+      z-index: 62 !important;
+      background: rgba(252, 249, 242, 0.88) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      backdrop-filter: blur(12px) !important;
+      padding: 5px 10px !important;
+      border-radius: 12px !important;
+      border: 1px solid rgba(181, 69, 47, 0.2) !important;
+      box-shadow: 0 4px 12px rgba(30, 24, 18, 0.12) !important;
     }
   }
+
   @media (max-width: 900px) {
-    body.atlas-embed #map-key {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 92px) !important;
-    }
     body.atlas-embed #canvas-br-dock {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 92px) !important;
+      top: calc(env(safe-area-inset-top, 0px) + 60px) !important;
+      right: 10px !important;
+      bottom: auto !important;
+      left: auto !important;
+      z-index: 62 !important;
     }
   }
 body.atlas-embed #map-key {
