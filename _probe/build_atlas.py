@@ -364,6 +364,230 @@ body.atlas-embed #map-key::after {
   color: #9A8A74;
 }
 
+/* ================= 响应式档案夹 + 实测时间轴避让（v13） ================= */
+/* 复位视图与比例尺：固定在地图右上角，纵向紧凑排列 */
+body.atlas-embed #canvas-br-dock {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 6px);
+  right: calc(env(safe-area-inset-right, 0px) + 6px);
+  bottom: auto;
+  z-index: 74;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+body.atlas-embed #canvas-br-dock .canvas-reset-btn {
+  padding: 5px 8px;
+  border-radius: 9px;
+  background: rgba(247, 242, 232, 0.88);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+body.atlas-embed #scale-bar-box { padding-right: 2px; }
+
+/* 所有底部浮卡共用时间轴实测留白，JS 在尺寸变化时更新 --dock-clearance */
+@media (min-width: 768px) {
+  body.atlas-embed #map-key {
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 198px));
+    max-height: min(42vh, 360px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* 手机：史志条贴时间轴上缘，图例再贴史志条上缘；位置全部由实际矩形计算 */
+@media (max-width: 767px) {
+  body.atlas-embed #chronicle-pane {
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 184px));
+    max-height: min(43vh, 340px);
+  }
+  body.atlas-embed #map-key {
+    bottom: var(--phone-pane-clearance, calc(env(safe-area-inset-bottom, 0px) + 244px));
+    max-height: min(30vh, 230px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  body.atlas-embed #map-key::after { display: none; }
+}
+
+/* 平板 / 电脑：史志与事件共用右侧美式马尼拉档案夹，顶部索引签切换 */
+body.atlas-embed .archive-folder-tabs { display: none; }
+@media (min-width: 768px) {
+  body.atlas-embed .archive-folder-tabs {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 62px);
+    right: calc(env(safe-area-inset-right, 0px) + 14px);
+    z-index: 65;
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 34px;
+    pointer-events: auto;
+  }
+  body.atlas-embed .archive-folder-tab {
+    position: relative;
+    min-width: 106px;
+    height: 29px;
+    padding: 0 18px 3px;
+    border: 1px solid rgba(105, 82, 45, 0.34);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    clip-path: polygon(0 100%, 0 10px, 11px 0, calc(100% - 11px) 0, 100% 10px, 100% 100%);
+    background: #cbb887;
+    color: #665433;
+    font-family: var(--serif-stack);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    cursor: pointer;
+    box-shadow: 0 -3px 9px rgba(65, 48, 25, 0.10);
+    transition: height .16s ease, background .16s ease, color .16s ease;
+  }
+  body.atlas-embed .archive-folder-tab small {
+    margin-left: 5px;
+    font-family: var(--sans-stack);
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    opacity: .64;
+  }
+  body.atlas-embed .archive-folder-tab.is-active {
+    height: 34px;
+    background: #ead9ae;
+    color: #4f3c20;
+    z-index: 2;
+  }
+  body.atlas-embed .archive-folder-tab:active { transform: translateY(1px); }
+
+  body.atlas-embed #chronicle-pane,
+  body.atlas-embed #milestone-balloon {
+    box-sizing: border-box;
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 96px) !important;
+    right: calc(env(safe-area-inset-right, 0px) + 14px) !important;
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 190px));
+    left: auto !important;
+    width: min(340px, 34vw);
+    max-width: min(340px, 34vw);
+    max-height: none;
+    margin: 0;
+    padding: 20px 20px 16px;
+    border: 1px solid rgba(105, 82, 45, 0.34);
+    border-top: 2px solid rgba(105, 82, 45, 0.42);
+    border-radius: 4px 4px 12px 12px;
+    background-color: rgba(234, 217, 174, 0.95);
+    background-image: linear-gradient(rgba(255,255,255,.16), rgba(255,255,255,0)),
+      repeating-linear-gradient(0deg, transparent 0, transparent 27px, rgba(113,91,50,.055) 28px);
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    backdrop-filter: blur(20px) saturate(1.25);
+    box-shadow: 0 15px 34px rgba(54, 40, 20, 0.23), inset 0 0 0 5px rgba(255, 250, 230, 0.16);
+    color: #44351f;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  body.atlas-embed #chronicle-pane::after,
+  body.atlas-embed #milestone-balloon::after {
+    content: 'HISTORICAL ARCHIVE';
+    display: block;
+    margin-top: 14px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(105, 82, 45, 0.25);
+    color: rgba(91, 69, 35, 0.58);
+    font-family: var(--sans-stack);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .22em;
+    text-align: right;
+  }
+  body.atlas-embed #milestone-balloon {
+    height: auto;
+    min-height: 150px;
+    font-size: 13px;
+    line-height: 1.75;
+    transition: opacity .2s ease;
+  }
+  body.atlas-embed #milestone-balloon::before { display: none; }
+  body.atlas-embed #milestone-balloon .ep-head { padding-right: 24px; }
+  body.atlas-embed #milestone-balloon .ep-year { font-size: 13px; color: #87422d; }
+  body.atlas-embed #milestone-balloon .ep-text { margin-top: 10px; }
+  body.atlas-embed #milestone-balloon .archive-empty {
+    color: #75613e;
+    font-family: var(--serif-stack);
+    line-height: 1.9;
+  }
+  body.atlas-embed #milestone-balloon .archive-empty strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #513d20;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* 档案夹互斥显示：保留原应用状态，只切换可见性 */
+  body.atlas-embed[data-archive-tab="chronicle"] #milestone-balloon {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  body.atlas-embed[data-archive-tab="event"] #chronicle-pane {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  body.atlas-embed[data-archive-tab="event"] #act-toggle-pane { opacity: 0; pointer-events: none; }
+
+  /* iPad 竖屏原本落入 <=900px 手机紧凑规则，这里恢复完整档案内容 */
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane {
+    display: flex;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 20px 20px 16px !important;
+    border: 1px solid rgba(105, 82, 45, 0.34) !important;
+    overflow-y: auto !important;
+    opacity: 1;
+    pointer-events: auto;
+    gap: 14px;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .dynasty-banner {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border-bottom: none;
+    cursor: default;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .dynasty-title-row {
+    display: flex;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--dynasty-accent);
+    overflow: visible;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane #dynasty-title {
+    font-size: 32px;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane #dynasty-span { font-size: 12px; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .seat-row {
+    display: flex;
+    width: auto;
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane #dynasty-summary { display: block; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .milestone-section { display: block; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .disclaimer-box { display: block; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .mobile-chronicle-btn { display: none; }
+  body.atlas-embed[data-archive-tab="event"] #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  body.atlas-embed #workspace-body.is-pane-collapsed:not(.is-mobile-chronicle-open) #chronicle-pane {
+    width: min(340px, 34vw);
+  }
+}
+
 /* 文字光晕：用描边代替 SVG 滤镜（iPad 上省掉大量 filter 重绘） */
 body.atlas-embed #atlas-svg text[filter] {
   filter: none !important;
