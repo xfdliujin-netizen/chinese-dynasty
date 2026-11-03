@@ -330,51 +330,98 @@
       box-shadow: 0 1px 4px rgba(184, 51, 42, 0.35);
     }
 
-    /* 刻度 */
-    #ticks-layer { position: absolute; left: 0; right: 0; top: 0; height: calc(26px * var(--v)); pointer-events: none; }
-    /* 卡尺邻域逐年小标签：随卷轴滚动逐个经过卡尺放大 */
-    #lens-layer { position: absolute; inset: 0; pointer-events: none; }
-    .minor-year {
+    /* ================= 疏朗自适应年份刻度尺与 iPad 中央红线 Apple Dock 透镜 ================= */
+    #ticks-layer {
       position: absolute;
-      top: calc(4px * var(--v));
-      transform: translateX(-50%);
-      transform-origin: 50% 100%;
-      font-size: max(8px, calc(8px * var(--v)));
-      font-weight: 700;
-      line-height: 1;
-      color: #A5947C;
-      font-family: ui-monospace, Menlo, Consolas, monospace;
-      white-space: nowrap;
-      transition: transform 0.32s cubic-bezier(0.25, 0.6, 0.35, 1), opacity 0.2s ease;
+      left: 0; right: 0; top: 0;
+      height: calc(36px * var(--v));
+      pointer-events: none;
+      z-index: 38;
+    }
+    #lens-layer {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: calc(36px * var(--v));
+      pointer-events: none;
+      z-index: 39;
+    }
+    .tick, .minor-year {
+      position: absolute;
+      bottom: calc(3px * var(--v));
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      will-change: transform, opacity;
       backface-visibility: hidden;
+      transform-origin: 50% 100%;
+      pointer-events: none;
     }
-    .minor-year.hot { color: #5C4F3E; }
-    .tick {
-      position: absolute; top: 0;
-      display: flex; flex-direction: column; align-items: center;
-      transform: translateX(-50%);          /* 只做居中，位置永不移动 */
-      transition: opacity 0.2s ease;
-    }
+    /* 年份数字：采用高可读圆体/等宽数字，留足呼吸空间，绝不互相挤压 */
     .tick-label {
-      margin-top: calc(3px * var(--v));
-      font-size: max(9px, calc(10px * var(--v)));
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 1px;
+      padding: calc(1.5px * var(--v)) calc(4px * var(--v));
+      border-radius: 999px;
+      font-size: max(9.5px, calc(10px * var(--v)));
       font-weight: 700;
-      line-height: 1;
-      color: #6E6254;
-      font-family: ui-monospace, Menlo, Consolas, monospace;
+      line-height: 1.05;
+      color: #6B5E4E;
+      font-variant-numeric: tabular-nums;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', 'PingFang SC', ui-monospace, monospace;
       white-space: nowrap;
-      /* Dock 放大只作用于数字：轴点在下缘，向上+左右扩展，视觉中心始终对准指针 */
       transform-origin: 50% 100%;
-      transition: transform 0.32s cubic-bezier(0.25, 0.6, 0.35, 1), color 0.2s ease;
+      will-change: transform, color, background-color;
       backface-visibility: hidden;
     }
-    /* 卡尺柔和高亮：正中的年份加深加重 */
-    .tick.hot .tick-label { color: #3A3022; }
-    .tick.hot .tick-mark { background: #7A6A52; }
+    .tick-label .yr-era {
+      font-size: 0.82em;
+      font-weight: 800;
+      color: #8C6D46;
+      margin-right: 0.5px;
+    }
+    .tick-label .yr-num {
+      letter-spacing: -0.02em;
+    }
     .tick-mark {
-      width: 1px; height: calc(8px * var(--v));
+      width: 1.25px;
+      height: calc(6px * var(--v));
       margin-top: calc(2px * var(--v));
-      background: #A89882;
+      background: rgba(154, 138, 116, 0.65);
+      border-radius: 1px;
+      transform-origin: 50% 100%;
+      will-change: transform, background-color;
+    }
+    /* 细分刻度：仅在屏幕缩放足够宽裕且远离主刻度碰撞区时才优雅浮现 */
+    .minor-year .tick-label {
+      font-size: max(8.5px, calc(8.8px * var(--v)));
+      font-weight: 600;
+      color: #8E7F6B;
+    }
+    .minor-year .tick-mark {
+      width: 1px;
+      height: calc(4px * var(--v));
+      background: rgba(168, 152, 130, 0.45);
+    }
+    /* 中央红线 Dock 焦点峰值态：独立悬浮胶囊光晕，每个放大的年份都端庄美观 */
+    .tick.hot .tick-label,
+    .minor-year.hot .tick-label {
+      color: var(--cinnabar);
+      font-weight: 900;
+      background: rgba(251, 247, 238, 0.95);
+      box-shadow: 0 2px 10px rgba(184, 51, 42, 0.18), 0 0 0 1px rgba(184, 51, 42, 0.26);
+    }
+    .tick.hot .tick-label .yr-era,
+    .minor-year.hot .tick-label .yr-era {
+      color: var(--cinnabar);
+    }
+    .tick.hot .tick-mark,
+    .minor-year.hot .tick-mark {
+      background: var(--cinnabar);
+      width: 1.8px;
     }
 
     /* 顶部大朝代块 */
@@ -758,7 +805,6 @@
       border: 1px solid rgba(255, 255, 255, 0.55);
       box-shadow: 0 10px 30px rgba(30, 27, 24, 0.18), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
       max-width: calc(100vw - 24px);
-      transition: padding 0.22s var(--ios-ease), gap 0.22s var(--ios-ease), bottom 0.22s var(--ios-ease);
     }
     .controls-row {
       display: flex;
@@ -778,20 +824,25 @@
       padding-left: 3px;
       margin-top: 2px;
     }
-    /* 横向模式：由 JS 实测可用宽度动态开启（一行排列 + 短名 + 隐藏计数），
-       空间不够时自动回落到竖排，避免与居中主导航相撞 */
-    .app-controls.is-row {
-      flex-direction: row;
-      align-items: center;
-      gap: 3px;
-      padding: 6px 10px 6px 6px;
+    /* 横屏（中宽以上）：改为一行横向排列，用短名 + 隐藏计数，避免碰到居中的主导航 */
+    @media (orientation: landscape) and (min-width: 700px) {
+      .app-controls {
+        flex-direction: row;
+        align-items: center;
+        gap: 3px;
+        padding: 6px 12px 6px 8px;
+      }
+      .controls-row { flex-direction: row; align-items: center; gap: 3px; }
+      .layer-switches { flex-direction: row; gap: 0; }
+      .layer-switch { gap: 5px; padding: 3px 8px 3px 3px; }
+      .app-controls .layer-switch .full { display: none; }
+      .app-controls .layer-switch .short { display: inline; }
+      .app-controls .layer-count { display: none; }
     }
-    .app-controls.is-row .controls-row { flex-direction: row; align-items: center; gap: 3px; }
-    .app-controls.is-row .layer-switches { flex-direction: row; align-items: center; gap: 0; }
-    .app-controls.is-row .layer-switch { gap: 4px; padding: 3px 6px 3px 3px; }
-    .app-controls.is-row .layer-switch .full { display: none; }
-    .app-controls.is-row .layer-switch .short { display: inline; }
-    .app-controls.is-row .layer-count { display: none; }
+    /* 手机竖屏：底部中间是主导航，图层胶囊抬到其上方左侧 */
+    @media (orientation: portrait) and (max-width: 560px) {
+      .app-controls { bottom: calc(env(safe-area-inset-bottom, 0px) + 82px); }
+    }
 
     /* 整块「开关 + 标签」即按钮：触控区更大，符合 iOS 习惯 */
     .layer-switch {
@@ -1364,9 +1415,10 @@
       display: flex;
       position: relative;
       overflow: hidden;
-      /* 底部标签栏已改为悬浮胶囊：不再为它预留整条空间，页面铺满到屏幕底 */
-      padding-bottom: 0;
+      padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
     }
+    /* 长卷：底部胶囊悬浮在卷轴上，画布可以一直延伸到屏幕底 */
+    body[data-view="scroll"] .app-main { padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
 
     /* 长卷沉浸模式：隐藏顶部栏，改用悬浮品牌 + 悬浮搜索 */
     body[data-view="scroll"] .app-header { display: none; }
@@ -1516,7 +1568,7 @@
       border: 1px solid var(--sep);
       border-radius: 14px;
       box-shadow: 0 2px 10px rgba(30, 27, 24, 0.05);
-      padding: 14px 16px calc(72px + env(safe-area-inset-bottom, 0px));
+      padding: 14px 16px 20px;
     }
 
     .arch-hero { padding-bottom: 12px; border-bottom: 1px solid #E2D6BF; }
@@ -1844,8 +1896,6 @@
       border: 1px solid var(--sep);
       border-radius: 14px;
       box-shadow: 0 2px 10px rgba(30, 27, 24, 0.05);
-      /* 悬浮胶囊之下仍可滚动：留出胶囊净空，最后一条不被遮住 */
-      padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
     }
 
     .ev-group {
@@ -1996,24 +2046,15 @@
       gap: 2px;
       padding: 5px 8px;
       border-radius: 26px;
-      /* 不透明纸色底，避免透出下层内容 */
-      background: #F6F0E5;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-      border: 1px solid #D8CBB6;
-      box-shadow:
-        0 14px 42px rgba(30, 27, 24, 0.24),
-        0 2px 6px rgba(30, 27, 24, 0.08),
-        0 1px 0 rgba(255, 255, 255, 0.78) inset,
-        0 -1px 0 rgba(140, 118, 88, 0.08) inset;
+      background: rgba(250, 246, 238, 0.68);
+      -webkit-backdrop-filter: blur(24px) saturate(1.8);
+      backdrop-filter: blur(24px) saturate(1.8);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 10px 34px rgba(30, 27, 24, 0.20), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
       max-width: calc(100vw - 24px);
-      isolation: isolate;
     }
-    /* 不透明样式不叠加玻璃高光 */
-    .bottom-tabs::before { display: none; }
     .bottom-tabs .view-tab {
       position: relative;
-      z-index: 1;
       flex: 0 0 auto;
       min-width: 66px;
       display: flex;
@@ -2040,11 +2081,7 @@
       flex: 0 0 auto;
       transition: transform 0.3s var(--ios-ease);
     }
-    .bottom-tabs .view-tab.active {
-      color: var(--tint);
-      background: #FFFDF8;
-      box-shadow: 0 3px 10px rgba(120, 92, 60, 0.14), 0 1px 0 #FFFFFF inset;
-    }
+    .bottom-tabs .view-tab.active { color: var(--tint); background: rgba(255, 255, 255, 0.78); }
     .bottom-tabs .view-tab.active svg { transform: scale(1.06); }
     .bottom-tabs .view-tab:not(.active):active { transform: scale(0.94); color: #6D6D72; }
 
@@ -2059,7 +2096,7 @@
       width: 100%;
       max-width: var(--page-max);
       margin: 0 auto;
-      padding: 8px var(--page-pad) 0;
+      padding: 8px var(--page-pad) 12px;
     }
     .people-toolbar {
       display: flex;
@@ -2129,7 +2166,7 @@
       overflow-y: auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
-      padding: 2px 2px calc(72px + env(safe-area-inset-bottom, 0px));
+      padding: 2px 2px 10px;
     }
     .emp-actions {
       grid-column: 3;
@@ -2493,8 +2530,6 @@
        ============================================================ */
     /* 地图页隐藏应用标题栏，让疆域图铺满整个视口（进入沉浸模式） */
     body[data-view="map"] .app-header { display: none; }
-    /* 地图页为全屏沉浸状态，底部主导航已隐藏，时间轴直接贴屏幕底边 */
-    body[data-view="map"] .bottom-tabs { display: none; }
 
     .map-stage {
       position: relative;
@@ -2627,6 +2662,1937 @@
       transition: opacity 0.26s ease, transform 0.32s var(--ios-ease);
     }
     .map-toast.show { opacity: 1; transform: translate(-50%, 0); }
+  
+    /* =========================================================================
+       V4 全局美学升级：东方博物院数字长卷 UI + 全屏穿透释放 + 晶透玻璃底栏
+       ========================================================================= */
+
+    /* --- 2. 释放「人物」与「事件」页面底部被占用的空白区，让列表延伸至屏幕最底端 --- */
+    .app-main {
+      padding-bottom: 0 !important;
+    }
+    body[data-view="scroll"] .app-main,
+    body[data-view="archive"] .app-main,
+    body[data-view="events"] .app-main {
+      padding-bottom: 0 !important;
+    }
+
+    /* 人物页与事件页：外层容器直通屏幕底部，内部滚动区底部预留呼吸内边距，滑到底部不被遮挡，滑动时文字自然从透明 Tab 栏下方穿过 */
+    .people-shell {
+      padding: 8px var(--page-pad) 0 !important;
+    }
+    .people-body {
+      padding: 4px 2px calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    .archive-shell {
+      padding: 8px var(--page-pad) 0 !important;
+    }
+    .archive-body {
+      padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    .events-shell {
+      padding: 8px var(--page-pad) 0 !important;
+    }
+    .events-list {
+      border-radius: 14px 14px 0 0 !important;
+      border-bottom: none !important;
+      padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* --- 3. 底部主导航 Tab 栏：大幅降低不透明度（0.68 -> 0.24），实现通透晶莹的透字效果 --- */
+    .bottom-tabs {
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: rgba(248, 243, 232, 0.24) !important;
+      -webkit-backdrop-filter: blur(8px) saturate(1.45) !important;
+      backdrop-filter: blur(8px) saturate(1.45) !important;
+      border: 1px solid rgba(255, 255, 255, 0.48) !important;
+      box-shadow:
+        0 8px 28px rgba(30, 24, 16, 0.12),
+        inset 0 1px 0.5px rgba(255, 255, 255, 0.68) !important;
+      transition: opacity 0.3s ease, background 0.3s ease;
+    }
+    .bottom-tabs .view-tab {
+      min-width: 64px;
+      padding: 4px 14px 3px;
+      border-radius: 999px;
+      color: rgba(44, 36, 28, 0.78);
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(250, 246, 238, 0.85);
+    }
+    .bottom-tabs .view-tab.active {
+      color: var(--cinnabar);
+      background: rgba(255, 252, 245, 0.46) !important;
+      box-shadow: 0 2px 8px rgba(184, 51, 42, 0.12), inset 0 0 0 0.5px rgba(184, 51, 42, 0.22);
+    }
+
+    /* --- 1. 长卷页（#view-scroll）东方博物院级 UI 全面重塑 --- */
+
+    /* 1.1 画卷底纹：古法熟宣丝绢光泽 + 上下天头地脚锦绫包边 */
+    .timeline-band {
+      background:
+        radial-gradient(ellipse 90% 55% at 50% 42%, rgba(255, 252, 245, 0.88) 0%, rgba(246, 239, 225, 0.45) 65%, rgba(232, 221, 200, 0.78) 100%),
+        repeating-linear-gradient(90deg, rgba(168, 142, 104, 0.028) 0px, rgba(168, 142, 104, 0.028) 1px, transparent 1px, transparent 18px),
+        linear-gradient(180deg, #EDE3CE 0%, #F8F4EA 18%, #F6F1E5 82%, #E9DEC7 100%) !important;
+      border-top: 1px solid rgba(186, 165, 132, 0.55) !important;
+      border-bottom: 1px solid rgba(186, 165, 132, 0.55) !important;
+      box-shadow:
+        inset 0 14px 28px rgba(45, 35, 22, 0.045),
+        inset 0 -14px 28px rgba(45, 35, 22, 0.045) !important;
+    }
+
+    /* 左右卷轴收边渐隐更柔和深邃 */
+    .edge-fade { width: 44px !important; }
+    .edge-fade-l { background: linear-gradient(90deg, rgba(238, 230, 213, 0.92) 0%, rgba(238, 230, 213, 0) 100%) !important; }
+    .edge-fade-r { background: linear-gradient(270deg, rgba(238, 230, 213, 0.92) 0%, rgba(238, 230, 213, 0) 100%) !important; }
+
+    /* 1.2 顶部三段式博物馆天头 HUD：左题签 · 中罗盘 · 右工具舱 */
+    .scroll-float-brand {
+      top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+      padding: 5px 13px 5px 7px !important;
+      border-radius: 999px !important;
+      background: rgba(251, 247, 238, 0.42) !important;
+      -webkit-backdrop-filter: blur(10px) saturate(1.4);
+      backdrop-filter: blur(10px) saturate(1.4);
+      border: 1px solid rgba(205, 190, 164, 0.45);
+      box-shadow: 0 4px 16px rgba(30, 24, 16, 0.06);
+    }
+    .scroll-float-brand .seal {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      background: linear-gradient(145deg, #C8382E 0%, #96221A 100%);
+      box-shadow: 0 2px 6px rgba(184, 51, 42, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .scroll-float-brand .app-title {
+      font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    /* 中央天头纪年罗盘：精准悬于中央朱砂红线顶端 */
+    .scroll-center-compass {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 62;
+      display: none;
+      align-items: center;
+      gap: 7px;
+      height: 34px;
+      padding: 0 15px;
+      border-radius: 999px;
+      background: rgba(252, 249, 242, 0.56);
+      -webkit-backdrop-filter: blur(12px) saturate(1.5);
+      backdrop-filter: blur(12px) saturate(1.5);
+      border: 1px solid rgba(184, 51, 42, 0.28);
+      box-shadow: 0 4px 18px rgba(184, 51, 42, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    body[data-view="scroll"] .scroll-center-compass { display: inline-flex; }
+    body.search-open .scroll-center-compass { opacity: 0; }
+    .scroll-center-compass::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 8px;
+      height: 8px;
+      background: #B8332A;
+      border-radius: 1.5px;
+      box-shadow: 0 1px 4px rgba(184, 51, 42, 0.4);
+    }
+    .compass-era {
+      font-family: 'Noto Serif SC', 'Songti SC', serif;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--cinnabar);
+      letter-spacing: 0.04em;
+    }
+    .compass-sep {
+      color: rgba(140, 120, 95, 0.55);
+      font-weight: 900;
+    }
+    .compass-year {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', ui-monospace, monospace;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #231D16;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 右上角工具舱（缩放胶囊 + 检索按钮） */
+    .scroll-float-RightTools {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      right: calc(env(safe-area-inset-right, 0px) + 14px);
+      z-index: 62;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.35s ease;
+    }
+    body[data-view="scroll"] .scroll-float-RightTools { display: flex; }
+    body.canvas-dragging .scroll-float-RightTools,
+    body.search-open .scroll-float-RightTools {
+      opacity: 0.18;
+      pointer-events: none;
+    }
+    .zoom-capsule {
+      display: inline-flex;
+      align-items: center;
+      height: 34px;
+      padding: 2px 3px;
+      border-radius: 999px;
+      background: rgba(251, 247, 238, 0.46);
+      -webkit-backdrop-filter: blur(12px) saturate(1.5);
+      backdrop-filter: blur(12px) saturate(1.5);
+      border: 1px solid rgba(197, 182, 152, 0.48);
+      box-shadow: 0 4px 14px rgba(30, 24, 16, 0.06);
+    }
+    .zc-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: #3D3327;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s ease, transform 0.14s ease;
+    }
+    .zc-btn:active {
+      background: rgba(184, 51, 42, 0.14);
+      color: var(--cinnabar);
+      transform: scale(0.9);
+    }
+    .zc-label {
+      min-width: 42px;
+      text-align: center;
+      font-size: 11.5px;
+      font-weight: 800;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      color: #6B5B48;
+      cursor: pointer;
+      user-select: none;
+    }
+    .zc-label.zoom-active { color: var(--cinnabar); }
+
+    .scroll-float-search {
+      position: static !important;
+      height: 34px !important;
+      padding: 0 13px 0 11px !important;
+      background: rgba(251, 247, 238, 0.46) !important;
+      -webkit-backdrop-filter: blur(12px) saturate(1.5);
+      backdrop-filter: blur(12px) saturate(1.5);
+      border: 1px solid rgba(197, 182, 152, 0.48) !important;
+      box-shadow: 0 4px 14px rgba(30, 24, 16, 0.06);
+      opacity: 0.92 !important;
+      font-size: 12.5px !important;
+    }
+
+    @media (max-width: 680px) {
+      .scroll-float-brand .brand-text { display: none; }
+      .scroll-float-brand { padding: 4px !important; }
+      .zoom-capsule { display: none; }
+    }
+
+    /* 1.3 中央朱砂游标指针升级：鎏金双环 + 朱砂光束 */
+    .center-indicator {
+      width: 1.5px !important;
+      background: linear-gradient(180deg,
+        rgba(184, 51, 42, 0.92) 0%,
+        rgba(184, 51, 42, 0.38) 28%,
+        rgba(184, 51, 42, 0.18) 55%,
+        rgba(184, 51, 42, 0.65) 100%) !important;
+      box-shadow: 0 0 10px rgba(184, 51, 42, 0.18);
+    }
+    .center-dot {
+      display: none; /* 已由顶部中央罗盘的朱砂菱形针尖接管，画面更干净 */
+    }
+
+    /* 1.4 刻度尺底栏：温润的宣纸暗金丝线标尺 */
+    #ticks-layer::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      bottom: calc(2px * var(--v));
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(168, 146, 114, 0.42) 5%, rgba(168, 146, 114, 0.42) 95%, transparent);
+    }
+
+    /* 1.5 顶层大朝代块：宋锦织金宣纸卡质感 */
+    .macro-dynasty-block {
+      border-radius: 10px !important;
+      border-width: 1.5px !important;
+      box-shadow:
+        0 3px 10px rgba(30, 24, 16, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.03) !important;
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0) 65%, rgba(0, 0, 0, 0.03) 100%) !important;
+      transition: transform 0.22s ease, box-shadow 0.25s ease, filter 0.25s ease !important;
+    }
+    .macro-dynasty-block.active-dynasty {
+      box-shadow:
+        0 0 0 2px var(--cinnabar),
+        0 6px 18px rgba(184, 51, 42, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+    }
+    .macro-name {
+      font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+      letter-spacing: 0.06em !important;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    .macro-period {
+      border-radius: 999px !important;
+      padding: 1px 8px !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', ui-monospace, monospace;
+      letter-spacing: 0.01em;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    /* 1.6 三轨细分政权块：温润矿物釉色条带 */
+    .sub-regime-block {
+      border-radius: 7px !important;
+      border: 1px solid rgba(255, 255, 255, 0.24) !important;
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(0, 0, 0, 0.08) 100%) !important;
+      box-shadow: 0 2px 5px rgba(24, 20, 14, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+    }
+    .sub-name {
+      font-family: 'Noto Serif SC', 'Songti SC', serif;
+      letter-spacing: 0.03em;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+    }
+
+    /* 1.7 事件基线与竹简 / 玉牌节点重塑 */
+    #events-axis-line {
+      height: 2px !important;
+      background: linear-gradient(90deg,
+        rgba(168, 142, 102, 0.15) 0%,
+        rgba(156, 126, 84, 0.68) 8%,
+        rgba(184, 51, 42, 0.72) 50%,
+        rgba(156, 126, 84, 0.68) 92%,
+        rgba(168, 142, 102, 0.15) 100%) !important;
+      box-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+    }
+
+    .pulse-circle {
+      border: 2.2px solid #FBF8F1 !important;
+      box-shadow: 0 2px 5px rgba(30, 24, 16, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.45) !important;
+    }
+
+    /* 竖排竹简：顶部与底部仿古韦编竹节纹 + 温润竹黄渐变 */
+    .vertical-bamboo-slip {
+      border-radius: 6px !important;
+      border: 1px solid rgba(168, 142, 98, 0.78) !important;
+      background:
+        linear-gradient(180deg,
+          rgba(184, 152, 98, 0.22) 0px,
+          rgba(184, 152, 98, 0.22) 2px,
+          transparent 2px,
+          transparent calc(100% - 3px),
+          rgba(184, 152, 98, 0.25) calc(100% - 3px),
+          rgba(184, 152, 98, 0.25) 100%),
+        linear-gradient(168deg, #FFFDF8 0%, #F7EFE0 58%, #EFE3CC 100%) !important;
+      box-shadow:
+        0 3px 10px rgba(36, 28, 18, 0.13),
+        inset 0 1px 0 rgba(255, 255, 255, 0.88),
+        inset -1px 0 0 rgba(168, 142, 98, 0.22) !important;
+    }
+    .slip-title {
+      font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+      color: #211C17;
+    }
+
+    /* 人物 / 文豪 / 盛世名牌：故宫玉牌光泽 */
+    .axis-person-card {
+      border-radius: calc(5px * var(--v)) !important;
+      box-shadow:
+        0 3px 10px rgba(36, 28, 18, 0.13),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+    }
+    .axis-person-card .ap-name {
+      font-family: 'Noto Serif SC', 'Songti SC', serif;
+    }
+
+    /* 1.8 左下角图层切换舱：同步升级为晶透悬浮胶囊，轻盈不挡画卷 */
+    .app-controls {
+      background: rgba(248, 243, 232, 0.28) !important;
+      -webkit-backdrop-filter: blur(8px) saturate(1.45) !important;
+      backdrop-filter: blur(8px) saturate(1.45) !important;
+      border: 1px solid rgba(255, 255, 255, 0.48) !important;
+      box-shadow:
+        0 8px 26px rgba(30, 24, 16, 0.12),
+        inset 0 1px 0.5px rgba(255, 255, 255, 0.65) !important;
+    }
+    .layer-switch {
+      color: rgba(56, 46, 35, 0.82);
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(250, 246, 238, 0.85);
+    }
+    .layer-switch.on {
+      background: rgba(255, 252, 245, 0.52) !important;
+      box-shadow: 0 1px 4px rgba(30, 24, 16, 0.08);
+    }
+
+    /* 右下角轻提示胶囊同样晶透化 */
+    .band-hint {
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+      background: rgba(34, 28, 22, 0.56) !important;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+  
+    /* =========================================================================
+       V5 专项升级：
+       1. 人物/事件页：省去冗余大顶栏，单行集成「品牌标识 + 动画下拉菜单 + 紧凑搜索框」
+       2. 长卷左下角图层按钮：静态半透明 + 根据屏幕自动选择横排/竖排且绝不与底部 Tab 栏遮挡
+       ========================================================================= */
+
+    /* 1. 隐藏外层冗余 .app-header，人物页与事件页顶部只保留紧凑单行工具栏，释放最大阅读面积 */
+    .app-header { display: none !important; }
+
+    .compact-header-bar {
+      position: relative;
+      z-index: 75;
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 8px !important;
+      padding: calc(6px + env(safe-area-inset-top, 0px)) 4px 8px !important;
+      margin-bottom: 2px;
+      border-bottom: 1px solid rgba(197, 182, 152, 0.38);
+    }
+
+    /* 内嵌轻量品牌标识 */
+    .inline-brand {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex: 0 0 auto;
+    }
+    .inline-brand .seal {
+      width: 26px;
+      height: 26px;
+      font-size: 15px;
+      border-radius: 6px;
+      background: linear-gradient(145deg, #C8382E 0%, #96221A 100%);
+      box-shadow: 0 2px 5px rgba(184, 51, 42, 0.25);
+    }
+    .inline-brand .ib-title {
+      font-family: 'Noto Serif SC', 'Songti SC', serif;
+      font-size: clamp(14px, 1.45vw, 16.5px);
+      font-weight: 900;
+      color: var(--ink-black);
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    @media (max-width: 520px) {
+      .inline-brand .ib-title { display: none; }
+    }
+
+    /* 中部下拉筛选组 */
+    .compact-filters {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    /* 动画下拉选择窗口（支持人物分类、朝代选择、事件类别） */
+    .anim-dropdown {
+      position: relative;
+      flex: 0 0 auto;
+    }
+    .anim-dd-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 11px 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(197, 182, 152, 0.65);
+      background: rgba(252, 249, 242, 0.78);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      color: var(--ink-black);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(30, 24, 16, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.14s ease, box-shadow 0.2s ease;
+    }
+    .anim-dd-trigger:active { transform: scale(0.96); }
+    .anim-dropdown.open .anim-dd-trigger {
+      border-color: var(--cinnabar);
+      background: #FFFDF9;
+      box-shadow: 0 0 0 2px rgba(184, 51, 42, 0.14), 0 4px 12px rgba(30, 24, 16, 0.08);
+    }
+    .dd-chev {
+      color: #8A7A64;
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+    }
+    .anim-dropdown.open .dd-chev {
+      transform: rotate(180deg);
+      color: var(--cinnabar);
+    }
+
+    /* 类别圆点色彩标识 */
+    .dd-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--cinnabar);
+      flex: 0 0 auto;
+    }
+    .dd-dot[data-kind="rulers"], .dd-dot[data-cat="政治变革"] { background: #B8332A; }
+    .dd-dot[data-kind="figures"], .dd-dot[data-cat="军事风云"] { background: #3C6E8F; }
+    .dd-dot[data-kind="literati"] { background: #7A5AA8; }
+    .dd-dot[data-cat="文明盛世"] { background: #C09020; }
+    .dd-dot[data-cat="对外开拓"] { background: #2E6E5E; }
+    .dd-dot[data-cat="all"] { background: #7A6852; }
+
+    /* 下拉弹出菜单：带 iOS 弹簧缩放 + 透明度过渡动画 */
+    .anim-dd-menu {
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 0;
+      z-index: 140;
+      min-width: 218px;
+      padding: 6px;
+      border-radius: 16px;
+      background: rgba(252, 249, 242, 0.94);
+      -webkit-backdrop-filter: blur(20px) saturate(1.6);
+      backdrop-filter: blur(20px) saturate(1.6);
+      border: 1px solid rgba(205, 190, 164, 0.78);
+      box-shadow:
+        0 16px 42px rgba(28, 22, 14, 0.22),
+        0 2px 8px rgba(28, 22, 14, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-8px) scale(0.92);
+      transform-origin: 24px top;
+      transition:
+        opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1),
+        visibility 0s linear 0.28s;
+    }
+    .anim-dropdown.open .anim-dd-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      transition:
+        opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1),
+        visibility 0s;
+    }
+
+    /* 朝代双列网格下拉菜单 */
+    .anim-dd-menu.dyn-menu {
+      min-width: 268px;
+      max-height: min(62dvh, 360px);
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .anim-dd-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--ink-black);
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.16s ease, transform 0.12s ease;
+    }
+    .anim-dd-item:hover { background: rgba(184, 152, 98, 0.12); }
+    .anim-dd-item:active { transform: scale(0.98); background: rgba(184, 152, 98, 0.2); }
+    .anim-dd-item.active {
+      background: rgba(184, 51, 42, 0.10);
+      color: var(--cinnabar);
+    }
+    .dd-item-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .dd-item-text b {
+      font-size: 13.5px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .dd-item-text small {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: #8A7A64;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dd-check {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--cinnabar);
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .anim-dd-item.active .dd-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* 缩小版紧凑搜索框（默认小巧省空间，点击聚焦时平滑微展） */
+    .compact-search {
+      flex: 0 1 175px !important;
+      width: clamp(118px, 22vw, 195px);
+      height: 32px !important;
+      padding: 0 9px !important;
+      border-radius: 999px !important;
+      background: rgba(238, 230, 214, 0.65) !important;
+      border: 1px solid rgba(197, 182, 152, 0.55) !important;
+      transition: width 0.26s var(--ios-ease), flex-basis 0.26s var(--ios-ease), background 0.2s ease, border-color 0.2s ease !important;
+    }
+    .compact-search:focus-within {
+      flex-basis: 230px !important;
+      width: clamp(148px, 30vw, 240px);
+      background: #FFFDF9 !important;
+      border-color: var(--cinnabar) !important;
+      box-shadow: 0 0 0 2px rgba(184, 51, 42, 0.12);
+    }
+    .compact-search .s-svg {
+      flex: 0 0 auto;
+      color: #8E7F6B;
+    }
+    .compact-search input {
+      font-size: 12.5px !important;
+    }
+    .events-count {
+      font-size: 11.5px !important;
+      color: #8A7A64 !important;
+      white-space: nowrap;
+    }
+    @media (max-width: 480px) {
+      .events-count { display: none; }
+      .compact-search { flex: 1 1 105px !important; width: auto; }
+    }
+
+    /* =========================================================================
+       3. 长卷左下方图层按钮区域（.app-controls）：
+          - 静态半透明（无动态闪烁位移，静止温润通透）
+          - 智能防碰撞自适应横排/竖排：
+            * 宽屏（>= 880px）：左下角空间充足（左侧距居中 Tab 栏超过 280px），自动采用精巧横排，与底部 Tab 栏处于同一水平线但互不触碰；
+            * 中小屏或竖屏（< 880px）：若横排会与居中的 Tab 栏碰撞，自动切换为紧凑竖排贴左边缘，且底边精确避开 Tab 栏，绝不遮挡。
+       ========================================================================= */
+    .app-controls {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+      z-index: 82 !important;
+      padding: 4px 6px !important;
+      border-radius: 18px !important;
+      background: rgba(246, 240, 228, 0.42) !important;
+      -webkit-backdrop-filter: blur(8px) saturate(1.35) !important;
+      backdrop-filter: blur(8px) saturate(1.35) !important;
+      border: 1px solid rgba(255, 255, 255, 0.45) !important;
+      box-shadow: 0 4px 16px rgba(30, 24, 16, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+      transition: none !important; /* 保持静态半透明稳定感 */
+    }
+    .app-controls .layer-count { display: none !important; }
+
+    /* 紧凑化每个开关胶囊，减少占地面积 */
+    .app-controls .layer-switch {
+      gap: 5px !important;
+      padding: 3px 8px 3px 4px !important;
+      font-size: 12px !important;
+      color: rgba(44, 36, 28, 0.76) !important;
+      transition: background 0.18s ease, color 0.18s ease !important;
+    }
+    .app-controls .layer-switch:active { transform: none !important; }
+    .app-controls .layer-switch .switch {
+      width: 30px !important;
+      height: 18px !important;
+    }
+    .app-controls .layer-switch .knob {
+      width: 14px !important;
+      height: 14px !important;
+      top: 2px !important;
+      left: 2px !important;
+      transition: transform 0.2s ease !important;
+    }
+    .app-controls .layer-switch.on .switch .knob {
+      transform: translateX(12px) !important;
+    }
+    .app-controls .layer-switch .full { display: none !important; }
+    .app-controls .layer-switch .short { display: inline !important; }
+
+    /* 宽屏（如 iPad 横屏 / 桌面 >= 880px）：左侧净空 > 290px，自动采用横排，与居中 Tab 栏同高并列且零遮挡 */
+    @media (min-width: 880px) {
+      .app-controls,
+      .app-controls .controls-row,
+      .app-controls .layer-switches {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 3px !important;
+      }
+      .app-controls {
+        border-radius: 999px !important;
+        padding: 4px 7px !important;
+      }
+    }
+
+    /* 中小屏或竖屏（< 880px）：自动切换为紧凑竖排，若屏幕过窄（< 540px）则自动上移至 Tab 栏左上方，彻底杜绝遮挡 */
+    @media (max-width: 879px) {
+      .app-controls,
+      .app-controls .controls-row,
+      .app-controls .layer-switches {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 2px !important;
+      }
+    }
+    @media (max-width: 540px) {
+      .app-controls {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 72px) !important;
+      }
+    }
+
+  
+    /* =========================================================================
+       V6 终极进化：
+       1. 全面对标 Apple iOS 26 / visionOS 液态玻璃（Liquid Glass）悬浮导航栏与控件
+       2. 长卷时间轴 Apple Watch Crown 级立体放大光晕、刻度尺阶梯脉冲与竹简 3D 托举
+       3. 全站 Apple 弹簧物理动效（Spring Curve）与触控按压微缩反馈
+       ========================================================================= */
+
+    :root {
+      --apple-spring: cubic-bezier(0.22, 1.32, 0.36, 1);
+      --apple-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+      --apple-press: cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    /* -------------------------------------------------------------------------
+       4. 下方悬浮 Tab 栏：全面对标苹果 iOS 26 液态玻璃（Liquid Glass）光学材质
+          - 多层高光折射（顶部斜向镜面高光 + 底部次表面散射 + 动态跟随光斑）
+          - 内部水滴滑块（.tab-glider）带弹簧位移与水滴拉伸形变（glider-morph）
+          - 超高通透度 + 180% 色彩饱和增艳，下方文字与宣纸肌理如透过水晶般清晰折射
+       ------------------------------------------------------------------------- */
+    .bottom-tabs.liquid-glass-bar {
+      --lg-x: 50%;
+      --lg-y: 20%;
+      position: fixed !important;
+      left: 50% !important;
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+      transform: translate3d(-50%, 0, 0) !important;
+      z-index: 95 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      padding: 5px 6px !important;
+      border-radius: 999px !important;
+      /* 液态玻璃多层光学叠加底色 */
+      background:
+        radial-gradient(120px 60px at var(--lg-x) var(--lg-y), rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 70%),
+        linear-gradient(165deg, rgba(255, 255, 255, 0.38) 0%, rgba(250, 245, 235, 0.16) 48%, rgba(242, 234, 218, 0.28) 100%) !important;
+      -webkit-backdrop-filter: blur(14px) saturate(190%) brightness(1.04) !important;
+      backdrop-filter: blur(14px) saturate(190%) brightness(1.04) !important;
+      /* 双重镜面折射边缘：外层微暗轮廓 + 顶部强高光内描边 + 底部柔光反射 */
+      border: 1px solid rgba(255, 255, 255, 0.62) !important;
+      box-shadow:
+        0 14px 36px -6px rgba(28, 22, 14, 0.18),
+        0 4px 12px rgba(28, 22, 14, 0.08),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.88),
+        inset 0 -1.5px 2px rgba(184, 152, 102, 0.18),
+        inset 1px 0 1px rgba(255, 255, 255, 0.5),
+        inset -1px 0 1px rgba(255, 255, 255, 0.5) !important;
+      overflow: hidden;
+      transition: transform 0.32s var(--apple-spring), box-shadow 0.32s ease !important;
+    }
+
+    /* 整个液态玻璃胶囊在手指按下时产生苹果原生微张力呼吸 */
+    .bottom-tabs.liquid-glass-bar:active {
+      transform: translate3d(-50%, 0, 0) scale(0.985) !important;
+    }
+
+    /* 顶部弧形液态镜面反光带 */
+    .liquid-glass-shine {
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      top: 1px;
+      height: 42%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.04) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 液态水滴滑动指示器（跟随激活 Tab 平滑弹性流动） */
+    .bottom-tabs .tab-glider {
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 0;
+      z-index: 1;
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 249, 240, 0.42) 55%, rgba(255, 244, 230, 0.62) 100%);
+      box-shadow:
+        0 4px 14px rgba(184, 51, 42, 0.14),
+        0 1px 3px rgba(30, 24, 16, 0.08),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.95),
+        inset 0 -1px 1.5px rgba(184, 51, 42, 0.12),
+        0 0 0 0.5px rgba(255, 255, 255, 0.75);
+      pointer-events: none;
+      will-change: transform, width;
+      transition:
+        transform 0.48s cubic-bezier(0.22, 1.28, 0.36, 1),
+        width 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes liquidDropletMorph {
+      0%   { transform: var(--glider-tx, translate3d(0,0,0)) scaleX(1) scaleY(1); }
+      38%  { filter: brightness(1.06); }
+      100% { transform: var(--glider-tx, translate3d(0,0,0)) scaleX(1) scaleY(1); }
+    }
+    .bottom-tabs .tab-glider.glider-morph {
+      animation: liquidDropletMorph 0.46s var(--apple-spring);
+    }
+
+    .bottom-tabs .view-tab {
+      position: relative !important;
+      z-index: 2 !important;
+      min-width: 68px !important;
+      padding: 5px 15px 4px !important;
+      border-radius: 999px !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: rgba(38, 31, 23, 0.74) !important;
+      font-weight: 700 !important;
+      transition: color 0.25s ease, transform 0.24s var(--apple-spring) !important;
+    }
+    .bottom-tabs .view-tab svg {
+      transition: transform 0.36s var(--apple-spring), filter 0.28s ease !important;
+    }
+    .bottom-tabs .view-tab:active {
+      transform: scale(0.88) !important;
+    }
+    .bottom-tabs .view-tab.active {
+      color: var(--cinnabar) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .bottom-tabs .view-tab.active svg {
+      transform: translateY(-1px) scale(1.12) !important;
+      filter: drop-shadow(0 2px 5px rgba(184, 51, 42, 0.28));
+    }
+
+    /* -------------------------------------------------------------------------
+       2. 长卷时间轴放大显示效果升级（立体悬浮胶囊 + 中央激光聚光晕 + 竹简托举高亮）
+       ------------------------------------------------------------------------- */
+    #ticks-layer, #lens-layer {
+      height: calc(40px * var(--v)) !important;
+    }
+    .tick-label {
+      padding: calc(2px * var(--v)) calc(5px * var(--v)) !important;
+      border-radius: 999px !important;
+      transition: color 0.16s ease, background-color 0.18s ease, box-shadow 0.18s ease !important;
+    }
+
+    /* 中央红线放大峰值态：彻底去除红底框与边框，纯数字加大加粗，干净利落融入宣纸 */
+    .tick .tick-label,
+    .minor-year .tick-label {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 calc(2px * var(--v)) !important;
+    }
+    .tick.hot .tick-label,
+    .minor-year.hot .tick-label {
+      color: var(--cinnabar) !important;
+      font-weight: 900 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      /* 宣纸微光衬底字影：既不产生任何框感，又让加大加粗的数字在经过中央红线时清晰挺拔 */
+      text-shadow:
+        0 1px 0 rgba(255, 252, 245, 0.96),
+        0 0 10px rgba(250, 245, 235, 0.92),
+        0 2px 6px rgba(184, 51, 42, 0.18) !important;
+    }
+    .tick.hot .tick-label .yr-era,
+    .minor-year.hot .tick-label .yr-era {
+      color: var(--cinnabar) !important;
+      font-weight: 900 !important;
+    }
+    .tick.hot .tick-label .yr-num,
+    .minor-year.hot .tick-label .yr-num {
+      font-weight: 900 !important;
+      letter-spacing: -0.01em !important;
+    }
+    .tick.hot .tick-mark,
+    .minor-year.hot .tick-mark {
+      background: linear-gradient(180deg, #C8382E 0%, rgba(184, 51, 42, 0.2) 100%) !important;
+      width: 2px !important;
+      box-shadow: 0 0 6px rgba(184, 51, 42, 0.45);
+    }
+
+    /* 中央天头罗盘刻度跳动微脉冲（模拟 Apple Watch 数码表冠齿轮感） */
+    @keyframes compassCrownPulse {
+      0%   { transform: translateX(-50%) scale(1); }
+      45%  { transform: translateX(-50%) scale(1.055); border-color: rgba(184, 51, 42, 0.58); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+    .scroll-center-compass.compass-tick-pulse {
+      animation: compassCrownPulse 0.24s var(--apple-spring);
+    }
+
+    /* 中央红线激光呼吸光晕 */
+    .center-indicator::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 50%;
+      width: 28px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg,
+        rgba(184, 51, 42, 0) 0%,
+        rgba(184, 51, 42, 0.055) 50%,
+        rgba(184, 51, 42, 0) 100%);
+      pointer-events: none;
+    }
+
+    /* 经过中央红线被 Dock 放大托举的竹简与人物竖卡：自动泛起温润高光描边与加深投影 */
+    .vertical-bamboo-slip.dock-focus,
+    .axis-person-card.dock-focus {
+      border-color: var(--cinnabar) !important;
+      box-shadow:
+        0 8px 20px rgba(184, 51, 42, 0.22),
+        0 2px 6px rgba(30, 24, 16, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+    }
+
+    /* -------------------------------------------------------------------------
+       1 & 3. 全站 Apple 级弹簧交互动效（朝代块、竹简、人物卡片、事件列表、顶部胶囊）
+       ------------------------------------------------------------------------- */
+    /* 顶部左题签、中罗盘、右工具舱、左下角图层舱同步升级为液态玻璃光泽 */
+    .scroll-float-brand,
+    .scroll-center-compass,
+    .zoom-capsule,
+    .scroll-float-search,
+    .app-controls,
+    .anim-dd-trigger {
+      background:
+        linear-gradient(165deg, rgba(255, 255, 255, 0.44) 0%, rgba(250, 245, 235, 0.22) 55%, rgba(242, 234, 218, 0.34) 100%) !important;
+      -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+      backdrop-filter: blur(12px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.62) !important;
+      box-shadow:
+        0 8px 24px -4px rgba(28, 22, 14, 0.10),
+        inset 0 1.2px 0.8px rgba(255, 255, 255, 0.85),
+        inset 0 -1px 1px rgba(184, 152, 102, 0.14) !important;
+    }
+
+    /* 朝代块与政权块：苹果级按压回弹与悬停浮起 */
+    .macro-dynasty-block,
+    .sub-regime-block {
+      transition:
+        transform 0.32s var(--apple-spring),
+        box-shadow 0.28s var(--apple-smooth),
+        filter 0.24s ease !important;
+    }
+    .macro-dynasty-block:active,
+    .sub-regime-block:active {
+      transform: scale(0.95) !important;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .macro-dynasty-block:hover {
+        transform: translateY(-2px) scale(1.015) !important;
+        box-shadow: 0 8px 20px rgba(30, 24, 16, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+        z-index: 20;
+      }
+      .sub-regime-block:hover {
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 6px 14px rgba(24, 20, 14, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+        z-index: 28;
+      }
+    }
+
+    /* 人物页卡片、帝王行、事件年表行：iOS 列表级轻盈按压与悬停微浮起 */
+    .fig-card,
+    .emp-row,
+    .ev-row {
+      transition:
+        transform 0.28s var(--apple-spring),
+        background-color 0.2s ease,
+        box-shadow 0.26s var(--apple-smooth),
+        border-color 0.22s ease !important;
+    }
+    .fig-card:active,
+    .ev-row:active {
+      transform: scale(0.982) !important;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .fig-card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 10px 24px rgba(30, 24, 16, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+      }
+    }
+
+    /* 视图切换过场：iOS 原生弹簧入场 */
+    .view.active {
+      animation: appleViewEnter 0.42s var(--apple-smooth) !important;
+    }
+    @keyframes appleViewEnter {
+      from { opacity: 0; transform: scale(0.985) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* 详情抽屉弹窗：同样融合液态玻璃边缘高光与弹簧升起曲线 */
+    .detail-sheet {
+      transition:
+        transform 0.52s cubic-bezier(0.22, 1.15, 0.36, 1),
+        opacity 0.28s ease,
+        visibility 0s linear 0.52s !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.78) !important;
+      box-shadow:
+        0 -20px 54px rgba(24, 20, 16, 0.26),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.9) !important;
+    }
+
+  
+    /* =========================================================================
+       V8 交互与动效精修：
+       1. 修复底部 Tab 栏点击误触与回弹卡壳（移除冲突的关键帧覆盖与容器缩放，采用临界阻尼丝滑过渡）
+       2. 默认隐藏第二层/第三层政权轴，光标落到对应第一层主流朝代时以「下拉展开」动效自然弹出重叠支系
+       3. 竖向时间光标落到第一层大朝代块时产生温润统一的悬浮抬升效果
+       ========================================================================= */
+
+    /* --- 1. 底部 Tab 栏防误触与丝滑无卡壳过渡 --- */
+    .bottom-tabs.liquid-glass-bar {
+      touch-action: manipulation !important;
+      user-select: none !important;
+      /* 去除 :active 整体缩放，防止手指抬起瞬间坐标偏移造成误触或闪烁 */
+      transition: box-shadow 0.28s ease !important;
+    }
+    .bottom-tabs.liquid-glass-bar:active {
+      transform: translate3d(-50%, 0, 0) !important;
+    }
+
+    /* 移除原先与 transform 冲突导致回弹卡壳的 animation，改用纯硬件加速临界阻尼曲线 */
+    .bottom-tabs .tab-glider,
+    .bottom-tabs .tab-glider.glider-morph {
+      animation: none !important;
+      will-change: transform, width;
+      transition:
+        transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.34s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+
+    /* 扩大每个 Tab 按钮的有效热区，消除按钮之间的死角缝隙，杜绝点不中或点偏 */
+    .bottom-tabs.liquid-glass-bar {
+      gap: 0 !important;
+      padding: 4px 5px !important;
+    }
+    .bottom-tabs .view-tab {
+      min-width: 72px !important;
+      min-height: 44px !important;
+      padding: 5px 16px 4px !important;
+      margin: 0 !important;
+      touch-action: manipulation !important;
+      /* 仅保留极轻微柔和的色彩与图标过渡，不缩放按钮盒子本身，彻底告别回弹卡顿 */
+      transition: color 0.2s ease !important;
+    }
+    .bottom-tabs .view-tab:active {
+      transform: none !important;
+    }
+    .bottom-tabs .view-tab svg {
+      pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease !important;
+    }
+    .bottom-tabs .view-tab span {
+      pointer-events: none;
+    }
+    .bottom-tabs .view-tab:active svg {
+      transform: scale(0.92) !important;
+    }
+    .bottom-tabs .view-tab.active svg {
+      transform: translateY(-1px) scale(1.08) !important;
+    }
+
+    /* --- 3. 竖向时间光标落到第一层大朝代块时的统一悬浮效果 --- */
+    .macro-dynasty-block {
+      transform-origin: center bottom;
+      will-change: transform, box-shadow, filter;
+      transition:
+        transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.3s ease !important;
+    }
+    .macro-dynasty-block.cursor-hover-macro {
+      transform: translate3d(0, -4px, 0) scale(1.018) !important;
+      z-index: 18 !important;
+      filter: brightness(1.03) saturate(1.08);
+      box-shadow:
+        0 10px 24px -4px rgba(184, 51, 42, 0.22),
+        0 4px 10px rgba(30, 24, 16, 0.10),
+        0 0 0 1.5px rgba(184, 51, 42, 0.45),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.92) !important;
+    }
+    .macro-dynasty-block.active-dynasty.cursor-hover-macro {
+      box-shadow:
+        0 12px 26px -4px rgba(184, 51, 42, 0.28),
+        0 0 0 2px var(--cinnabar),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95) !important;
+    }
+
+    /* --- 2. 第二层与第三层细分政权：默认隐藏，随第一层主流朝代往下拉动效弹出 --- */
+    .sub-regime-block {
+      transform-origin: center top !important;
+      will-change: transform, opacity, filter;
+      transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.3s ease,
+        filter 0.28s ease !important;
+    }
+
+    /* 隐藏态：向上收拢回第一层朝代块底部背侧，透明且不响应误触 */
+    .sub-regime-block.sub-pulldown-hide {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translate3d(0, -28px, 0) scaleY(0.45) scaleX(0.96) !important;
+      filter: blur(2px);
+    }
+
+    /* 下拉弹出态：从第一层主流朝代下方柔顺下拉展开，第1轨、第2轨、第3轨带微妙的阶梯瀑布层次 */
+    .sub-regime-block.sub-pulldown-show {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translate3d(0, 0, 0) scaleY(1) scaleX(1) !important;
+      filter: blur(0);
+    }
+    .sub-regime-block.sub-cursor-linked {
+      box-shadow:
+        0 5px 14px rgba(24, 20, 14, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+    }
+
+    /* 左下角「联动支系」开关开启态采用温润琥珀金古铜色调，与事件/人物开关自然区分 */
+    #toggle-smart-subs.on .switch {
+      background: #B85D2A !important;
+    }
+
+  
+    /* =========================================================================
+       V9 四大核心交互升级：
+       1. 第一层主流朝代悬浮时彻底去除红色外框，加入温润有机的呼吸律动（macroFloatBreathe）
+       2. 支系独立三档滑动式开关（a.触碰弹出 / b.常驻展开 / c.关闭隐藏）
+       3. 左下角图层面板全面升级为 iOS 液态玻璃滑动式分段开关（支持点按与手指滑动连选）
+       4. 上方朝代轴与下方人物/事件时间轴动态向屏幕中央靠拢，彻底消除中间大面积空当
+       ========================================================================= */
+
+    /* --- 1. 去除第一层朝代块悬浮/选中时的红色外框，赋予温润呼吸感 --- */
+    @keyframes macroFloatBreathe {
+      0%, 100% {
+        transform: translate3d(0, -4px, 0) scale(1.018);
+        box-shadow:
+          0 10px 24px -4px rgba(42, 32, 20, 0.16),
+          0 3px 8px rgba(30, 24, 16, 0.08),
+          inset 0 1.5px 1px rgba(255, 255, 255, 0.92);
+        filter: brightness(1.02) saturate(1.06);
+      }
+      50% {
+        transform: translate3d(0, -6.5px, 0) scale(1.028);
+        box-shadow:
+          0 16px 32px -4px rgba(42, 32, 20, 0.22),
+          0 6px 14px rgba(30, 24, 16, 0.11),
+          inset 0 2px 2px rgba(255, 255, 255, 0.98);
+        filter: brightness(1.05) saturate(1.12);
+      }
+    }
+
+    .macro-dynasty-block.active-dynasty,
+    .macro-dynasty-block.cursor-hover-macro,
+    .macro-dynasty-block.active-dynasty.cursor-hover-macro {
+      /* 彻底去除红色外框（0 0 0 2px var(--cinnabar)），保留原朝代雅致细边框与立体悬浮呼吸阴影 */
+      box-shadow:
+        0 12px 26px -4px rgba(42, 32, 20, 0.18),
+        0 4px 10px rgba(30, 24, 16, 0.09),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.94) !important;
+    }
+
+    .macro-dynasty-block.cursor-hover-macro {
+      animation: macroFloatBreathe 2.8s ease-in-out infinite !important;
+      z-index: 18 !important;
+    }
+
+    /* --- 4. 上方朝代轴与下方人物/事件时间轴动态向屏幕中央靠拢，消除中间空当 --- */
+    #ticks-layer,
+    #lens-layer,
+    #macro-dynasty-layer,
+    #sub-regime-layer {
+      transform: translate3d(0, var(--upper-shift-y, 0px), 0);
+      transition: transform 0.46s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    #events-axis-line,
+    #events-layer {
+      transform: translate3d(0, var(--lower-shift-y, 0px), 0);
+      transition: transform 0.46s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      will-change: transform, opacity;
+    }
+
+    /* --- 2 & 3. 左下角双轨液态玻璃滑动式开关（支系三档 + 图层五档） --- */
+    .app-controls.sliding-controls-dock {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+      z-index: 86 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 6px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      pointer-events: none;
+    }
+
+    .slide-switch-pod {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3.5px 5px;
+      border-radius: 999px;
+      background:
+        linear-gradient(165deg, rgba(255, 255, 255, 0.46) 0%, rgba(250, 245, 235, 0.22) 52%, rgba(242, 234, 218, 0.34) 100%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.64);
+      box-shadow:
+        0 8px 22px -4px rgba(28, 22, 14, 0.12),
+        inset 0 1.2px 0.8px rgba(255, 255, 255, 0.88),
+        inset 0 -1px 1px rgba(184, 152, 102, 0.15);
+      user-select: none;
+      touch-action: none;
+    }
+
+    .pod-caption {
+      padding-left: 7px;
+      padding-right: 2px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(68, 56, 42, 0.72);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .slide-track {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 1px;
+    }
+
+    /* 滑动胶囊指示器 */
+    .slide-pill {
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      left: 0;
+      z-index: 1;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 250, 242, 0.76) 100%);
+      box-shadow:
+        0 2px 8px rgba(30, 24, 16, 0.14),
+        inset 0 1px 0.5px rgba(255, 255, 255, 0.98),
+        0 0 0 0.5px rgba(184, 152, 102, 0.25);
+      pointer-events: none;
+      will-change: transform, width;
+      transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.25s ease;
+    }
+
+    /* 支系三档滑块主题色点缀 */
+    #sub-mode-pill[data-mode="auto"] {
+      box-shadow: 0 2px 8px rgba(184, 93, 42, 0.20), inset 0 1px 0.5px #FFF, 0 0 0 1px rgba(184, 93, 42, 0.28);
+    }
+    #sub-mode-pill[data-mode="always"] {
+      box-shadow: 0 2px 8px rgba(46, 110, 94, 0.20), inset 0 1px 0.5px #FFF, 0 0 0 1px rgba(46, 110, 94, 0.28);
+    }
+
+    .slide-opt {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 26px;
+      padding: 0 10px;
+      border: none;
+      border-radius: 999px;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: rgba(52, 43, 33, 0.72);
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s ease;
+    }
+    .slide-opt.active {
+      color: #1E1B18 !important;
+      font-weight: 900 !important;
+    }
+    #sub-mode-track .slide-opt[data-submode="auto"].active { color: #A84319 !important; }
+    #sub-mode-track .slide-opt[data-submode="always"].active { color: #246353 !important; }
+    #sub-mode-track .slide-opt[data-submode="off"].active { color: #6E6254 !important; }
+
+    /* 图层圆点指示 */
+    .opt-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      opacity: 0.65;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+    .slide-opt.active .opt-dot {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    .opt-dot[data-c="events"]   { background: #B8332A; }
+    .opt-dot[data-c="figures"]  { background: #3C6E8F; }
+    .opt-dot[data-c="literati"] { background: #7A5AA8; }
+    .opt-dot[data-c="eras"]     { background: #C09020; }
+
+    /* 手机竖屏或窄屏（< 860px）：左下角滑动开关组自动抬高至主导航 Tab 栏左上方，绝不与居中 Tab 栏碰撞重叠 */
+    @media (max-width: 860px) {
+      .app-controls.sliding-controls-dock {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 68px) !important;
+        gap: 5px !important;
+      }
+      .slide-opt {
+        height: 24px;
+        padding: 0 8.5px;
+        font-size: 11px;
+      }
+    }
+
+  
+    /* =========================================================================
+       V10 四项核心体验精修：
+       1. 第一/二/三层朝代与政权块文字、时间全比例尺始终保持在屏幕可见区正中间，移出屏幕时自然随边缘滑出
+       2. 彻底去除顶部时间轴的横线与竖向刻度短线，只保留纯粹的数字，放大时绝不侵入下方朝代图
+       3. 第一层朝代在光标接近/停留期间持续保持轻盈Q弹的微弹跳呼吸动效（macroBounceBreathe），直至光标离开
+       4. 左下角控制器重构为「一体化晶透双轨控制台（含一键收折圆钮）」，层次分明、紧凑优雅
+       ========================================================================= */
+
+    /* --- 1. 确保第一/二/三层朝代文字与时间位移时硬件加速且不换行 --- */
+    .macro-name,
+    .macro-period,
+    .sub-name,
+    .sub-period {
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    /* --- 2. 彻底去除顶部时间轴的底栏横线与每个年份下方的刻度线，只保留纯数字 --- */
+    #ticks-layer::after {
+      display: none !important;
+      content: none !important;
+    }
+    .tick-mark,
+    .minor-year .tick-mark,
+    .tick.hot .tick-mark,
+    .minor-year.hot .tick-mark {
+      display: none !important;
+      height: 0 !important;
+      margin: 0 !important;
+      opacity: 0 !important;
+    }
+    /* 纯数字略微上提 4px，放大 2.68x 时向下留出充裕净空，绝不侵入第一层朝代图 */
+    .tick, .minor-year {
+      bottom: calc(8px * var(--v)) !important;
+      transform-origin: 50% 65% !important;
+    }
+    .tick-label {
+      transform-origin: 50% 65% !important;
+    }
+
+    /* --- 3. 第一层朝代在光标停留期间持续保持轻微弹跳呼吸感（直至光标离开该朝代） --- */
+    @keyframes macroElasticBreathe {
+      0%, 100% {
+        transform: translate3d(0, -4px, 0) scale(1.02);
+        box-shadow:
+          0 10px 24px -4px rgba(42, 32, 20, 0.18),
+          0 4px 10px rgba(30, 24, 16, 0.09),
+          inset 0 1.5px 1px rgba(255, 255, 255, 0.94);
+      }
+      35% {
+        transform: translate3d(0, -9.5px, 0) scale(1.042, 1.055);
+        box-shadow:
+          0 22px 42px -4px rgba(184, 51, 42, 0.28),
+          0 8px 18px rgba(30, 24, 16, 0.14),
+          inset 0 2.5px 2px rgba(255, 255, 255, 1);
+      }
+      70% {
+        transform: translate3d(0, -5px, 0) scale(1.025, 1.02);
+      }
+    }
+
+    .macro-dynasty-block.cursor-hover-macro {
+      animation: macroElasticBreathe 1.45s cubic-bezier(0.34, 1.56, 0.64, 1) infinite !important;
+      z-index: 19 !important;
+    }
+
+    /* --- 4. 左下角全新「一体化晶透双轨控制台」设计 --- */
+    .app-controls.unified-glass-console {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+      z-index: 88 !important;
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: flex-end !important;
+      gap: 8px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      pointer-events: none;
+    }
+
+    /* 左下角独立小圆钮：轻点可一键收起/展开右侧控制面板 */
+    .console-fab {
+      pointer-events: auto;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.68);
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.56) 0%, rgba(246, 239, 225, 0.36) 100%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      backdrop-filter: blur(14px) saturate(180%);
+      box-shadow:
+        0 6px 18px rgba(28, 22, 14, 0.14),
+        inset 0 1.2px 0.8px rgba(255, 255, 255, 0.9);
+      color: #5C4D3C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease, background 0.2s ease;
+    }
+    .console-fab:active {
+      transform: scale(0.9);
+    }
+    .unified-glass-console:not(.is-collapsed) .console-fab {
+      color: var(--cinnabar);
+    }
+
+    /* 一体化双轨圆角面板主体 */
+    .console-body {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 7px 9px;
+      border-radius: 16px;
+      background:
+        linear-gradient(165deg, rgba(255, 253, 248, 0.58) 0%, rgba(247, 240, 226, 0.38) 55%, rgba(240, 231, 214, 0.48) 100%);
+      -webkit-backdrop-filter: blur(16px) saturate(185%);
+      backdrop-filter: blur(16px) saturate(185%);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow:
+        0 12px 30px -6px rgba(28, 22, 14, 0.16),
+        0 3px 8px rgba(28, 22, 14, 0.06),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.92);
+      transform-origin: left bottom;
+      transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.26s ease,
+        visibility 0.26s;
+    }
+
+    .unified-glass-console.is-collapsed .console-body {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate3d(-10px, 6px, 0) scale(0.86);
+    }
+
+    .console-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .console-tag {
+      width: 48px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(72, 58, 42, 0.78);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .console-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(168, 146, 114, 0.08), rgba(168, 146, 114, 0.28) 25%, rgba(168, 146, 114, 0.28) 75%, rgba(168, 146, 114, 0.08));
+    }
+
+    /* 内嵌滑动凹槽轨道 */
+    .console-track {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px;
+      border-radius: 10px;
+      background: rgba(142, 126, 102, 0.13);
+      box-shadow: inset 0 1px 2px rgba(30, 24, 16, 0.08);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .console-track .slide-pill {
+      top: 2px;
+      bottom: 2px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FDF9F1 100%);
+      box-shadow:
+        0 2px 6px rgba(30, 24, 16, 0.14),
+        0 0 0 0.5px rgba(184, 152, 102, 0.28);
+    }
+
+    /* 下轴图层选中时滑块呈现对应高雅淡彩光晕 */
+    #axis-layer-pill[data-theme="events"]   { box-shadow: 0 2px 7px rgba(184, 51, 42, 0.22), 0 0 0 1px rgba(184, 51, 42, 0.25); }
+    #axis-layer-pill[data-theme="figures"]  { box-shadow: 0 2px 7px rgba(60, 110, 143, 0.22), 0 0 0 1px rgba(60, 110, 143, 0.25); }
+    #axis-layer-pill[data-theme="literati"] { box-shadow: 0 2px 7px rgba(122, 90, 168, 0.22), 0 0 0 1px rgba(122, 90, 168, 0.25); }
+    #axis-layer-pill[data-theme="eras"]     { box-shadow: 0 2px 7px rgba(192, 144, 32, 0.24), 0 0 0 1px rgba(192, 144, 32, 0.28); }
+
+    .console-track .slide-opt {
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: rgba(58, 48, 36, 0.72);
+    }
+
+    #axis-layer-track .slide-opt[data-layer="events"].active   { color: #B8332A !important; }
+    #axis-layer-track .slide-opt[data-layer="figures"].active  { color: #2D5B7A !important; }
+    #axis-layer-track .slide-opt[data-layer="literati"].active { color: #644490 !important; }
+    #axis-layer-track .slide-opt[data-layer="eras"].active     { color: #9E6E10 !important; }
+    #axis-layer-track .slide-opt[data-layer="off"].active      { color: #6E6254 !important; }
+
+    /* 窄屏与手机竖屏自适应避让底部主导航栏 */
+    @media (max-width: 900px) {
+      .app-controls.unified-glass-console {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 68px) !important;
+      }
+    }
+
+  
+    /* =========================================================================
+       V11 东方雅集极简悬浮控制浮岛（Zen Floating Dock）CSS：
+       - 精致半透明晶透双轨滑块卡片，带侧边精致的收折/展开圆钮
+       - 完美适配各尺寸屏幕，绝不喧宾夺主
+       ========================================================================= */
+    .app-controls.zen-floating-dock {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 12px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+      z-index: 88 !important;
+      display: inline-flex !important;
+      flex-direction: row-reverse !important;
+      align-items: flex-end !important;
+      gap: 6px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      pointer-events: none;
+    }
+
+    .zen-fab {
+      pointer-events: auto;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      background: rgba(251, 247, 238, 0.82);
+      -webkit-backdrop-filter: blur(14px) saturate(170%);
+      backdrop-filter: blur(14px) saturate(170%);
+      box-shadow: 0 4px 14px rgba(28, 22, 14, 0.12);
+      color: #6B5B48;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, color 0.2s ease;
+    }
+    .zen-fab:active { transform: scale(0.9); }
+    .zen-floating-dock:not(.is-collapsed) .zen-fab { color: var(--cinnabar); background: rgba(255, 252, 245, 0.95); }
+
+    .zen-dock-card {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 6px 8px;
+      border-radius: 14px;
+      background: rgba(250, 246, 238, 0.78);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 10px 28px -4px rgba(28, 22, 14, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transform-origin: left bottom;
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease, visibility 0.24s;
+    }
+
+    .zen-floating-dock.is-collapsed .zen-dock-card {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate3d(-12px, 8px, 0) scale(0.85);
+    }
+
+    .zen-dock-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .zen-tag {
+      width: 32px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(78, 64, 48, 0.75);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .zen-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(184, 152, 102, 0.08), rgba(184, 152, 102, 0.28) 20%, rgba(184, 152, 102, 0.28) 80%, rgba(184, 152, 102, 0.08));
+    }
+
+    .zen-track {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 1.5px;
+      border-radius: 9px;
+      background: rgba(168, 148, 122, 0.12);
+      box-shadow: inset 0 1px 2px rgba(30, 24, 16, 0.06);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .zen-track .slide-pill {
+      top: 1.5px;
+      bottom: 1.5px;
+      border-radius: 7.5px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(30, 24, 16, 0.12), 0 0 0 0.5px rgba(184, 152, 102, 0.25);
+    }
+
+    .zen-opt {
+      height: 24px;
+      padding: 0 8.5px;
+      border-radius: 7.5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(62, 51, 39, 0.76);
+    }
+
+    @media (max-width: 900px) {
+      .app-controls.zen-floating-dock {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 68px) !important;
+      }
+    }
+
+  
+    /* =========================================================================
+       V12 三项关键 Bug 修复与体验升级：
+       1. 修复时间轴线条在第一层朝代图放大时侵入朝代图内的 Bug：
+          - 将竖向时间游标线（.center-indicator）置于画卷背景层（z-index: 5），
+            使第一层朝代块（#macro-dynasty-layer）在呼吸放大时完整覆盖在线条上方，线条绝不刺入朝代图内部；
+          - 顶部年份刻度严格以底边向上放大（transform-origin: 50% 100%），并与第一层朝代留出充裕净空。
+       2. 下方轴上圆点与牌子联动 + 被遮蔽牌子自动置顶显现：
+          - 当竖向光标接近轴上圆点时，圆点（.pulse-circle）与下方牌子同步产生弹性放大与光晕；
+          - 若该节点因密集避让被隐藏（.label-hidden）或被相邻牌子遮挡，触发 .cursor-unmask-node
+            自动解除遮蔽并置顶（z-index 动态提升至最前），完整展示动效。
+       3. 修复下方牌子放大时向上侵入轴线与圆点的 Bug：
+          - 强制所有竹简（.vertical-bamboo-slip）与人物竖卡（.axis-person-card）以顶部中心
+            （transform-origin: 50% 0%）为原点向下放大，杜绝任何向上越界侵入轴线或圆点的现象。
+       ========================================================================= */
+
+    /* --- 1. 防止时间轴线条侵入第一层朝代放大效果图 --- */
+    .center-indicator {
+      z-index: 5 !important;
+    }
+    #timeline-canvas {
+      z-index: 10 !important;
+    }
+    #macro-dynasty-layer {
+      z-index: 22 !important;
+    }
+    #sub-regime-layer {
+      z-index: 20 !important;
+    }
+    #events-axis-line {
+      z-index: 24 !important;
+    }
+    #events-layer {
+      z-index: 30 !important;
+    }
+
+    /* 顶部纯数字刻度：严格向上放大，底部距第一层朝代留足安全净空 */
+    #ticks-layer, #lens-layer {
+      height: calc(34px * var(--v)) !important;
+      z-index: 15 !important;
+    }
+    .tick, .minor-year {
+      bottom: calc(6px * var(--v)) !important;
+      transform-origin: 50% 100% !important;
+    }
+    .tick-label {
+      transform-origin: 50% 100% !important;
+    }
+
+    /* --- 2. 光标接近轴上圆点时：被遮蔽/隐藏的牌子自动置顶弹出 + 圆点联动光晕 --- */
+    .event-node.label-hidden.cursor-unmask-node .slip-fold-wrapper,
+    .event-node.folded-by-zoom.cursor-unmask-node .slip-fold-wrapper {
+      display: flex !important;
+      opacity: 1 !important;
+      transform: none !important;
+      pointer-events: auto !important;
+    }
+
+    .pulse-circle {
+      transform-origin: 50% 50% !important;
+      z-index: 3 !important;
+      transition: box-shadow 0.2s ease !important;
+    }
+    .pulse-circle.dock-dot-active {
+      box-shadow:
+        0 0 0 3px rgba(184, 51, 42, 0.24),
+        0 2px 8px rgba(184, 51, 42, 0.45) !important;
+    }
+
+    /* --- 3. 牌子放大严格以顶部中心（50% 0%）向下延展，绝不向上侵入轴线与圆点 --- */
+    .slip-fold-wrapper {
+      position: relative;
+      z-index: 1;
+    }
+    .stem-line {
+      flex: 0 0 auto;
+      min-height: calc(10px * var(--v));
+    }
+    .vertical-bamboo-slip,
+    .axis-person-card {
+      transform-origin: 50% 0% !important;
+    }
+    .event-node.selected .vertical-bamboo-slip,
+    .event-node.selected .axis-person-card {
+      transform-origin: 50% 0% !important;
+      transform: translate3d(0, 3px, 0) scale(1.06) !important;
+    }
+/* ================= 修复事件竹简与人物竖卡点击选中后白字泛白看不见的 Bug ================= */
+.event-node.selected .vertical-bamboo-slip,
+.event-node.selected .axis-person-card {
+  background: linear-gradient(168deg, #C8382E 0%, #9E261E 100%) !important;
+  border-color: #7F1D1D !important;
+  box-shadow:
+    0 6px 16px rgba(184, 51, 42, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+.event-node.selected .vertical-bamboo-slip .slip-year {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #FFFDF8 !important;
+}
+
+.event-node.selected .vertical-bamboo-slip .slip-title,
+.event-node.selected .axis-person-card .ap-name {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(90, 14, 10, 0.45) !important;
+}
+
+.event-node.selected .axis-person-card .ap-life {
+  color: rgba(255, 250, 242, 0.88) !important;
+}
+/* =========================================================================
+   地图弹窗体验重构：
+   1. 触碰/滑动地图时所有弹窗统一为 50% 透明度；触碰对应弹窗或点击地图关联元素时恢复 100%
+   2. 右侧双弹窗（#genealogy-card 与 #chronicle-pane / #milestone-balloon）防叠加互斥布局
+   3. 全面精简各弹窗尺寸与内边距，最大化让出地图视野
+   ========================================================================= */
+
+/* --- 1. 弹窗透明度过渡与 50% 半透明态 --- */
+#genealogy-card,
+#chronicle-pane,
+#map-key,
+#journey-card,
+#milestone-balloon,
+#challenge-card,
+#map-search-box,
+#layers-popover {
+  transition:
+    opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s ease !important;
+}
+
+/* 当触碰空白地图或拖动/缩放地图时（body.map-interacting），所有弹窗降为 50% 透明度 */
+body.map-interacting #genealogy-card:not(.popup-focused),
+body.map-interacting #chronicle-pane:not(.popup-focused),
+body.map-interacting #map-key:not(.popup-focused),
+body.map-interacting #journey-card:not(.popup-focused),
+body.map-interacting #milestone-balloon:not(.popup-focused),
+body.map-interacting #challenge-card:not(.popup-focused),
+body.map-interacting #map-search-box:not(.popup-focused):not(:focus-within),
+body.map-interacting #layers-popover:not(.popup-focused) {
+  opacity: 0.5 !important;
+}
+
+/* 触碰到特定弹窗或点击地图关联信息唤醒的弹窗：立即恢复 100% 正常不透明态并提升层级 */
+.popup-focused {
+  opacity: 1 !important;
+}
+
+/* --- 2. 彻底解决右侧两个弹窗叠加问题 --- */
+/* 将编年侧栏 (#chronicle-pane) 改为右侧悬浮抽屉卡片，与 #genealogy-card 纳入同一右侧栈区并自动互斥避让 */
+@media (min-width: 901px) {
+  #workspace-body {
+    grid-template-columns: minmax(0, 1fr) 288px !important;
+  }
+
+  /* 当右侧「点地溯源 / 人物轨迹 (#genealogy-card)」打开时，自动收起右侧「编年侧栏 (#chronicle-pane)」，杜绝右侧双面板视觉争夺与叠加 */
+  #workspace-body:has(#genealogy-card:not(.is-hidden)) {
+    grid-template-columns: minmax(0, 1fr) 0px !important;
+  }
+  #workspace-body:has(#genealogy-card:not(.is-hidden)) #chronicle-pane {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    border: none !important;
+  }
+  #workspace-body:has(#genealogy-card:not(.is-hidden)) #viewport-frame {
+    border-right: none !important;
+  }
+}
+
+/* --- 3. 缩减所有弹窗尺寸与留白，最大限度减少对地图的遮挡 --- */
+#genealogy-card {
+  top: 10px !important;
+  right: 10px !important;
+  width: min(286px, calc(100vw - 20px)) !important;
+  max-height: min(56vh, 420px) !important;
+  padding: 9px 11px !important;
+  border-radius: 12px !important;
+}
+
+@media (min-width: 901px) {
+  #viewport-frame.has-active-person #genealogy-card {
+    width: 310px !important;
+  }
+}
+
+#chronicle-pane {
+  padding: 12px 14px !important;
+  gap: 10px !important;
+}
+#dynasty-title {
+  font-size: 28px !important;
+}
+.dynasty-desc {
+  font-size: 12.5px !important;
+  line-height: 1.58 !important;
+}
+
+#map-key {
+  left: 10px !important;
+  bottom: 10px !important;
+  max-width: 248px !important;
+  max-height: 148px !important;
+  overflow-y: auto !important;
+  padding: 6px 9px !important;
+  gap: 3px !important;
+  font-size: 11px !important;
+}
+
+#journey-card,
+#journey-card.is-custom-route {
+  left: 10px !important;
+  bottom: 12px !important;
+  width: min(420px, calc(100% - 20px)) !important;
+  padding: 7px 10px !important;
+  gap: 4px !important;
+}
+
+#milestone-balloon {
+  max-width: min(268px, calc(100vw - 24px)) !important;
+  padding: 6px 10px 7px !important;
+  font-size: 11.5px !important;
+}
+
+#map-search-box {
+  left: 10px !important;
+  top: 10px !important;
+  width: 204px !important;
+}
   </style>
 </head>
 <body data-view="scroll">
@@ -2642,14 +4608,7 @@
         </div>
       </div>
 
-      <!-- 顶部工具已移入长卷悬浮层；以下隐形桩仅为保留 JS 引用的 ID -->
-      <div class="header-tools scroll-only" hidden aria-hidden="true">
-        <span id="center-era-badge">—</span>
-        <span id="center-year-display">—</span>
-        <span id="zoom-label">100%</span>
-        <button id="zoom-out-btn" type="button" tabindex="-1"></button>
-        <button id="zoom-in-btn" type="button" tabindex="-1"></button>
-      </div>
+      <!-- 顶部工具已整合至长卷沉浸式天头 HUD -->
     </div>
   </header>
 
@@ -2670,20 +4629,34 @@
 
     <!-- ============ 视图一：时间轴长卷 ============ -->
     <section id="view-scroll" class="view active">
-      <!-- 悬浮品牌（融入纸面，卷轴信息冲突时自动变淡） -->
+      <!-- 悬浮品牌印记（左上角：故宫卷轴题签风范） -->
       <div id="scroll-brand" class="scroll-float-brand">
         <div class="seal font-calligraphy">史</div>
         <div class="brand-text">
           <h1 class="app-title">华夏千年历史长卷</h1>
-          <p class="app-sub">五千年 · 长卷 · 帝王 · 事件</p>
+          <p class="app-sub">五千年 · 帝王 · 史事 · 舆图</p>
         </div>
       </div>
 
-      <!-- 悬浮搜索（静默半透明，拖动卷轴时隐去） -->
-      <button id="axis-search-btn" class="scroll-float-search" type="button" aria-label="搜索长卷">
-        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-        <span>搜索长卷</span>
-      </button>
+      <!-- 中央天头纪年罗盘（实时联动屏幕中央朱砂红线，显示当前朝代与精确纪年） -->
+      <div class="scroll-center-compass" aria-live="polite">
+        <span id="center-era-badge" class="compass-era">三国</span>
+        <span class="compass-sep">·</span>
+        <span id="center-year-display" class="compass-year">公元235年</span>
+      </div>
+
+      <!-- 右上角悬浮工具舱（无级缩放控制 + 全库搜索） -->
+      <div class="scroll-float-RightTools">
+        <div class="zoom-capsule" role="group" aria-label="长卷比例缩放">
+          <button id="zoom-out-btn" class="zc-btn" type="button" aria-label="缩小长卷">−</button>
+          <span id="zoom-label" class="zc-label" title="轻点恢复100%">100%</span>
+          <button id="zoom-in-btn" class="zc-btn" type="button" aria-label="放大长卷">+</button>
+        </div>
+        <button id="axis-search-btn" class="scroll-float-search" type="button" aria-label="搜索长卷">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          <span>检索</span>
+        </button>
+      </div>
 
       <div id="timeline-viewport" class="timeline-band">
         <div class="edge-fade edge-fade-l"></div>
@@ -2702,28 +4675,59 @@
         </div>
       </div>
 
-      <section class="app-controls" id="app-controls">
-        <div class="page-wrap controls-row">
-          <div class="layer-switches" role="group" aria-label="时间轴图层">
-            <button id="layer-events" class="layer-switch on" data-layer="events" type="button" role="switch" aria-checked="true">
-              <span class="switch on"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">重大事件</span><span class="short">事件</span></span>
-            </button>
-            <button id="layer-figures" class="layer-switch" data-layer="figures" type="button" role="switch" aria-checked="false">
-              <span class="switch"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">重要人物</span><span class="short">人物</span></span>
-            </button>
-            <button id="layer-literati" class="layer-switch" data-layer="literati" type="button" role="switch" aria-checked="false">
-              <span class="switch"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">文学大家</span><span class="short">文豪</span></span>
-            </button>
-            <button id="layer-eras" class="layer-switch" data-layer="eras" type="button" role="switch" aria-checked="false">
-              <span class="switch"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">各朝盛世</span><span class="short">盛世</span></span>
-            </button>
+      <!-- 左下角重构：东方雅集极简悬浮控制浮岛（一键收折 + 禅意双轨滑块） -->
+      <section class="app-controls zen-floating-dock" id="unified-console" aria-label="长卷视图控制舱">
+        <div class="zen-dock-card" id="console-body">
+          <!-- 第一轨：上轴支系三档（触碰 / 常驻 / 关闭） -->
+          <div class="zen-dock-row">
+            <span class="zen-tag">支系</span>
+            <div class="slide-track zen-track" id="sub-mode-track" role="radiogroup" aria-label="二三层政权支系模式">
+              <div class="slide-pill zen-pill" id="sub-mode-pill" data-mode="auto" aria-hidden="true"></div>
+              <button class="slide-opt zen-opt active" data-submode="auto" type="button" role="radio" aria-checked="true" title="光标接触时下拉弹出">触碰</button>
+              <button class="slide-opt zen-opt" data-submode="always" type="button" role="radio" aria-checked="false" title="常驻展开二三层政权">常驻</button>
+              <button class="slide-opt zen-opt" data-submode="off" type="button" role="radio" aria-checked="false" title="关闭隐藏二三层政权">关闭</button>
+            </div>
           </div>
-          <span id="layer-count" class="layer-count">124 事件</span>
+
+          <div class="zen-divider" aria-hidden="true"></div>
+
+          <!-- 第二轨：下轴图层五档（事件 / 人物 / 文豪 / 盛世 / 关闭） -->
+          <div class="zen-dock-row">
+            <span class="zen-tag">下轴</span>
+            <div class="slide-track zen-track" id="axis-layer-track" role="radiogroup" aria-label="下方时间轴图层">
+              <div class="slide-pill zen-pill" id="axis-layer-pill" data-theme="events" aria-hidden="true"></div>
+              <button id="layer-events" class="slide-opt zen-opt layer-switch on active" data-layer="events" type="button" role="radio" aria-checked="true">
+                <span class="switch on" hidden><span class="knob"></span></span>
+                <span>事件</span>
+              </button>
+              <button id="layer-figures" class="slide-opt zen-opt layer-switch" data-layer="figures" type="button" role="radio" aria-checked="false">
+                <span class="switch" hidden><span class="knob"></span></span>
+                <span>人物</span>
+              </button>
+              <button id="layer-literati" class="slide-opt zen-opt layer-switch" data-layer="literati" type="button" role="radio" aria-checked="false">
+                <span class="switch" hidden><span class="knob"></span></span>
+                <span>文豪</span>
+              </button>
+              <button id="layer-eras" class="slide-opt zen-opt layer-switch" data-layer="eras" type="button" role="radio" aria-checked="false">
+                <span class="switch" hidden><span class="knob"></span></span>
+                <span>盛世</span>
+              </button>
+              <button id="layer-off" class="slide-opt zen-opt" data-layer="off" type="button" role="radio" aria-checked="false" title="收起下方时间轴">
+                <span>关闭</span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- 极简收折切换圆钮（悬浮于浮岛左下角或侧边，点击顺滑收起/展开） -->
+        <button class="zen-fab" id="console-fab-btn" type="button" aria-expanded="true" title="展开/收起控制面板">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </button>
+        <span id="layer-count" class="layer-count" hidden>124 事件</span>
       </section>
 
       <!-- 底部详情弹窗：点击事件竹简后由屏幕下方升起，悬浮于卷轴之上 -->
@@ -2806,51 +4810,141 @@
       </footer>
     </section>
 
-    <!-- ============ 视图二：人物（帝王 / 重要人物） ============ -->
+    <!-- ============ 视图二：人物（单行极简顶栏：品牌标识 + 动画下拉选择窗 + 紧凑搜索框） ============ -->
     <section id="view-archive" class="view">
       <div class="people-shell">
-        <div class="people-toolbar">
-          <div id="people-seg" class="seg-tabs" role="tablist" aria-label="人物分类">
-            <button class="seg-btn active" data-ptab="rulers" type="button" role="tab">帝王</button>
-            <button class="seg-btn" data-ptab="figures" type="button" role="tab">重要人物</button>
-            <button class="seg-btn" data-ptab="literati" type="button" role="tab">文学大家</button>
+        <div class="people-toolbar compact-header-bar">
+          <!-- 左：保留品牌标识 -->
+          <div class="inline-brand">
+            <div class="seal font-calligraphy">史</div>
+            <span class="ib-title">华夏长卷</span>
           </div>
-          <div class="dyn-select-wrap">
-            <select id="dyn-select" class="dyn-select" aria-label="选择朝代"></select>
+
+          <!-- 中：人物分类动画下拉窗 + 朝代选择 -->
+          <div class="compact-filters">
+            <div class="anim-dropdown" id="people-cat-dd">
+              <button class="anim-dd-trigger" id="people-cat-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dd-dot" data-kind="rulers" id="people-cat-dot"></span>
+                <span id="people-cat-label">帝王</span>
+                <svg class="dd-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="anim-dd-menu" id="people-cat-menu" role="listbox" aria-label="人物分类">
+                <button class="anim-dd-item active" data-ptab="rulers" type="button" role="option" aria-selected="true">
+                  <span class="dd-dot" data-kind="rulers"></span>
+                  <span class="dd-item-text"><b>帝王</b><small>历朝君主世系与在位功过</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+                <button class="anim-dd-item" data-ptab="figures" type="button" role="option" aria-selected="false">
+                  <span class="dd-dot" data-kind="figures"></span>
+                  <span class="dd-item-text"><b>重要人物</b><small>名相良将与《史记》专传人物</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+                <button class="anim-dd-item" data-ptab="literati" type="button" role="option" aria-selected="false">
+                  <span class="dd-dot" data-kind="literati"></span>
+                  <span class="dd-item-text"><b>文学大家</b><small>诸子百家与诗词曲赋名家</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 保留原 #people-seg 隐藏节点以兼容外部调用 -->
+            <div id="people-seg" hidden aria-hidden="true">
+              <button class="seg-btn active" data-ptab="rulers" type="button"></button>
+              <button class="seg-btn" data-ptab="figures" type="button"></button>
+              <button class="seg-btn" data-ptab="literati" type="button"></button>
+            </div>
+
+            <!-- 朝代动画下拉选择窗（底层同步原 #dyn-select） -->
+            <div class="anim-dropdown" id="people-dyn-dd">
+              <button class="anim-dd-trigger dyn-trigger" id="people-dyn-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="people-dyn-label">三国</span>
+                <svg class="dd-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="anim-dd-menu dyn-menu ancient-scroll" id="people-dyn-menu" role="listbox" aria-label="选择朝代"></div>
+            </div>
+            <div class="dyn-select-wrap" hidden aria-hidden="true">
+              <select id="dyn-select" class="dyn-select" aria-label="选择朝代"></select>
+            </div>
           </div>
-          <div class="people-search-row">
-            <label class="search-box" id="people-search-box" style="flex:1 1 auto;">
-              <span class="s-icon">🔍</span>
-              <input id="people-search" type="search" inputmode="search" autocomplete="off"
-                     placeholder="查找人物 / 文豪 / 帝王，可直接定位到长卷" aria-label="查找人物" />
-              <button id="people-search-clear" class="search-clear" type="button" aria-label="清空">×</button>
-            </label>
-          </div>
+
+          <!-- 右：缩小版紧凑搜索框 -->
+          <label class="search-box compact-search" id="people-search-box">
+            <svg class="s-svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            <input id="people-search" type="search" inputmode="search" autocomplete="off"
+                   placeholder="查人物/帝王…" aria-label="查找人物" />
+            <button id="people-search-clear" class="search-clear" type="button" aria-label="清空">×</button>
+          </label>
         </div>
         <div id="people-body" class="people-body ancient-scroll"></div>
       </div>
     </section>
 
-    <!-- ============ 视图三：事件年表 ============ -->
+    <!-- ============ 视图三：事件年表（单行极简顶栏：品牌标识 + 动画下拉选择窗 + 紧凑搜索框） ============ -->
     <section id="view-events" class="view">
       <div class="events-shell">
-        <div class="events-toolbar">
-          <label class="search-box" id="search-box">
-            <span class="s-icon">🔍</span>
-            <input id="event-search" type="search" inputmode="search" autocomplete="off"
-                   placeholder="搜索事件 / 人物 / 年号，如：玄武门、安史、1689" aria-label="搜索历史事件" />
-            <button id="search-clear" class="search-clear" type="button" aria-label="清空">×</button>
-          </label>
-
-          <div id="event-chips" class="event-chips no-scrollbar">
-            <button data-cat="all" class="fchip active" type="button">全部</button>
-            <button data-cat="政治变革" class="fchip" type="button">政治兴替</button>
-            <button data-cat="军事风云" class="fchip" type="button">军事风云</button>
-            <button data-cat="文明盛世" class="fchip" type="button">文明盛世</button>
-            <button data-cat="对外开拓" class="fchip" type="button">对外开拓</button>
+        <div class="events-toolbar compact-header-bar">
+          <!-- 左：保留品牌标识 -->
+          <div class="inline-brand">
+            <div class="seal font-calligraphy">史</div>
+            <span class="ib-title">华夏长卷</span>
           </div>
 
-          <span id="events-count" class="events-count"></span>
+          <!-- 中：事件类别动画下拉选择窗 + 条目数 -->
+          <div class="compact-filters">
+            <div class="anim-dropdown" id="event-cat-dd">
+              <button class="anim-dd-trigger" id="event-cat-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dd-dot" data-cat="all" id="event-cat-dot"></span>
+                <span id="event-cat-label">全部事件</span>
+                <svg class="dd-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="anim-dd-menu" id="event-cat-menu" role="listbox" aria-label="事件类别">
+                <button class="anim-dd-item active" data-cat="all" type="button" role="option" aria-selected="true">
+                  <span class="dd-dot" data-cat="all"></span>
+                  <span class="dd-item-text"><b>全部事件</b><small>纵览五千年全部重大史事</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+                <button class="anim-dd-item" data-cat="政治变革" type="button" role="option" aria-selected="false">
+                  <span class="dd-dot" data-cat="政治变革"></span>
+                  <span class="dd-item-text"><b>政治兴替</b><small>王朝更迭、变法改制与政局转折</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+                <button class="anim-dd-item" data-cat="军事风云" type="button" role="option" aria-selected="false">
+                  <span class="dd-dot" data-cat="军事风云"></span>
+                  <span class="dd-item-text"><b>军事风云</b><small>定鼎决战、经典战役与边疆征伐</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+                <button class="anim-dd-item" data-cat="文明盛世" type="button" role="option" aria-selected="false">
+                  <span class="dd-dot" data-cat="文明盛世"></span>
+                  <span class="dd-item-text"><b>文明盛世</b><small>治世盛景、科技发明与文化典籍</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+                <button class="anim-dd-item" data-cat="对外开拓" type="button" role="option" aria-selected="false">
+                  <span class="dd-dot" data-cat="对外开拓"></span>
+                  <span class="dd-item-text"><b>对外开拓</b><small>丝路凿空、下西洋与疆域奠定</small></span>
+                  <span class="dd-check">✓</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 保留原 #event-chips 以支持朝代过滤标签及兼容逻辑 -->
+            <div id="event-chips" class="event-chips no-scrollbar" hidden aria-hidden="true">
+              <button data-cat="all" class="fchip active" type="button">全部</button>
+              <button data-cat="政治变革" class="fchip" type="button">政治兴替</button>
+              <button data-cat="军事风云" class="fchip" type="button">军事风云</button>
+              <button data-cat="文明盛世" class="fchip" type="button">文明盛世</button>
+              <button data-cat="对外开拓" class="fchip" type="button">对外开拓</button>
+            </div>
+
+            <span id="events-count" class="events-count"></span>
+          </div>
+
+          <!-- 右：缩小版紧凑搜索框 -->
+          <label class="search-box compact-search" id="search-box">
+            <svg class="s-svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            <input id="event-search" type="search" inputmode="search" autocomplete="off"
+                   placeholder="搜事件/年号…" aria-label="搜索历史事件" />
+            <button id="search-clear" class="search-clear" type="button" aria-label="清空">×</button>
+          </label>
         </div>
 
         <div id="events-list" class="events-list"></div>
@@ -2918,8 +5012,10 @@
     </div>
   </div>
 
-  <!-- 底部 iOS 风格标签栏：长卷 / 人物 / 事件 -->
-  <nav class="bottom-tabs" role="tablist" aria-label="主导航">
+  <!-- 底部 Apple iOS 26 液态玻璃（Liquid Glass）悬浮胶囊导航栏 -->
+  <nav class="bottom-tabs liquid-glass-bar" role="tablist" aria-label="主导航">
+    <div class="liquid-glass-shine" aria-hidden="true"></div>
+    <div class="tab-glider" aria-hidden="true"></div>
     <button class="view-tab active" data-view="scroll" type="button" role="tab" aria-selected="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z"/><path d="M12 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1"/><path d="M5 8.5h4M5 12h4"/></svg>
       <span>长卷</span>
@@ -5142,6 +7238,10 @@
       lastMapYear: 1800,          // 疆域图谱：上次查看的年份（默认清中期）
       activeCategory: 'all',
       activeDynastyId: 'sanguo',
+      cursorDynastyId: 'sanguo',
+      subMode: 'auto',           // 支系三档：'auto'(默认接触弹出) | 'always'(二三层常驻) | 'off'(二三层关闭)
+      smartSubFold: true,
+      subExpandedNow: false,     // 当前时刻二三层支系是否处于展开态（用于动态收拢上下轴间距，消除大面积空当）
       activeSubId: 'caowei',
       isDragging: false,
       hasMoved: false,
@@ -5176,22 +7276,26 @@
       GEOM.v = v;
 
       const px = (n) => Math.round(n * v);
-      GEOM.macroTop = px(26);
+      GEOM.macroTop = px(44);
       GEOM.macroH = Math.max(px(52), 36);
       GEOM.subH = Math.max(px(34), 24);
-      GEOM.subTops = [0, 1, 2].map((i) => px(84 + i * 38));
-      GEOM.axisY = px(204);
+      GEOM.subTops = [0, 1, 2].map((i) => px(102 + i * 38));
+      GEOM.axisY = px(222);
       GEOM.slipW = Math.max(20, px(24));
-      GEOM.stems = [px(8), px(22), px(36), px(50)];
+      GEOM.stems = [px(12), px(24), px(38), px(52)];
+
+      // 二三层政权完整三轨高度（用于当二三层收起或部分展开时，将上方朝代轴与下方人物/事件时间轴动态向屏幕中央靠拢，彻底消除中间大面积空当）
+      GEOM.subTrackStep = px(38);
+      GEOM.fullSubZoneH = px(114);
 
       const contentH = GEOM.axisY + px(139);
       // 顶部净空 52px：避开悬浮品牌与搜索胶囊；其余空间适度下移、视觉居中偏上
       const topFree = 52;
       GEOM.offsetY = Math.max(topFree, Math.round((bandH - contentH) * 0.45));
 
-      // 折叠态（仅朝代，无事件）内容高度：三轨细分底缘 + 呼吸空间 → 折叠时重新定位
-      const foldedH = GEOM.subTops[2] + GEOM.subH + px(18);
-      GEOM.foldedOffsetY = Math.max(topFree, Math.round((bandH - foldedH) / 2));
+      // 折叠态（仅朝代，无事件）内容高度：根据当前支系高度动态居中
+      const foldedH = GEOM.macroTop + GEOM.macroH + px(28);
+      GEOM.foldedOffsetY = Math.max(topFree, Math.round((bandH - foldedH) * 0.48));
 
       // 字号档位缓存失效（v 变化后必须重测文本宽度）
       domCache.macros.forEach((m) => { m.el.__tier = -1; });
@@ -5308,30 +7412,43 @@
     const TICK_STEPS = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000];
 
     function buildCanvasElementsOnce() {
-      // 1. 刻度线（虚拟池：随缩放与滚动动态补位，任何比例下年份都在视野内）
+      // 1. 主刻度池（疏朗自适应跨度：随缩放动态调整步长，确保放大 2.2x 后仍有充足留白）
       ticksLayer.innerHTML = '';
       domCache.ticks = [];
       for (let i = 0; i < 96; i++) {
         const tick = document.createElement('div');
         tick.className = 'tick';
-        tick.innerHTML = '<span class="tick-label"></span><span class="tick-mark"></span>';
+        tick.style.display = 'none';
+        tick.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span><span class="tick-mark"></span>';
         ticksLayer.appendChild(tick);
+        const labelEl = tick.firstElementChild;
         domCache.ticks.push({
-          yr: null, el: tick, labelEl: tick.firstElementChild,
-          tgt: tick.firstElementChild, centered: false,   // 只缩放数字，刻度线不动
+          yr: null, baseX: 0, estW: 36, el: tick,
+          labelEl,
+          eraEl: labelEl.firstElementChild,
+          numEl: labelEl.lastElementChild,
+          markEl: tick.lastElementChild
         });
       }
 
-      // 1b. 卡尺邻域逐年小标签池（虚拟补位，密度随缩放自适应）
+      // 1b. 中央红线邻域细分刻度池（仅当相邻主刻度间距足够宽敞时才平滑浮现）
       const lensLayer = document.getElementById('lens-layer');
       lensLayer.innerHTML = '';
       domCache.minors = [];
-      for (let i = 0; i < 56; i++) {
+      for (let i = 0; i < 64; i++) {
         const m = document.createElement('div');
         m.className = 'minor-year';
         m.style.display = 'none';
+        m.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span><span class="tick-mark"></span>';
         lensLayer.appendChild(m);
-        domCache.minors.push({ yr: null, el: m, tgt: m, centered: true });
+        const labelEl = m.firstElementChild;
+        domCache.minors.push({
+          yr: null, baseX: 0, estW: 32, baseAlpha: 0, el: m,
+          labelEl,
+          eraEl: labelEl.firstElementChild,
+          numEl: labelEl.lastElementChild,
+          markEl: m.lastElementChild
+        });
       }
 
       // 2. 大朝代块
@@ -5545,8 +7662,10 @@
           else selectHistoricalEvent(item.id, true);
         });
 
+        const cardEl = node.querySelector('.vertical-bamboo-slip, .axis-person-card');
+        const dotEl = node.querySelector('.pulse-circle');
         eventsLayer.appendChild(node);
-        return { data: item, kind: item.kind || 'event', ev: isPerson ? null : item, el: node, stemEl };
+        return { data: item, kind: item.kind || 'event', ev: isPerson ? null : item, el: node, stemEl, cardEl, dotEl };
       });
 
       canvasEl.dataset.layer = state.axisLayer || 'none';
@@ -5565,6 +7684,59 @@
      ********************************************************************/
     const tickRange = { from: Infinity, to: -Infinity, step: 0 };
 
+    // 格式化年份标签并估算其基础像素宽度（用于防挤压碰撞检测）
+    function setYearLabelAndWidth(item, y, v) {
+      const absY = Math.abs(y);
+      const digits = String(absY).length;
+      if (y < 0) {
+        item.eraEl.textContent = '前';
+        item.eraEl.style.display = 'inline';
+        item.numEl.textContent = String(absY);
+        item.estW = Math.round((digits * 6.5 + 22) * v);
+      } else {
+        item.eraEl.textContent = '';
+        item.eraEl.style.display = 'none';
+        item.numEl.textContent = String(y);
+        item.estW = Math.round((digits * 6.5 + 12) * v);
+      }
+    }
+
+    // 根据每个历史分段的当前缩放像素密度（localPxPerYear），自动计算舒展的主刻度跨度与细分跨度
+    // 核心原则：主刻度默认间距保持在 96px ~ 150px 以上，确保中央红线放大 2.25 倍时也绝不挤压
+    function pickSpaciousSteps(localPxPerYear, v) {
+      const targetMajorGap = Math.max(92, Math.round(104 * v));
+      let majorStep = TICK_STEPS[TICK_STEPS.length - 1];
+      for (const cand of TICK_STEPS) {
+        if (cand * localPxPerYear >= targetMajorGap) {
+          majorStep = cand;
+          break;
+        }
+      }
+      // 细分步长：只取主刻度的 1/2 或 1/5，并且要求细分格距至少达到 54px 才启用
+      let minorStep = 0;
+      const candidates = [];
+      if (majorStep === 1000) candidates.push(200, 500);
+      else if (majorStep === 500) candidates.push(100, 250);
+      else if (majorStep === 250) candidates.push(50);
+      else if (majorStep === 200) candidates.push(50, 100);
+      else if (majorStep === 100) candidates.push(20, 50);
+      else if (majorStep === 50) candidates.push(10, 25);
+      else if (majorStep === 25) candidates.push(5);
+      else if (majorStep === 20) candidates.push(5, 10);
+      else if (majorStep === 10) candidates.push(2, 5);
+      else if (majorStep === 5) candidates.push(1);
+      else if (majorStep === 2) candidates.push(1);
+
+      const minMinorGap = Math.max(52, Math.round(58 * v));
+      for (const m of candidates) {
+        if (m * localPxPerYear >= minMinorGap) {
+          minorStep = m;
+          break;
+        }
+      }
+      return { majorStep, minorStep };
+    }
+
     function layoutTicks(force = false) {
       const vw = Math.max(280, viewportEl.clientWidth);
       const pad = getCenterPad();
@@ -5573,83 +7745,121 @@
       const to = Math.min(1920, xToYear(viewLeft + vw * 1.6));
       if (!force && tickRange.step && from >= tickRange.from && to <= tickRange.to) return;
 
-      // 当前视野中心的「每年像素」，据此挑步长，保证刻度间距 56~110px
-      const midYear = Math.round((from + to) / 2);
-      const pxPerYear = Math.max(0.02, yearToX(midYear + 1) - yearToX(midYear));
-      const targetGap = Math.max(56, Math.round(62 * GEOM.v));
+      const majorYears = [];
+      const majorSet = new Set();
 
-      let step = TICK_STEPS[TICK_STEPS.length - 1];
-      for (const cand of TICK_STEPS) {
-        if (cand * pxPerYear >= targetGap) { step = cand; break; }
-      }
-
-      let years = [];
-      for (let guard = 0; guard < 5; guard++) {
-        years = [];
-        const first = Math.ceil(from / step) * step;
-        for (let y = first; y <= to; y += step) {
-          if (y === 0) continue;
-          years.push(Math.round(y));
+      // 按各朝代实际比例尺分段生成跨度，避免疏密不均或切换突变
+      for (const seg of TIME_SEGMENTS) {
+        if (seg.end < from || seg.start > to) continue;
+        const localPpy = seg.basePxPerYear * state.zoomScale;
+        const { majorStep } = pickSpaciousSteps(localPpy, GEOM.v);
+        const segFrom = Math.max(from, seg.start);
+        const segTo = Math.min(to, seg.end);
+        const first = Math.ceil(segFrom / majorStep) * majorStep;
+        for (let y = first; y <= segTo; y += majorStep) {
+          const yr = Math.round(y);
+          if (yr === 0 || majorSet.has(yr)) continue;
+          majorSet.add(yr);
+          majorYears.push(yr);
         }
-        if (years.length <= domCache.ticks.length) break;
-        const idx = TICK_STEPS.indexOf(step);
-        step = TICK_STEPS[Math.min(TICK_STEPS.length - 1, idx + 1)];
       }
+      majorYears.sort((a, b) => a - b);
 
-      const minGap = Math.max(34, Math.round(40 * GEOM.v));
-      let lastX = -9999;
-      domCache.ticks.forEach((tick, i) => {
-        const y = years[i];
-        if (y === undefined) {
-          if (tick.yr !== null) { tick.el.style.display = 'none'; tick.yr = null; }
-          return;
-        }
+      // 严格的最小安全间距（78px），防止跨分段交界处两个年份靠得太近导致放大挤压
+      const minSafeGap = Math.max(72, Math.round(82 * GEOM.v));
+      let lastX = -99999;
+      let used = 0;
+
+      for (let i = 0; i < majorYears.length && used < domCache.ticks.length; i++) {
+        const y = majorYears[i];
         const x = yearToX(y, state.zoomScale);
-        if (x - lastX < minGap) {
-          if (tick.yr !== null) { tick.el.style.display = 'none'; tick.yr = null; }
-          return;
-        }
+        if (x - lastX < minSafeGap) continue;
         lastX = x;
+        const tick = domCache.ticks[used++];
         tick.yr = y;
-        tick.s = undefined;   // 位置变了，让鱼眼倍率下帧重算
-        tick.el.style.display = '';
-        tick.el.style.left = `${x}px`;
-        tick.labelEl.textContent = y < 0 ? '前' + Math.abs(y) : String(y);
-      });
+        tick.baseX = x;
+        tick.el.style.display = 'flex';
+        tick.el.style.opacity = '1';
+        setYearLabelAndWidth(tick, y, GEOM.v);
+      }
+
+      for (let i = used; i < domCache.ticks.length; i++) {
+        const tick = domCache.ticks[i];
+        if (tick.yr !== null) {
+          tick.el.style.display = 'none';
+          tick.yr = null;
+        }
+      }
 
       tickRange.from = from;
       tickRange.to = to;
-      tickRange.step = step;
+      tickRange.step = 1;
     }
 
-    /* 放大后朝代块可能宽过一屏：让「朝代名 + 年代」贴着视野左侧跟随，始终看得见 */
+    /* =========================================================================
+       全层级朝代文字与时间动态居中引擎（第一层、第二层、第三层通用）：
+       - 无论缩放比例多大或多小，每个朝代/政权块内的「文字 + 时间」始终保持在
+         当前屏幕可见交集区（或屏幕正中央）的正中间；
+       - 当朝代块跨过屏幕正中央时，文字与时间稳稳锚定在屏幕正中间；
+       - 当朝代块即将移出屏幕左/右边缘时，文字与时间保持在剩余可见段的正中间，
+         并贴着朝代块内缘自然随块一同移出屏幕。
+       ========================================================================= */
+    function computeViewportCenteredShift(geo, viewLeft, viewRight, screenCenterX) {
+      if (!geo || geo.w <= 12) return '';
+      const blockLeft = geo.x;
+      const blockRight = geo.x + geo.w;
+      if (blockRight < viewLeft - 2 || blockLeft > viewRight + 2) return '';
+
+      const labelW = Math.min(geo.w - 4, Math.max(16, geo.labelW || Math.max(geo.nameW || 0, geo.periodW || 0) || 30));
+      if (geo.w <= labelW + 4) return '';
+
+      // 当前朝代/政权块在当前视口内的可见交集区间 [visL, visR]
+      const visL = Math.max(blockLeft, viewLeft + 6);
+      const visR = Math.min(blockRight, viewRight - 6);
+      if (visL >= visR) return '';
+
+      // 核心规则：文字与时间始终保持在当前所显示的屏幕正中间（若色块在屏幕内，则严格对准视口正中心 screenCenterX；
+      // 若色块部分移出屏幕，则对准当前可见交集段的正中间，直到整个色块完全移除屏幕）
+      let targetCenterX = (blockLeft <= screenCenterX && blockRight >= screenCenterX)
+        ? screenCenterX
+        : (visL + visR) * 0.5;
+
+      const naturalCenterX = blockLeft + geo.w * 0.5;
+      const maxShift = Math.max(0, (geo.w - labelW) * 0.5 - 3);
+      const rawShift = targetCenterX - naturalCenterX;
+      const clampedShift = Math.max(-maxShift, Math.min(maxShift, rawShift));
+      return Math.abs(clampedShift) > 0.2 ? `translate3d(${clampedShift.toFixed(1)}px, 0, 0)` : '';
+    }
+
     function syncMacroSticky() {
       const vw = viewportEl.clientWidth;
       const pad = getCenterPad();
       const viewLeft = state.scrollX - pad;
       const viewRight = viewLeft + vw;
+      const screenCenterX = viewLeft + vw * 0.5;
 
-      domCache.macros.forEach(({ el, nameEl, periodEl }) => {
-        const geo = el.__geo;
-        if (!geo) return;
-        if (geo.x + geo.w < viewLeft - 4 || geo.x > viewRight + 4) {
-          nameEl.style.transform = '';
-          periodEl.style.transform = '';
-          return;
+      // 1) 第一层主流朝代：文字与时间动态保持在当前屏幕可见段/正中央
+      for (let i = 0; i < domCache.macros.length; i++) {
+        const { el, nameEl, periodEl } = domCache.macros[i];
+        const t = computeViewportCenteredShift(el.__geo, viewLeft, viewRight, screenCenterX);
+        if (el.__lastShift !== t) {
+          el.__lastShift = t;
+          nameEl.style.transform = t;
+          periodEl.style.transform = t;
         }
-        const labelW = Math.max(geo.nameW || 0, geo.periodW || 0);
-        if (!labelW) return;
-        const naturalLeft = Math.max(0, (geo.w - labelW) / 2);
-        // 把名称夹在「朝代块 ∩ 视野」区间内：贴左缘或贴右缘都能看见
-        const minLeft = Math.max(10, viewLeft - geo.x + 12);
-        let maxLeft = Math.min(geo.w - labelW - 10, viewRight - geo.x - labelW - 12);
-        if (maxLeft < minLeft) maxLeft = minLeft;
-        const desiredLeft = Math.min(Math.max(naturalLeft, minLeft), maxLeft);
-        const shift = Math.round(desiredLeft - naturalLeft);
-        const t = shift !== 0 ? `translateX(${shift}px)` : '';
-        nameEl.style.transform = t;
-        periodEl.style.transform = t;
-      });
+      }
+
+      // 2) 第二层与第三层细分政权：同样遵循动态居中规则
+      for (let i = 0; i < domCache.subs.length; i++) {
+        const { el, nameSpan, periodSpan } = domCache.subs[i];
+        if (el.classList.contains('sub-pulldown-hide')) continue;
+        const t = computeViewportCenteredShift(el.__geo, viewLeft, viewRight, screenCenterX);
+        if (el.__lastShift !== t) {
+          el.__lastShift = t;
+          nameSpan.style.transform = t;
+          periodSpan.style.transform = t;
+        }
+      }
     }
 
     /********************************************************************
@@ -5759,6 +7969,17 @@
             periodSpan.className = 'sub-period inline-badge';
             periodSpan.style.fontSize = `${Math.round(10 * v)}px`;
           }
+          const nw = nameSpan.scrollWidth || 0;
+          const pw = periodSpan.style.display === 'none' ? 0 : (periodSpan.scrollWidth || 0);
+          el.__geo = {
+            x: x1, w: width,
+            labelW: tier === 3 ? (nw + pw + 8) : Math.max(nw, pw)
+          };
+        } else if (el.__geo) {
+          el.__geo.x = x1;
+          el.__geo.w = width;
+        } else {
+          el.__geo = { x: x1, w: width, labelW: 36 };
         }
       });
 
@@ -5769,19 +7990,25 @@
       const nodeTop = GEOM.axisY - Math.round(6 * v);
       const isCardLayer = !!CARD_LAYERS[state.axisLayer];
 
-      /* 统一水平避让池：与左侧已放节点间距不足 gap 时降级为纯圆点 */
+      /* 统一水平避让池：与左侧已放节点间距不足 gap 时默认收起标签（只留圆点），
+         但保留引线高度，一旦竖向光标接近该轴上圆点时，被遮蔽的牌子即可置顶弹出并享受同款放大动效 */
       function placeNodes(items, gap, apply) {
         let lastX = -Infinity;
+        const isCard = !!CARD_LAYERS[state.axisLayer];
+        const stemRows = [Math.round(8 * v), Math.round(32 * v)];
         items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
           const forced = item.el.classList.contains('selected');
+          const stemH = isCard ? stemRows[idx % 2] : GEOM.stems[idx % GEOM.stems.length];
+          item.defaultStemH = stemH;
           if (x - lastX < gap && !forced) {
             item.el.classList.add('label-hidden');
             item.x = x;
             item.row = -1;
             item.el.style.left = `${x}px`;
             item.el.style.top = `${nodeTop}px`;
-            item.stemEl.style.height = '0px';
+            item.stemEl.style.height = `${stemH}px`;
+            item.el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
             return;
           }
           lastX = x;
@@ -5803,7 +8030,7 @@
         });
       } else {
         const cardW = CARD_W * v;
-        const stemRows = [Math.round(4 * v), Math.round(32 * v)];
+        const stemRows = [Math.round(10 * v), Math.round(34 * v)];
         placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
           const { el, stemEl } = item;
           item.x = x;
@@ -6725,6 +8952,82 @@
       });
     }
 
+    /* =========================================================================
+       竖向时间光标联动引擎：
+       1. 光标落到第一层大朝代（.macro-dynasty-block）时赋予统一自然的悬浮抬升效果（.cursor-hover-macro）
+       2. 当「联动支系」（state.smartSubFold）开启时，默认隐藏第二层、第三层细分政权，
+          仅将与当前光标所在第一层主流朝代有时间交叉重叠（sub.start < curDyn.end && sub.end > curDyn.start）
+          的第二层和第三层政权以阶梯下拉动效（pull-down）自然弹出
+       ========================================================================= */
+    function syncCursorDynastyAndSubs(curDyn) {
+      if (!curDyn) return;
+      const dynChanged = state.cursorDynastyId !== curDyn.id;
+      state.cursorDynastyId = curDyn.id;
+      const mode = state.subMode || 'auto';
+
+      // 1. 第一层主流朝代：竖向时间光标落入时触发无红框、带柔和呼吸感的悬浮态
+      for (let i = 0; i < domCache.macros.length; i++) {
+        const m = domCache.macros[i];
+        const isUnderCursor = m.dyn.id === curDyn.id;
+        if (m.el.__underCursor !== isUnderCursor) {
+          m.el.__underCursor = isUnderCursor;
+          m.el.classList.toggle('cursor-hover-macro', isUnderCursor);
+        }
+      }
+
+      // 2. 第二层与第三层细分政权：支持三档模式
+      //    - 'auto'  ：默认档，仅在光标接触对应第一层主流朝代时下拉弹出时间重叠的二三层
+      //    - 'always'：常驻档，二三层常驻显示
+      //    - 'off'   ：关闭档，二三层全部隐藏
+      let maxVisibleTrack = -1;
+      for (let i = 0; i < domCache.subs.length; i++) {
+        const s = domCache.subs[i];
+        const sub = s.sub;
+        const isOverlapping = (sub.start <= curDyn.end) && (sub.end >= curDyn.start);
+        let shouldReveal = false;
+        if (mode === 'always') {
+          shouldReveal = true;
+        } else if (mode === 'auto') {
+          shouldReveal = isOverlapping;
+        } else {
+          shouldReveal = false;
+        }
+
+        if (shouldReveal && isOverlapping) {
+          const tr = sub.track || 0;
+          if (tr > maxVisibleTrack) maxVisibleTrack = tr;
+        }
+
+        if (s.el.__revealed !== shouldReveal || dynChanged) {
+          s.el.__revealed = shouldReveal;
+          s.el.classList.toggle('sub-pulldown-show', shouldReveal);
+          s.el.classList.toggle('sub-pulldown-hide', !shouldReveal);
+          s.el.classList.toggle('sub-cursor-linked', mode === 'auto' && isOverlapping);
+        }
+      }
+
+      // 3. 动态双向收拢上下轴间距（消除朝代轴与下方人物/事件时间轴之间的大面积空当）：
+      //    - 当 mode === 'always' 时，预留完整三轨空间（activeTracks = 3）
+      //    - 当 mode === 'off' 时，0 轨展开（activeTracks = 0），上下轴向屏幕中央紧密靠拢
+      //    - 当 mode === 'auto' 时，根据当前光标所在朝代实际弹出的支系层数（0~3轨）动态伸缩！
+      //      例如在夏/商/西周/秦/隋/唐/元/明/清等无支系大一统朝代，activeTracks = 0，上下轴自动向中央合拢；
+      //      滑入东周/三国/两晋/南北朝/五代/宋辽金时，上下轴柔顺推开恰好的高度迎接下拉支系！
+      const activeTracks = mode === 'always' ? 3 : (mode === 'off' ? 0 : (maxVisibleTrack + 1));
+      const unusedTracks = Math.max(0, 3 - activeTracks);
+      const trackStep = GEOM.subTrackStep || Math.round(38 * (GEOM.v || 1));
+      // 预留 10px 呼吸间隙，其余未用轨道高度由上轴下移 + 下轴上移共同向屏幕中央聚拢
+      const totalClosePx = Math.max(0, unusedTracks * trackStep - (activeTracks === 0 ? Math.round(8 * (GEOM.v || 1)) : 0));
+      const upperDownPx = Math.round(totalClosePx * 0.42);
+      const lowerUpPx = -Math.round(totalClosePx * 0.58);
+
+      if (canvasEl.__upperDownPx !== upperDownPx || canvasEl.__lowerUpPx !== lowerUpPx) {
+        canvasEl.__upperDownPx = upperDownPx;
+        canvasEl.__lowerUpPx = lowerUpPx;
+        canvasEl.style.setProperty('--upper-shift-y', `${upperDownPx}px`);
+        canvasEl.style.setProperty('--lower-shift-y', `${lowerUpPx}px`);
+      }
+    }
+
     function applyScrollTransform() {
       state.scrollX = clampScrollX(state.scrollX);
       const pad = getCenterPad();
@@ -6749,100 +9052,294 @@
       }
       centerEraBadge.textContent = curDyn.name.replace('(春秋战国)', '');
 
+      syncCursorDynastyAndSubs(curDyn);
       syncMacroSticky();
       layoutTicks();
       updateMinorYears();
       magnifyTicks();
     }
 
-    /* Dock 式放大：以中央指针为中心的距离衰减透镜。
-       中心 2.0x、相邻 1.5~1.8、远端 1.0；只缩放数字字形，锚点不移动，
-       所以年份经过指针时视觉中心始终与指针对齐。CSS transition 提供柔和追焦 */
-    const TICK_LENS_R = 120;    // 作用半径（px）
-    const TICK_LENS_AMP = 1.0;  // 峰值额外倍数 → 正中 2.0x
-    function lensScaleAt(d) {
-      if (d >= TICK_LENS_R) return 1;
-      const w = (1 + Math.cos((Math.PI * d) / TICK_LENS_R)) / 2;
-      return 1 + TICK_LENS_AMP * w;
-    }
-    function applyLensScale(item) {
-      const d = Math.abs(item.el.offsetLeft + getCenterPad() - state.scrollX - viewportEl.clientWidth / 2);
-      const s = lensScaleAt(d);
-      if (item.s === undefined || Math.abs(s - item.s) > 0.003) {
-        item.s = s;
-        item.tgt.style.transform = item.centered
-          ? `translateX(-50%) scale(${s.toFixed(3)})`
-          : `scale(${s.toFixed(3)})`;
-        item.el.classList.toggle('hot', s > 1.30);
+    /* =========================================================================
+       iPad 中央红线专属：自适应跨度 + 零挤压 Apple Dock 鱼眼放大引擎
+       - 紧盯屏幕正中央红线（.center-indicator），峰值放大至 2.25 倍
+       - 动态计算每个放大年份的真实渲染包络宽度（estW * scale），并施加充足的
+         水平推开力（DOCK_PUSH_FACTOR = 28px），保证红线处放大的年份与两侧年份
+         始终保持舒适间距，绝不粘连或挤压
+       ========================================================================= */
+    /* =========================================================================
+       Apple macOS Dock / Watch Crown 光学级余弦钟形放大透镜引擎 (V6)
+       - 采用 Raised-Cosine 升余弦平方包络（比普通高斯曲线顶部更饱满、边缘收束更干净）
+       - 积分位移场（sin(pi * d / R)）：模拟真实 macOS Dock 图标膨胀时将左右邻居等比例
+         向外推开的物理体积感，正中焦点 2.45x 放大且零遮挡
+       - 全链路联动：上方年份刻度 + 游标刻度线 + 下方事件竹简/人物玉牌 + 轴线圆点
+         全部随中央红线产生 3D 悬浮与光影响应
+       ========================================================================= */
+    const DOCK_RADIUS = 142;         // 光学透镜作用半径（px）
+    const DOCK_MAX_ADD_SCALE = 1.68; // 峰值放大增量：1 + 1.68 = 2.68x 纯数字加大加粗，无外框更大气
+    const DOCK_PUSH_FACTOR = 34.0;   // 积分体积推开量（px），确保 2.68x 放大绝不拥挤
+
+    function evalCenterRedLineDock(screenX, centerX) {
+      const dist = screenX - centerX;
+      const absD = Math.abs(dist);
+      if (absD >= DOCK_RADIUS) {
+        return { weight: 0, pushX: 0, normDist: dist > 0 ? 1 : -1 };
       }
-    }
-    function magnifyTicks() {
-      if (document.body.dataset.view !== 'scroll') return;
-      domCache.ticks.forEach((tick) => { if (tick.yr !== null) applyLensScale(tick); });
-      domCache.minors.forEach((m) => { if (m.yr !== null) applyLensScale(m); });
+      const u = dist / DOCK_RADIUS; // -1 ~ 1
+      // Raised cosine: 0.5 * (1 + cos(pi * u))，再做 1.35 次幂让峰值更聚焦挺拔
+      const rawCos = 0.5 * (1 + Math.cos(Math.PI * u));
+      const weight = Math.pow(rawCos, 1.35);
+      // 积分推开位移：sin(pi * u) * cos^0.8，在 u = ±0.42 处达到最大推开量，u=0 严格归零
+      const pushX = Math.sin(Math.PI * u) * Math.pow(rawCos, 0.75) * DOCK_PUSH_FACTOR;
+      return { weight, pushX, normDist: u };
     }
 
-    /* 卡尺邻域逐年小标签：缩放足够密时显示每一年，否则按最小可读密度补位；
-       与主刻度重合的年份跳过（主刻度已有） */
-    const MINOR_STEPS = [1, 2, 5, 10, 20, 50, 100];
     function updateMinorYears() {
       if (document.body.dataset.view !== 'scroll') return;
-      const hideAll = () => domCache.minors.forEach((m) => {
-        if (m.yr !== null) { m.yr = null; m.el.style.display = 'none'; }
-      });
-      const centerY = xToYear(state.scrollX - getCenterPad() + viewportEl.clientWidth / 2);
-      const ppy = Math.max(0.02, yearToX(centerY + 1) - yearToX(centerY));
-      let mstep = 0;
-      for (const s of MINOR_STEPS) { if (s * ppy >= 30) { mstep = s; break; } }
-      if (!mstep || mstep >= (tickRange.step || Infinity)) { hideAll(); return; }
 
-      const cx = viewportEl.clientWidth / 2;
-      const viewLeft = state.scrollX - getCenterPad();
-      const zChanged = updateMinorYears.lastZoom !== state.zoomScale;
-      updateMinorYears.lastZoom = state.zoomScale;
-      // 主刻度占位：记下屏幕坐标、字数与当前倍率，用于精确判重叠（等宽字体估算字宽）
-      const majorFont = Math.max(9, 10 * GEOM.v);
-      const minorFont = Math.max(8, 8 * GEOM.v);
+      const vw = Math.max(280, viewportEl.clientWidth);
+      const cx = vw * 0.5;
+      const pad = getCenterPad();
+      const viewLeft = state.scrollX - pad;
+      const viewRight = viewLeft + vw;
+
+      // 收集视野内主刻度经过 Dock 推开后的真实屏幕包络盒
       const majors = [];
-      domCache.ticks.forEach((t) => {
-        if (t.yr === null) return;
-        const mx = t.el.offsetLeft;
+      const majorYears = new Set();
+      for (let i = 0; i < domCache.ticks.length; i++) {
+        const t = domCache.ticks[i];
+        if (t.yr === null) continue;
+        const sx = t.baseX - viewLeft;
+        const { weight, pushX } = evalCenterRedLineDock(sx, cx);
+        const scale = 1 + weight * DOCK_MAX_ADD_SCALE;
         majors.push({
-          x: mx,
-          w: t.labelEl.textContent.length * 0.6 * majorFont,
-          s: lensScaleAt(Math.abs(mx - viewLeft - cx)),
+          x: t.baseX + pushX,
+          halfW: (t.estW * scale) * 0.5 + 9
         });
-      });
-
-      const yFrom = Math.ceil(xToYear(viewLeft + cx - TICK_LENS_R) / mstep) * mstep;
-      const yTo = Math.floor(xToYear(viewLeft + cx + TICK_LENS_R) / mstep) * mstep;
-      let i = 0;
-      for (let y = yFrom; y <= yTo && i < domCache.minors.length; y += mstep) {
-        if (y === 0) continue;
-        const label = y < 0 ? '前' + Math.abs(y) : String(y);
-        const x = yearToX(y, state.zoomScale);
-        const s = lensScaleAt(Math.abs(x - viewLeft - cx));
-        const w = label.length * 0.6 * minorFont;
-        // 精确重叠判定：与任一主刻度（含小标签自身）放大会不会压字
-        const clash = majors.some((mj) => {
-          const gap = Math.abs(x - mj.x);
-          if (gap < 1) return true;                   // 同年份主刻度已标
-          return gap < (mj.w * mj.s + w * s) / 2 + 2;
-        });
-        if (clash) continue;
-        const m = domCache.minors[i];
-        if (m.yr !== y || zChanged) {
-          m.yr = y;
-          m.s = undefined;              // 年份换位，倍率下帧重算
-          m.el.style.left = `${x}px`;
-          m.el.textContent = label;
-        }
-        m.el.style.display = '';
-        i += 1;
+        majorYears.add(t.yr);
       }
-      for (; i < domCache.minors.length; i += 1) {
+
+      let poolIdx = 0;
+      let lastMinorRight = -99999;
+
+      for (const seg of TIME_SEGMENTS) {
+        const segStartX = yearToX(seg.start, state.zoomScale);
+        const segEndX = yearToX(seg.end, state.zoomScale);
+        if (segEndX < viewLeft - 60 || segStartX > viewRight + 60) continue;
+
+        const localPpy = seg.basePxPerYear * state.zoomScale;
+        const { majorStep, minorStep } = pickSpaciousSteps(localPpy, GEOM.v);
+        if (!minorStep || minorStep >= majorStep) continue;
+
+        const lensLeftX = Math.max(segStartX, viewLeft + cx - (DOCK_RADIUS + 36));
+        const lensRightX = Math.min(segEndX, viewLeft + cx + (DOCK_RADIUS + 36));
+        if (lensRightX <= lensLeftX) continue;
+
+        const yFrom = Math.max(seg.start, Math.ceil(xToYear(lensLeftX) / minorStep) * minorStep);
+        const yTo = Math.min(seg.end, Math.floor(xToYear(lensRightX) / minorStep) * minorStep);
+
+        for (let y = yFrom; y <= yTo && poolIdx < domCache.minors.length; y += minorStep) {
+          const yr = Math.round(y);
+          if (yr === 0 || majorYears.has(yr)) continue;
+
+          const x = yearToX(yr, state.zoomScale);
+          const screenX = x - viewLeft;
+          const { weight, pushX } = evalCenterRedLineDock(screenX, cx);
+          if (weight < 0.05) continue;
+
+          const renderedX = x + pushX;
+          const scale = 0.92 + weight * 1.48;
+          const digits = String(Math.abs(yr)).length;
+          const estW = Math.round((digits * 6.2 + (yr < 0 ? 20 : 10)) * GEOM.v);
+          const myHalfW = (estW * scale) * 0.5 + 7;
+
+          if (renderedX - myHalfW < lastMinorRight) continue;
+
+          let minClearance = 9999;
+          for (let k = 0; k < majors.length; k++) {
+            const dist = Math.abs(renderedX - majors[k].x) - (majors[k].halfW + myHalfW);
+            if (dist < minClearance) minClearance = dist;
+          }
+          const clearanceAlpha = Math.max(0, Math.min(1, minClearance / 16));
+          if (clearanceAlpha <= 0.03) continue;
+
+          const lensAlpha = Math.pow(weight, 1.1) * 0.98;
+          const finalAlpha = lensAlpha * clearanceAlpha;
+          if (finalAlpha <= 0.04) continue;
+
+          lastMinorRight = renderedX + myHalfW;
+
+          const m = domCache.minors[poolIdx++];
+          if (m.yr !== yr) {
+            m.yr = yr;
+            setYearLabelAndWidth(m, yr, GEOM.v);
+          }
+          m.baseX = x;
+          m.baseAlpha = finalAlpha;
+          m.el.style.display = 'flex';
+        }
+      }
+
+      for (let i = poolIdx; i < domCache.minors.length; i++) {
         const m = domCache.minors[i];
-        if (m.yr !== null) { m.yr = null; m.el.style.display = 'none'; }
+        if (m.yr !== null) {
+          m.yr = null;
+          m.el.style.display = 'none';
+        }
+      }
+    }
+
+    // 记录上一次经过中央红线激活的刻度年份，当切换时触发天头罗盘微脉冲反馈
+    let lastHotTickYear = null;
+
+    function magnifyTicks() {
+      if (document.body.dataset.view !== 'scroll') return;
+
+      const vw = viewportEl.clientWidth;
+      const cx = vw * 0.5;
+      const viewLeft = state.scrollX - getCenterPad();
+      let currentPeakYear = null;
+      let currentPeakWeight = 0;
+
+      // 1. 主刻度：Apple Dock 升余弦放大 + 底部发光刻度尺阶梯伸展
+      for (let i = 0; i < domCache.ticks.length; i++) {
+        const tick = domCache.ticks[i];
+        if (tick.yr === null) continue;
+        const screenX = tick.baseX - viewLeft;
+        const { weight, pushX } = evalCenterRedLineDock(screenX, cx);
+
+        const scale = 1 + weight * DOCK_MAX_ADD_SCALE;
+        const liftY = -weight * 4.2; // 向上优雅拱起，形成饱满的 Dock 弧线
+        const markScaleY = 1 + weight * 1.15;
+
+        tick.el.style.transform = `translate3d(${(tick.baseX + pushX).toFixed(2)}px, ${liftY.toFixed(2)}px, 0) translateX(-50%)`;
+        tick.labelEl.style.transform = `scale(${scale.toFixed(3)})`;
+        tick.markEl.style.transform = `scaleY(${markScaleY.toFixed(2)})`;
+        const isHot = weight > 0.56;
+        tick.el.classList.toggle('hot', isHot);
+        if (weight > currentPeakWeight) {
+          currentPeakWeight = weight;
+          currentPeakYear = tick.yr;
+        }
+      }
+
+      // 2. 细分刻度：同步享受饱满弧线拱起与液态胶囊高亮
+      for (let i = 0; i < domCache.minors.length; i++) {
+        const m = domCache.minors[i];
+        if (m.yr === null) continue;
+        const screenX = m.baseX - viewLeft;
+        const { weight, pushX } = evalCenterRedLineDock(screenX, cx);
+
+        const scale = 0.92 + weight * 1.48;
+        const liftY = -weight * 3.6;
+        const markScaleY = 0.85 + weight * 0.95;
+
+        m.el.style.transform = `translate3d(${(m.baseX + pushX).toFixed(2)}px, ${liftY.toFixed(2)}px, 0) translateX(-50%)`;
+        m.labelEl.style.transform = `scale(${scale.toFixed(3)})`;
+        m.markEl.style.transform = `scaleY(${markScaleY.toFixed(2)})`;
+        m.el.style.opacity = m.baseAlpha.toFixed(3);
+        m.el.classList.toggle('hot', weight > 0.65);
+        if (weight > currentPeakWeight && m.baseAlpha > 0.6) {
+          currentPeakWeight = weight;
+          currentPeakYear = m.yr;
+        }
+      }
+
+      // 当新的刻度滑入中央红线峰值区时，赋予顶部中央罗盘轻微的 Apple Watch 表冠刻度跳动脉冲
+      if (currentPeakWeight > 0.72 && currentPeakYear !== lastHotTickYear) {
+        lastHotTickYear = currentPeakYear;
+        const compassEl = document.querySelector('.scroll-center-compass');
+        if (compassEl) {
+          compassEl.classList.remove('compass-tick-pulse');
+          void compassEl.offsetWidth;
+          compassEl.classList.add('compass-tick-pulse');
+        }
+      }
+
+      // 3. 下方轴上的圆点与牌子联动引擎（以竖向光标接近轴上圆点为基准）：
+      //    - 光标接近轴上圆点时，圆点与下方牌子同步产生放大动效；
+      //    - 若光标接近到被密度抽样隐藏（.label-hidden）或被邻近牌子遮蔽的节点时，
+      //      自动将该被遮蔽的牌子置顶显示（.cursor-unmask-node + 动态高 z-index），并同步施加圆点与牌子动效；
+      //    - 牌子以顶部中心（50% 0%）为原点向下放大（dropY >= 0），绝不向上侵入轴线与圆点！
+      if (state.axisLayer) {
+        const CIRCLE_SENSE_RADIUS = 76; // 以轴上圆点为基准的感应半径（px）
+        // 先找出当前距离中央光标最近的主焦点圆点（用于精准唤醒被遮蔽的牌子）
+        let closestIdx = -1;
+        let closestDist = Infinity;
+        for (let i = 0; i < domCache.events.length; i++) {
+          const item = domCache.events[i];
+          if (!item || typeof item.x !== 'number') continue;
+          const d = Math.abs((item.x - viewLeft) - cx);
+          if (d < closestDist) {
+            closestDist = d;
+            closestIdx = i;
+          }
+        }
+
+        for (let i = 0; i < domCache.events.length; i++) {
+          const item = domCache.events[i];
+          if (!item || typeof item.x !== 'number') continue;
+          const screenX = item.x - viewLeft;
+          const card = item.cardEl || item.el.querySelector('.vertical-bamboo-slip, .axis-person-card');
+          const dot = item.dotEl || item.el.querySelector('.pulse-circle');
+          if (!card) continue;
+
+          if (screenX < -200 || screenX > vw + 200) {
+            if (item.__dockActive) {
+              item.__dockActive = false;
+              card.style.transform = '';
+              card.classList.remove('dock-focus');
+              item.el.classList.remove('cursor-unmask-node');
+              item.el.style.zIndex = '';
+              if (dot) {
+                dot.style.transform = '';
+                dot.classList.remove('dock-dot-active');
+              }
+            }
+            continue;
+          }
+
+          const dist = screenX - cx;
+          const absD = Math.abs(dist);
+
+          if (absD < CIRCLE_SENSE_RADIUS) {
+            item.__dockActive = true;
+            const u = dist / CIRCLE_SENSE_RADIUS;
+            const c = Math.cos(u * Math.PI * 0.5);
+            const weight = c * c; // 0 ~ 1 升余弦平滑权重（以圆点到光标距离为基准）
+            const pushX = Math.sin(u * Math.PI) * 14 * (1 - Math.abs(u) * 0.45);
+
+            // 若光标已接近该圆点（weight > 0.32 或为最近圆点且距离 < 38px），将被遮蔽/隐藏的牌子置顶显现
+            const isUnmasked = (weight > 0.35) || (i === closestIdx && absD < 42);
+            item.el.classList.toggle('cursor-unmask-node', isUnmasked);
+            // 按接近程度动态分配层级（36 ~ 85），确保越靠近光标的牌子越在最上层，绝不被旁边牌子遮挡
+            item.el.style.zIndex = String(36 + Math.round(weight * 48) + (i === closestIdx ? 10 : 0));
+
+            // 牌子以顶部中心（50% 0%）为基准向下自然放大并微下垂（dropY >= 0），严禁向上侵入轴线与圆点
+            const cardScale = 1 + weight * 0.34;
+            const cardDropY = weight * 3.0;
+            card.style.transform = `translate3d(${pushX.toFixed(2)}px, ${cardDropY.toFixed(2)}px, 0) scale(${cardScale.toFixed(3)})`;
+            card.classList.toggle('dock-focus', weight > 0.48);
+
+            // 轴上圆点同步放大并泛起呼吸光晕
+            if (dot) {
+              const dotScale = 1 + weight * 0.58;
+              dot.style.transform = `scale(${dotScale.toFixed(3)})`;
+              dot.classList.toggle('dock-dot-active', weight > 0.42);
+            }
+          } else {
+            if (item.__dockActive) {
+              item.__dockActive = false;
+              card.style.transform = '';
+              card.classList.remove('dock-focus');
+              item.el.classList.remove('cursor-unmask-node');
+              item.el.style.zIndex = '';
+              if (dot) {
+                dot.style.transform = '';
+                dot.classList.remove('dock-dot-active');
+              }
+            }
+          }
+        }
       }
     }
 
@@ -7250,20 +9747,67 @@
       bandHintTimer = setTimeout(() => bandHintEl.classList.add('hide'), 4200);
     }
 
-    /* 切换时间轴图层：events / figures / literati，点当前已开启的图层则收起 */
+    /* 同步左下角两个滑动式开关的滑块位置与尺寸 */
+    function syncSlidingSwitchPills() {
+      // 1) 支系三档滑块
+      const subTrack = document.getElementById('sub-mode-track');
+      const subPill = document.getElementById('sub-mode-pill');
+      if (subTrack && subPill) {
+        const activeSubBtn = subTrack.querySelector(`.slide-opt[data-submode="${state.subMode || 'auto'}"]`);
+        if (activeSubBtn) {
+          subPill.style.width = `${activeSubBtn.offsetWidth}px`;
+          subPill.style.transform = `translate3d(${activeSubBtn.offsetLeft}px, 0, 0)`;
+          subPill.dataset.mode = state.subMode || 'auto';
+        }
+      }
+
+      // 2) 图层五档滑块
+      const layerTrack = document.getElementById('axis-layer-track');
+      const layerPill = document.getElementById('axis-layer-pill');
+      if (layerTrack && layerPill) {
+        const key = state.axisLayer || 'off';
+        const activeLayerBtn = layerTrack.querySelector(`.slide-opt[data-layer="${key}"]`);
+        if (activeLayerBtn) {
+          layerPill.style.width = `${activeLayerBtn.offsetWidth}px`;
+          layerPill.style.transform = `translate3d(${activeLayerBtn.offsetLeft}px, 0, 0)`;
+          layerPill.dataset.theme = key;
+        }
+      }
+    }
+
+    function setSubMode(mode) {
+      if (!['auto', 'always', 'off'].includes(mode)) return;
+      state.subMode = mode;
+      state.smartSubFold = (mode === 'auto');
+      document.querySelectorAll('#sub-mode-track .slide-opt').forEach((btn) => {
+        const on = btn.dataset.submode === mode;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-checked', String(on));
+      });
+      syncSlidingSwitchPills();
+      state.cursorDynastyId = null;
+      applyScrollTransform();
+    }
+
+    /* 切换时间轴图层：events / figures / literati / eras / off，支持点击与手指滑动切换 */
     function setAxisLayer(layer, opts = {}) {
-      const next = (state.axisLayer === layer && !opts.force) ? null : layer;
+      const targetLayer = (layer === 'off') ? null : layer;
+      const next = (state.axisLayer === targetLayer && !opts.force && !opts.fromSlide) ? null : targetLayer;
       const layerChanged = next !== state.axisLayer;
 
       state.axisLayer = next;
       state.showEventsMaster = !!next;
 
-      document.querySelectorAll('.layer-switch').forEach((btn) => {
-        const on = btn.dataset.layer === next;
+      const activeKey = next || 'off';
+      document.querySelectorAll('#axis-layer-track .slide-opt').forEach((btn) => {
+        const on = btn.dataset.layer === activeKey;
         btn.classList.toggle('on', on);
-        btn.querySelector('.switch').classList.toggle('on', on);
+        btn.classList.toggle('active', on);
+        const sw = btn.querySelector('.switch');
+        if (sw) sw.classList.toggle('on', on);
         btn.setAttribute('aria-checked', String(on));
       });
+      syncSlidingSwitchPills();
 
       if (!next) {
         // 收起：只折叠下方卷轴，朝代带纹丝不动
@@ -7305,10 +9849,84 @@
       else selectPersonItem(item, true);
     }
 
-    function initControls() {
-      document.querySelectorAll('.layer-switch').forEach((btn) => {
-        btn.addEventListener('click', () => setAxisLayer(btn.dataset.layer));
+    /* 为滑动式开关轨道绑定「点按 + 左右手指拖拽滑选」手势 */
+    function bindSlidingTrackGesture(trackEl, onSelectBtn) {
+      if (!trackEl) return;
+      let isSliding = false;
+      let hasDragged = false;
+
+      const pickButtonAt = (clientX, clientY) => {
+        const opts = Array.from(trackEl.querySelectorAll('.slide-opt'));
+        for (const btn of opts) {
+          const r = btn.getBoundingClientRect();
+          if (clientX >= r.left && clientX <= r.right) return btn;
+        }
+        return null;
+      };
+
+      trackEl.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        isSliding = true;
+        hasDragged = false;
+        try { trackEl.setPointerCapture(e.pointerId); } catch (_) {}
       });
+
+      trackEl.addEventListener('pointermove', (e) => {
+        if (!isSliding) return;
+        e.stopPropagation();
+        hasDragged = true;
+        const hit = pickButtonAt(e.clientX, e.clientY);
+        if (hit && !hit.classList.contains('active')) {
+          onSelectBtn(hit, true);
+        }
+      });
+
+      const endSlide = (e) => {
+        if (!isSliding) return;
+        isSliding = false;
+        try { trackEl.releasePointerCapture(e.pointerId); } catch (_) {}
+      };
+      trackEl.addEventListener('pointerup', endSlide);
+      trackEl.addEventListener('pointercancel', endSlide);
+
+      trackEl.querySelectorAll('.slide-opt').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (hasDragged) {
+            hasDragged = false;
+            return;
+          }
+          onSelectBtn(btn, false);
+        });
+      });
+    }
+
+    function initControls() {
+      const subTrack = document.getElementById('sub-mode-track');
+      bindSlidingTrackGesture(subTrack, (btn) => {
+        setSubMode(btn.dataset.submode);
+      });
+
+      const layerTrack = document.getElementById('axis-layer-track');
+      bindSlidingTrackGesture(layerTrack, (btn, fromSlide) => {
+        setAxisLayer(btn.dataset.layer, { fromSlide });
+      });
+
+      const consoleEl = document.getElementById('unified-console');
+      const fabBtn = document.getElementById('console-fab-btn');
+      if (consoleEl && fabBtn) {
+        fabBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const collapsed = consoleEl.classList.toggle('is-collapsed');
+          fabBtn.setAttribute('aria-expanded', String(!collapsed));
+          if (!collapsed) {
+            requestAnimationFrame(() => syncSlidingSwitchPills());
+          }
+        });
+      }
+
+      requestAnimationFrame(() => syncSlidingSwitchPills());
+      window.addEventListener('resize', () => requestAnimationFrame(syncSlidingSwitchPills), { passive: true });
 
       document.getElementById('zoom-in-btn').addEventListener('click', () => {
         animateZoomTo(state.zoomScale * 1.4);
@@ -7316,6 +9934,10 @@
 
       document.getElementById('zoom-out-btn').addEventListener('click', () => {
         animateZoomTo(state.zoomScale / 1.4);
+      });
+
+      zoomLabelEl.addEventListener('click', () => {
+        animateZoomTo(1.0);
       });
 
       document.getElementById('prev-event-btn').addEventListener('click', () => stepAxisNode(-1));
@@ -7359,26 +9981,6 @@
       document.addEventListener(type, (e) => e.preventDefault(), { passive: false });
     });
 
-    // iOS：锁整页上下滑动（overflow:hidden 在 iOS Safari 上仍会出现橡皮筋滚动）。
-    // 触摸落在任何真实可滚动的容器（详情列表、史志窗格等）内时放行，其余一律拦截。
-    (function () {
-      const isScrollable = (el, axis) => {
-        const s = getComputedStyle(el);
-        const ov = axis === 'x' ? s.overflowX : s.overflowY;
-        return (ov === 'auto' || ov === 'scroll') &&
-          (axis === 'x' ? el.scrollWidth : el.scrollHeight) >
-          (axis === 'x' ? el.clientWidth : el.clientHeight) + 1;
-      };
-      document.addEventListener('touchmove', (e) => {
-        let t = e.target;
-        while (t && t.nodeType === 1 && t !== document.documentElement) {
-          if (isScrollable(t, 'y') || isScrollable(t, 'x')) return;
-          t = t.parentElement;
-        }
-        e.preventDefault();
-      }, { passive: false });
-    })();
-
     /********************************************************************
      * 15. 启动
      ********************************************************************/
@@ -7386,37 +9988,24 @@
     const bottomTabsEl = document.querySelector('.bottom-tabs');
     const tabGliderEl = bottomTabsEl ? bottomTabsEl.querySelector('.tab-glider') : null;
     function syncTabGlider() {
-      if (tabGliderEl && bottomTabsEl) {
-        const active = bottomTabsEl.querySelector('.view-tab.active');
-        if (active) {
-          tabGliderEl.style.width = `${active.offsetWidth}px`;
-          tabGliderEl.style.transform = `translateX(${active.offsetLeft}px)`;
-        }
-      }
-      syncControlLayout();
+      if (!tabGliderEl || !bottomTabsEl) return;
+      const active = bottomTabsEl.querySelector('.view-tab.active');
+      if (!active) return;
+      const targetW = active.offsetWidth;
+      const targetX = active.offsetLeft;
+      tabGliderEl.style.width = `${targetW}px`;
+      tabGliderEl.style.transform = `translate3d(${targetX}px, 0, 0)`;
     }
 
-    /* 图层胶囊方向：按实测可用宽度动态决定横排/竖排，并判断是否需要抬到主导航上方。
-       不再依赖屏幕方向 —— 分屏、iPad 侧拉、手机横屏都能自适应 */
-    function syncControlLayout() {
-      const appControlsEl = document.getElementById('app-controls');
-      if (!appControlsEl || !bottomTabsEl) return;
-      const vw = document.documentElement.clientWidth;
-      const tabsBox = bottomTabsEl.getBoundingClientRect();
-      const switches = appControlsEl.querySelectorAll('.layer-switch');
-      const SAFE_L = 12;
-      const tabsLeft = (vw - tabsBox.width) / 2;
-      // 先按横排量一次真实宽度（横排用短名，比竖排窄），再决定用不用横排
-      appControlsEl.classList.add('is-row');
-      let rowW = 24;
-      switches.forEach((el) => { rowW += el.getBoundingClientRect().width; });
-      const canRow = SAFE_L + rowW + 8 <= tabsLeft;
-      if (!canRow) appControlsEl.classList.remove('is-row');
-
-      const cw = appControlsEl.getBoundingClientRect().width;
-      const collides = SAFE_L + cw + 8 > tabsLeft;
-      const lift = Math.round(tabsBox.height) + 10;
-      appControlsEl.style.bottom = `calc(env(safe-area-inset-bottom, 0px) + ${collides ? 12 + lift : 12}px)`;
+    // 为液态玻璃底栏绑定实时环境高光折射跟随（手指/指针滑过时玻璃边缘泛起流动光泽）
+    if (bottomTabsEl) {
+      bottomTabsEl.addEventListener('pointermove', (e) => {
+        const rect = bottomTabsEl.getBoundingClientRect();
+        const xPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        const yPct = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+        bottomTabsEl.style.setProperty('--lg-x', `${xPct.toFixed(1)}%`);
+        bottomTabsEl.style.setProperty('--lg-y', `${yPct.toFixed(1)}%`);
+      }, { passive: true });
     }
 
     function boot() {
@@ -7770,7 +10359,7 @@
         b.setAttribute('aria-selected', String(on));
       });
       document.body.dataset.view = name;
-      syncTabGlider();
+      syncTabGlider(true);
 
       if (name !== 'scroll') closeSheet();
 
@@ -7906,6 +10495,74 @@
       }, 80);
     }
 
+    function closeAllAnimDropdowns(exceptEl = null) {
+      document.querySelectorAll('.anim-dropdown.open').forEach((dd) => {
+        if (dd !== exceptEl) {
+          dd.classList.remove('open');
+          const trig = dd.querySelector('.anim-dd-trigger');
+          if (trig) trig.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    function toggleAnimDropdown(dd) {
+      if (!dd) return;
+      const willOpen = !dd.classList.contains('open');
+      closeAllAnimDropdowns(dd);
+      dd.classList.toggle('open', willOpen);
+      const trig = dd.querySelector('.anim-dd-trigger');
+      if (trig) trig.setAttribute('aria-expanded', String(willOpen));
+    }
+
+    document.addEventListener('pointerdown', (e) => {
+      const inside = e.target.closest('.anim-dropdown');
+      if (!inside) closeAllAnimDropdowns();
+    });
+
+    function syncPeopleDropdownUI(arcId, tabKey) {
+      const catNames = { rulers: '帝王', figures: '重要人物', literati: '文学大家' };
+      const catLabel = document.getElementById('people-cat-label');
+      const catDot = document.getElementById('people-cat-dot');
+      if (catLabel && catNames[tabKey]) catLabel.textContent = catNames[tabKey];
+      if (catDot) catDot.dataset.kind = tabKey;
+
+      document.querySelectorAll('#people-cat-menu .anim-dd-item').forEach((btn) => {
+        const on = btn.dataset.ptab === tabKey;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', String(on));
+      });
+
+      const arc = ARCHIVE_MAP[arcId] || DYNASTY_ARCHIVES[0];
+      const dynLabel = document.getElementById('people-dyn-label');
+      if (dynLabel && arc) dynLabel.textContent = arc.name;
+
+      document.querySelectorAll('#people-dyn-menu .anim-dd-item').forEach((btn) => {
+        const on = btn.dataset.dynId === (arc && arc.id);
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', String(on));
+      });
+    }
+
+    function syncEventDropdownUI(catKey) {
+      const catNames = {
+        all: '全部事件',
+        '政治变革': '政治兴替',
+        '军事风云': '军事风云',
+        '文明盛世': '文明盛世',
+        '对外开拓': '对外开拓'
+      };
+      const labelEl = document.getElementById('event-cat-label');
+      const dotEl = document.getElementById('event-cat-dot');
+      if (labelEl) labelEl.textContent = catNames[catKey] || catKey;
+      if (dotEl) dotEl.dataset.cat = catKey;
+
+      document.querySelectorAll('#event-cat-menu .anim-dd-item').forEach((btn) => {
+        const on = btn.dataset.cat === catKey;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', String(on));
+      });
+    }
+
     function buildDynSelect() {
       const sel = document.getElementById('dyn-select');
       sel.innerHTML = DYNASTY_ARCHIVES.map((arc) =>
@@ -7914,6 +10571,65 @@
       sel.addEventListener('change', () => {
         clearPeopleSearch();
         renderArchive(sel.value);
+      });
+
+      // 构建动画朝代下拉菜单项
+      const dynMenu = document.getElementById('people-dyn-menu');
+      if (dynMenu) {
+        dynMenu.innerHTML = DYNASTY_ARCHIVES.map((arc) => `
+          <button class="anim-dd-item" data-dyn-id="${arc.id}" type="button" role="option">
+            <span class="dd-item-text"><b>${arc.name}</b><small>${arc.range}</small></span>
+            <span class="dd-check">✓</span>
+          </button>
+        `).join('');
+        dynMenu.querySelectorAll('.anim-dd-item').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.dynId;
+            sel.value = id;
+            clearPeopleSearch();
+            renderArchive(id);
+            closeAllAnimDropdowns();
+          });
+        });
+      }
+
+      // 绑定三个动画下拉菜单触发器
+      const pCatDd = document.getElementById('people-cat-dd');
+      const pCatTrig = document.getElementById('people-cat-trigger');
+      if (pCatTrig && pCatDd) {
+        pCatTrig.addEventListener('click', () => toggleAnimDropdown(pCatDd));
+      }
+      document.querySelectorAll('#people-cat-menu .anim-dd-item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          peopleTab = btn.dataset.ptab;
+          clearPeopleSearch();
+          renderArchive(archiveDynId || state.activeDynastyId || 'sanguo');
+          closeAllAnimDropdowns();
+        });
+      });
+
+      const pDynDd = document.getElementById('people-dyn-dd');
+      const pDynTrig = document.getElementById('people-dyn-trigger');
+      if (pDynTrig && pDynDd) {
+        pDynTrig.addEventListener('click', () => toggleAnimDropdown(pDynDd));
+      }
+
+      const eCatDd = document.getElementById('event-cat-dd');
+      const eCatTrig = document.getElementById('event-cat-trigger');
+      if (eCatTrig && eCatDd) {
+        eCatTrig.addEventListener('click', () => toggleAnimDropdown(eCatDd));
+      }
+      document.querySelectorAll('#event-cat-menu .anim-dd-item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          eventFilter = btn.dataset.cat;
+          document.querySelectorAll('.fchip').forEach((b) => {
+            if (b.dataset.dynChip) return;
+            b.classList.toggle('active', b.dataset.cat === eventFilter);
+          });
+          syncEventDropdownUI(eventFilter);
+          renderEventList();
+          closeAllAnimDropdowns();
+        });
       });
     }
 
@@ -7938,6 +10654,7 @@
       document.querySelectorAll('#people-seg .seg-btn').forEach((b) => {
         b.classList.toggle('active', b.dataset.ptab === peopleTab);
       });
+      syncPeopleDropdownUI(arc.id, peopleTab);
 
       const body = document.getElementById('people-body');
 
@@ -8070,6 +10787,7 @@
 
     function renderEventList() {
       syncDynChip();
+      syncEventDropdownUI(eventFilter);
       const list = document.getElementById('events-list');
       const q = eventQuery.trim().toLowerCase();
 
@@ -8172,8 +10890,25 @@
         });
       }
 
+      // 防误触优化：阻止在 Tab 栏上的触摸事件穿透到底层画卷，且仅在干净点按（移动距离 < 10px）时立即触发切换
+      if (bottomTabsEl) {
+        ['pointerdown', 'touchstart', 'mousedown'].forEach((evt) => {
+          bottomTabsEl.addEventListener(evt, (e) => e.stopPropagation(), { passive: true });
+        });
+      }
       document.querySelectorAll('.view-tab').forEach((btn) => {
-        btn.addEventListener('click', () => switchView(btn.dataset.view));
+        let downX = 0, downY = 0;
+        btn.addEventListener('pointerdown', (e) => {
+          downX = e.clientX;
+          downY = e.clientY;
+        }, { passive: true });
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (downX && Math.hypot(e.clientX - downX, e.clientY - downY) > 14) return;
+          if (currentView !== btn.dataset.view) {
+            switchView(btn.dataset.view);
+          }
+        });
       });
 
       document.getElementById('open-archive-btn').addEventListener('click', () => {
@@ -8226,5 +10961,158 @@
       boot();
     }
   </script>
+<!-- ================= V14 长卷 ⇄ 地图精准联动 & 地图全屏隐藏Tab栏补丁 ================= -->
+<style id="scroll-atlas-v14-style">
+  /* 切换到地图视图时，自动向下隐藏底部液态玻璃导航栏，将底部空间彻底让给地图时间轴 */
+  body[data-view="map"] .liquid-glass-bar,
+  body[data-view="map"] #bottom-tab-bar {
+    transform: translate3d(-50%, 140%, 0) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease !important;
+  }
+
+  /* 地图容器在隐藏底栏后铺满全屏高度 */
+  body[data-view="map"] #view-map,
+  body[data-view="map"] #map-stage,
+  body[data-view="map"] #map-embed {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+</style>
+
+<script id="scroll-atlas-v14-patch">
+(function () {
+  function installScrollAtlasPatch() {
+    if (typeof window.switchView !== 'function' || typeof window.openJiangshan !== 'function') {
+      setTimeout(installScrollAtlasPatch, 60);
+      return;
+    }
+
+    // 1. 获取长卷当前最精准的焦点年份（优先选中事件 -> 选中人物 -> 中央红线游标年份）
+    function getCurrentFocusYear() {
+      if (window.state) {
+        if (typeof state.cursorYear === 'number' && Number.isFinite(state.cursorYear)) {
+          return Math.round(state.cursorYear);
+        }
+        if (typeof state.currentYear === 'number' && Number.isFinite(state.currentYear)) {
+          return Math.round(state.currentYear);
+        }
+      }
+      const compassEl = document.getElementById('compass-year-val') || document.querySelector('.compass-year');
+      if (compassEl) {
+        const txt = compassEl.textContent || '';
+        const m = txt.match(/(前)?\s*(\d+)/);
+        if (m) return m[1] ? -Number(m[2]) : Number(m[2]);
+      }
+      return (window.state && Number(state.lastMapYear)) || 235;
+    }
+
+    // 2. 修复人物「地图 ›」按钮：携带人物当前激活节点年份或长卷当前年份，而非死板使用出生年
+    const origUpdatePersonMapBtn = window.updatePersonMapBtn;
+    window.updatePersonMapBtn = function (p) {
+      if (typeof origUpdatePersonMapBtn === 'function') origUpdatePersonMapBtn(p);
+      const btn = document.getElementById('person-map-btn');
+      if (!btn || !p) return;
+      const hit = typeof mapPersonOf === 'function' ? mapPersonOf(p.n) : null;
+      if (!hit) return;
+      // 若人物有具体代表年份 y，且在合理范围内则优先用 p.y，否则用 hit.from
+      const targetYear = (typeof p.y === 'number' && Number.isFinite(p.y)) ? p.y : hit.from;
+      const clampedYear = Math.max(MAP_MIN_YEAR, Math.min(MAP_MAX_YEAR, Math.round(targetYear)));
+      btn.dataset.key = hit.key;
+      btn.dataset.year = String(clampedYear);
+      btn.dataset.name = hit.name;
+      btn.textContent = '地图 ' + mapYearLabel(clampedYear) + ' ›';
+    };
+
+    // 3. 升级 mapEmbedGoto：同时发送 year 与 person，并带强制同步标记
+    window.mapEmbedGoto = function (year, key, extra) {
+      const rawYear = Number.isFinite(Number(year)) ? Number(year) : getCurrentFocusYear();
+      const y = Math.max(MAP_MIN_YEAR, Math.min(MAP_MAX_YEAR, Math.round(rawYear)));
+      const msg = Object.assign({
+        __atlas: 1,
+        year: y,
+        person: key || null,
+        exactYear: true,
+        token: Date.now()
+      }, extra || {});
+
+      if (window.state) state.lastMapYear = y;
+
+      if (window.MAP_EMBED && MAP_EMBED.ready) {
+        mapEmbedPost(msg);
+        mapToast(key
+          ? ('人物轨迹 · ' + (mapPersonNameByKey(key) || '历史人物') + ' (' + formatYearStr(y) + ')')
+          : ('已同步至 · ' + formatYearStr(y)));
+        return true;
+      }
+      if (window.MAP_EMBED) {
+        MAP_EMBED.pending = msg;
+        if (!MAP_EMBED.booted) mapEmbedBoot(y, key);
+        else mapToast('地图载入中，稍候自动定位至 ' + formatYearStr(y));
+      }
+      return true;
+    };
+
+    // 4. 拦截 switchView('map')：从长卷直接点底部「地图」Tab 时，自动把长卷当前红线年份同步进地图！
+    const origSwitchView = window.switchView;
+    let isInternalMapOpen = false;
+
+    window.openJiangshan = function (year, key, extra) {
+      const base = Number.isFinite(Number(year)) ? Number(year) : getCurrentFocusYear();
+      const y = Math.max(MAP_MIN_YEAR, Math.min(MAP_MAX_YEAR, Math.round(base)));
+      isInternalMapOpen = true;
+      if (currentView !== 'map') origSwitchView('map');
+      isInternalMapOpen = false;
+      return window.mapEmbedGoto(y, key, extra);
+    };
+
+    window.switchView = function (name) {
+      const prevView = window.currentView;
+      origSwitchView(name);
+      if (name === 'map' && !isInternalMapOpen) {
+        // 如果是从长卷切入地图，自动对齐长卷当前红线游标所在的年份
+        const focusYear = (prevView === 'scroll') ? getCurrentFocusYear() : ((window.state && Number(state.lastMapYear)) || getCurrentFocusYear());
+        const clamped = Math.max(MAP_MIN_YEAR, Math.min(MAP_MAX_YEAR, Math.round(focusYear)));
+        window.mapEmbedGoto(clamped, null);
+      }
+    };
+
+    // 5. 增强从地图返回长卷时的定位准确性
+    window.mapExitToAxis = function (d) {
+      const y = Number(d && d.year);
+      const name = (d && d.personName) || '';
+      if (Number.isFinite(y) && window.state) {
+        state.lastMapYear = y;
+      }
+      if (name) {
+        const inFig = (typeof FIGURE_AXIS !== 'undefined' && FIGURE_AXIS || []).some((x) => x.n === name);
+        const inLit = !inFig && (typeof LITERATI_AXIS !== 'undefined' && LITERATI_AXIS || []).some((x) => x.n === name);
+        if (inFig || inLit) {
+          const list = inFig ? FIGURE_AXIS : LITERATI_AXIS;
+          const item = list.find((x) => x.n === name);
+          locateOnAxis(inFig ? 'figures' : 'literati', item.id, Number.isFinite(y) ? y : undefined);
+          return;
+        }
+      }
+      origSwitchView('scroll');
+      if (Number.isFinite(y)) {
+        requestAnimationFrame(() => {
+          if (typeof jumpToYear === 'function') jumpToYear(Math.round(y));
+          else if (typeof centerOnYear === 'function') centerOnYear(Math.round(y), true);
+        });
+      }
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installScrollAtlasPatch);
+  } else {
+    installScrollAtlasPatch();
+  }
+})();
+</script>
 </body>
 </html>
