@@ -610,6 +610,18 @@ body.atlas-embed #nav-bar { border-color: #D8CBB6; }
 body.atlas-embed .brand-group .home-link {
   background: #E9DFCE;
 }
+body.atlas-embed #nav-bar .action-btn.subtle,
+body.atlas-embed .locale-pill-group,
+body.atlas-embed .music-pill-group,
+body.atlas-embed .search-input-wrap {
+  background: #FCF8F0;
+}
+body.atlas-embed #layers-popover {
+  background: #FBF8F1;
+}
+body.atlas-embed .play-speed-btn {
+  background: #FFFFFF;
+}
 body.atlas-embed #act-toggle-pane:hover {
   background: #FFFDF8;
 }
