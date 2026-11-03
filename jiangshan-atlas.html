@@ -5384,28 +5384,6 @@ body.atlas-embed #scrubber-dock {
 }
 /* 时间轴触摸拖动：交给指针事件，避免被浏览器手势抢走 */
 body.atlas-embed #scrubber-track { touch-action: none; }
-
-/* 触碰地图：悬浮面板淡到 75%；拖动/滚轮缩放地图：全部降到 15%，松手恢复 */
-body.atlas-embed.ui-recede #nav-bar,
-body.atlas-embed.ui-recede #scrubber-dock,
-body.atlas-embed.ui-recede #chronicle-pane,
-body.atlas-embed.ui-recede #map-key,
-body.atlas-embed.ui-recede #canvas-br-dock,
-body.atlas-embed.ui-recede #act-toggle-pane { opacity: 0.75; }
-
-body.atlas-embed #map-key,
-body.atlas-embed #canvas-br-dock { transition: opacity 0.3s ease, transform 0.28s ease; }
-
-body.atlas-embed.ui-move #nav-bar,
-body.atlas-embed.ui-move #scrubber-dock,
-body.atlas-embed.ui-move #chronicle-pane,
-body.atlas-embed.ui-move #map-key,
-body.atlas-embed.ui-move #canvas-br-dock,
-body.atlas-embed.ui-move #act-toggle-pane {
-  opacity: 0.15;
-  transition-duration: 0.18s;
-}
-
 /* 详情卡收起/展开手柄：贴在卡片左缘，收起后滑到屏幕右缘 */
 body.atlas-embed #act-toggle-pane {
   position: fixed;
@@ -5975,469 +5953,49 @@ body.atlas-embed #atlas-svg text[filter] {
 })();
 </script>
 <script id="atlas-float-ui">
-/* 悬浮 UI 状态：触碰地图 → 75%；拖动 / 滚轮缩放地图 → 15%；松手恢复 */
+/* 左下角图例：左右滑动 = 时间轴上一站 / 下一站（已彻底移除所有动态透明度逻辑） */
 (function () {
   function boot() {
-    var body = document.body;
-    var viewport = document.getElementById('viewport-frame');
-    var dock = document.getElementById('scrubber-dock');
-    if (!viewport || !dock) { setTimeout(boot, 120); return; }
-    var restoreTimer = 0;
-    var moveTimer = 0;
-    function recede(on) {
-      clearTimeout(restoreTimer);
-      if (on) body.classList.add('ui-recede');
-      else restoreTimer = setTimeout(function () { body.classList.remove('ui-recede'); }, 160);
-    }
-    function moving(on) {
-      clearTimeout(moveTimer);
-      if (on) body.classList.add('ui-move');
-      else moveTimer = setTimeout(function () { body.classList.remove('ui-move'); }, 220);
-    }
-    var dragging = false;
-    viewport.addEventListener('pointerdown', function () {
-      dragging = true; recede(true); moving(false);
+    var key = document.getElementById('map-key');
+    if (!key) { setTimeout(boot, 120); return; }
+
+    key.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    var sx = 0, sy = 0, dx = 0, active = false, horiz = false;
+    key.addEventListener('pointerdown', function (e) {
+      if (e.button && e.button !== 0) return;
+      e.stopPropagation(); /* 不当作地图触摸，也不触发地图拖拽 */
+      active = true; horiz = false; dx = 0;
+      sx = e.clientX; sy = e.clientY;
     }, { passive: true });
     window.addEventListener('pointermove', function (e) {
-      if (dragging && ((e.buttons && e.buttons > 0) || (e.touches && e.touches.length > 0))) moving(true);
-    }, { passive: true });
-    window.addEventListener('wheel', function () { moving(true); }, { passive: true });
-    function endDrag() { dragging = false; moving(false); recede(false); }
-    window.addEventListener('pointerup', endDrag, { passive: true });
-    window.addEventListener('pointercancel', endDrag, { passive: true });
-
-    ['nav-bar', 'scrubber-dock', 'chronicle-pane', 'map-key', 'canvas-br-dock'].forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) el.addEventListener('pointerdown', function () { recede(false); moving(false); dragging = false; }, { passive: true });
-    });
-
-    /* 左下角图例：左右滑动 = 时间轴上一站 / 下一站 */
-    var key = document.getElementById('map-key');
-    if (key) {
-      key.addEventListener('dragstart', function (e) { e.preventDefault(); });
-      var sx = 0, sy = 0, dx = 0, active = false, horiz = false;
-      key.addEventListener('pointerdown', function (e) {
-        if (e.button && e.button !== 0) return;
-        e.stopPropagation();               /* 不当作地图触摸，也不触发地图拖拽 */
-        active = true; horiz = false; dx = 0;
-        sx = e.clientX; sy = e.clientY;
-      }, { passive: true });
-      window.addEventListener('pointermove', function (e) {
-        if (!active) return;
-        if (e.pointerType === 'mouse' && e.buttons === 0) { settle(); return; }  /* 兜底：pointerup 丢失 */
-        dx = e.clientX - sx;
-        var dy = e.clientY - sy;
-        if (!horiz) {
-          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-          horiz = Math.abs(dx) > Math.abs(dy);
-          if (!horiz) { active = false; return; }
-        }
-        var off = Math.max(-44, Math.min(44, dx / 2.4));
-        key.style.transition = 'none';
-        key.style.transform = 'translateX(' + off.toFixed(1) + 'px)';
-      }, { passive: true });
-      function settle() {
-        if (!active) return;
-        active = false;
-        key.style.transition = '';
-        key.style.transform = '';
-        if (horiz && Math.abs(dx) > 36) {
-          var btn = document.getElementById(dx < 0 ? 'act-step-next' : 'act-step-prev');
-          if (btn) btn.click();
-        }
-        horiz = false;
+      if (!active) return;
+      if (e.pointerType === 'mouse' && e.buttons === 0) { settle(); return; }
+      dx = e.clientX - sx;
+      var dy = e.clientY - sy;
+      if (!horiz) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        horiz = Math.abs(dx) > Math.abs(dy);
+        if (!horiz) { active = false; return; }
       }
-      window.addEventListener('pointerup', settle, { passive: true });
-      window.addEventListener('pointercancel', settle, { passive: true });
+      var off = Math.max(-44, Math.min(44, dx / 2.4));
+      key.style.transition = 'none';
+      key.style.transform = 'translateX(' + off.toFixed(1) + 'px)';
+    }, { passive: true });
+    function settle() {
+      if (!active) return;
+      active = false;
+      key.style.transition = '';
+      key.style.transform = '';
+      if (horiz && Math.abs(dx) > 36) {
+        var btn = document.getElementById(dx < 0 ? 'act-step-next' : 'act-step-prev');
+        if (btn) btn.click();
+      }
+      horiz = false;
     }
+    window.addEventListener('pointerup', settle, { passive: true });
+    window.addEventListener('pointercancel', settle, { passive: true });
   }
   boot();
-})();
-</script>
-<!-- ================= V14 悬浮弹窗 · 史志与溯源互斥防重合 · 点击地图50%半透明 · 时间轴UI与精准联动补丁 ================= -->
-<style id="atlas-v14-upgrade-style">
-  /* 1. 悬浮弹窗统一质感：宣纸鎏金 + 液态毛玻璃 + 四周悬浮留白 */
-  body.atlas-embed #chronicle-pane,
-  body.atlas-embed #genealogy-card,
-  body.atlas-embed #journey-card,
-  body.atlas-embed #milestone-balloon {
-    background: linear-gradient(180deg, rgba(252, 249, 242, 0.94), rgba(245, 239, 227, 0.90)) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(1.85) !important;
-    backdrop-filter: blur(24px) saturate(1.85) !important;
-    border: 1px solid rgba(181, 69, 47, 0.24) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 18px 42px -10px rgba(30, 24, 18, 0.26), 0 4px 12px rgba(30, 24, 18, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.82) !important;
-    transition: opacity 0.26s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1) !important;
-  }
-
-  /* 2. 右侧坐标对齐与层级统一（点地溯源 #genealogy-card 与 史志 #chronicle-pane 互斥展示在同一黄金悬浮区） */
-  @media (min-width: 901px) {
-    body.atlas-embed #chronicle-pane {
-      position: fixed !important;
-      top: calc(env(safe-area-inset-top, 0px) + 58px) !important;
-      right: 14px !important;
-      bottom: auto !important;
-      max-height: calc(100dvh - 166px) !important;
-      width: min(348px, 31vw) !important;
-      z-index: 64 !important;
-    }
-
-    body.atlas-embed #genealogy-card {
-      position: fixed !important;
-      top: calc(env(safe-area-inset-top, 0px) + 58px) !important;
-      right: 14px !important;
-      left: auto !important;
-      bottom: auto !important;
-      max-height: calc(100dvh - 166px) !important;
-      width: min(368px, 33vw) !important;
-      z-index: 65 !important;
-    }
-
-    body.atlas-embed #viewport-frame.has-active-person #genealogy-card {
-      width: min(396px, 35vw) !important;
-    }
-  }
-
-  @media (max-width: 900px) {
-    body.atlas-embed #chronicle-pane {
-      position: fixed !important;
-      left: 12px !important;
-      right: 12px !important;
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 104px) !important;
-      max-height: min(44vh, 330px) !important;
-      z-index: 64 !important;
-    }
-
-    body.atlas-embed #genealogy-card {
-      position: fixed !important;
-      left: 12px !important;
-      right: 12px !important;
-      top: auto !important;
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 104px) !important;
-      max-height: min(48vh, 370px) !important;
-      z-index: 65 !important;
-    }
-  }
-
-  /* 当点地溯源/点人溯事 (#genealogy-card) 处于打开状态时，强制收起隐藏史志面板与侧栏手柄，彻底杜绝重合 */
-  body.atlas-embed.has-genealogy-open #chronicle-pane {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transform: translateX(24px) scale(0.97) !important;
-  }
-  body.atlas-embed.has-genealogy-open #act-toggle-pane {
-    right: 14px !important;
-  }
-
-  /* 3. 点击/操作地图时，所有悬浮弹窗透明度严格变为 50% (0.5) */
-  body.atlas-embed.ui-recede #chronicle-pane,
-  body.atlas-embed.ui-move #chronicle-pane,
-  body.atlas-embed.map-active-50 #chronicle-pane,
-  body.atlas-embed.ui-recede #genealogy-card:not(.is-hidden),
-  body.atlas-embed.ui-move #genealogy-card:not(.is-hidden),
-  body.atlas-embed.map-active-50 #genealogy-card:not(.is-hidden),
-  body.atlas-embed.ui-recede #journey-card:not(.is-hidden),
-  body.atlas-embed.ui-move #journey-card:not(.is-hidden),
-  body.atlas-embed.map-active-50 #journey-card:not(.is-hidden),
-  body.atlas-embed.ui-recede #milestone-balloon:not(.is-hidden),
-  body.atlas-embed.ui-move #milestone-balloon:not(.is-hidden),
-  body.atlas-embed.map-active-50 #milestone-balloon:not(.is-hidden) {
-    opacity: 0.5 !important;
-  }
-
-  /* 保持顶部导航与底部时间轴在点击地图时清晰可控 */
-  body.atlas-embed.ui-recede #nav-bar,
-  body.atlas-embed.ui-move #nav-bar,
-  body.atlas-embed.ui-recede #scrubber-dock,
-  body.atlas-embed.ui-move #scrubber-dock {
-    opacity: 0.92 !important;
-  }
-
-  /* 鼠标悬停或触摸弹窗自身时立即恢复 100% 不透明 */
-  body.atlas-embed #chronicle-pane:hover,
-  body.atlas-embed #genealogy-card:hover,
-  body.atlas-embed #journey-card:hover,
-  body.atlas-embed #milestone-balloon:hover {
-    opacity: 1 !important;
-  }
-
-  /* 4. 底部时间轴下沉至原 Tab 栏位置 & UI 全面美化 */
-  body.atlas-embed #scrubber-dock {
-    position: fixed !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
-    width: min(960px, calc(100vw - 20px)) !important;
-    padding: 10px 16px 12px !important;
-    border-radius: 22px !important;
-    border: 1px solid rgba(184, 134, 45, 0.34) !important;
-    background: linear-gradient(180deg, rgba(252, 249, 242, 0.92), rgba(244, 237, 224, 0.86)) !important;
-    -webkit-backdrop-filter: blur(26px) saturate(1.9) !important;
-    backdrop-filter: blur(26px) saturate(1.9) !important;
-    box-shadow: 0 16px 38px -8px rgba(28, 20, 12, 0.24), 0 2px 8px rgba(28, 20, 12, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
-    z-index: 68 !important;
-  }
-
-  /* 时间轴朝代色带与滑块精致化 */
-  body.atlas-embed #scrubber-track {
-    height: 32px !important;
-    border-radius: 10px !important;
-    box-shadow: inset 0 1px 3px rgba(43, 38, 34, 0.18), 0 1px 0 rgba(255, 255, 255, 0.7) !important;
-    border: 1px solid rgba(120, 96, 68, 0.22) !important;
-  }
-  body.atlas-embed #dynasty-bands {
-    border-radius: 9px !important;
-  }
-  body.atlas-embed .band-cell {
-    font-weight: 600 !important;
-    letter-spacing: 0.04em !important;
-    transition: opacity 0.2s ease, filter 0.2s ease !important;
-  }
-  body.atlas-embed .band-cell.is-active {
-    opacity: 1 !important;
-    filter: saturate(1.18) brightness(1.04) !important;
-    box-shadow: inset 0 0 0 1.5px rgba(255, 250, 240, 0.65) !important;
-  }
-
-  /* 朱砂鎏金游标手柄 */
-  body.atlas-embed #scrubber-handle {
-    top: -5px !important;
-    bottom: -5px !important;
-    width: 6px !important;
-    margin-left: -3px !important;
-    border-radius: 999px !important;
-    background: linear-gradient(180deg, #d4483b, #9e2218) !important;
-    box-shadow: 0 0 0 2.5px #fffdf9, 0 3px 10px rgba(158, 34, 24, 0.45) !important;
-  }
-
-  /* 顶部悬浮纪年气泡升级为朱砂印章质感 */
-  body.atlas-embed #scrubber-Bubble {
-    background: linear-gradient(135deg, #3a2e25, #241c16) !important;
-    color: #fff9f0 !important;
-    border: 1px solid rgba(212, 168, 86, 0.45) !important;
-    border-radius: 999px !important;
-    padding: 2.5px 11px !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 12px rgba(28, 20, 12, 0.24) !important;
-  }
-
-  /* 播放按钮与步进器精致化 */
-  body.atlas-embed .round-btn {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 12px !important;
-    background: linear-gradient(180deg, #ffffff, #f6f0e4) !important;
-    border: 1px solid rgba(181, 69, 47, 0.24) !important;
-    color: var(--vermilion) !important;
-    box-shadow: 0 3px 8px rgba(43, 38, 34, 0.1) !important;
-  }
-  body.atlas-embed .round-btn.is-playing {
-    background: linear-gradient(135deg, #c84630, #9e2218) !important;
-    color: #fffdf9 !important;
-  }
-  body.atlas-embed .year-stepper {
-    border-radius: 12px !important;
-    background: rgba(255, 253, 248, 0.92) !important;
-    border: 1px solid rgba(181, 69, 47, 0.22) !important;
-    padding: 3px 6px !important;
-    box-shadow: 0 2px 6px rgba(43, 38, 34, 0.06) !important;
-  }
-
-  /* 左下角图例与右下角比例尺同步下移，配合下沉后的时间轴 */
-  @media (min-width: 901px) {
-    body.atlas-embed #map-key {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 108px) !important;
-      max-height: calc(100dvh - 180px) !important;
-    }
-    body.atlas-embed #canvas-br-dock {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 108px) !important;
-    }
-  }
-  @media (max-width: 900px) {
-    body.atlas-embed #map-key {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 172px) !important;
-    }
-    body.atlas-embed #canvas-br-dock {
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 108px) !important;
-    }
-  }
-</style>
-
-<script id="atlas-v14-logic-patch">
-(function () {
-  function bootAtlasV14Patch() {
-    var body = document.body;
-    var workBody = document.getElementById('workspace-body');
-    var genCard = document.getElementById('genealogy-card');
-    var chronPane = document.getElementById('chronicle-pane');
-    var togglePaneBtn = document.getElementById('act-toggle-pane');
-    var mobileChronBtn = document.getElementById('act-mobile-chronicle');
-    var bannerBar = document.getElementById('dynasty-banner-bar');
-    var viewport = document.getElementById('viewport-frame');
-
-    if (!workBody || !genCard || !chronPane || !viewport || !window.atlasApp) {
-      setTimeout(bootAtlasV14Patch, 80);
-      return;
-    }
-
-    var app = window.atlasApp;
-
-    /* =========================================================================
-     * 1. 右侧「史志 (#chronicle-pane)」与「点地溯源/点人溯事 (#genealogy-card)」互斥防重合
-     * ========================================================================= */
-    function syncRightPanelMutex() {
-      var isGenOpen = !genCard.classList.contains('is-hidden');
-      body.classList.toggle('has-genealogy-open', isGenOpen);
-      if (isGenOpen) {
-        // 当点地溯源或点人溯事打开时，自动收起史志面板，防止右侧重叠
-        workBody.classList.add('is-pane-collapsed');
-        workBody.classList.remove('is-mobile-chronicle-open');
-        if (togglePaneBtn) {
-          var arrow = togglePaneBtn.querySelector('.tp-arrow');
-          var lbl = document.getElementById('lbl-toggle-pane');
-          if (arrow) arrow.textContent = '‹';
-          if (lbl) lbl.textContent = '史志';
-        }
-      }
-    }
-
-    var genObserver = new MutationObserver(syncRightPanelMutex);
-    genObserver.observe(genCard, { attributes: true, attributeFilter: ['class'] });
-    syncRightPanelMutex();
-
-    // 当用户主动点击「史志/全图」按钮或窄屏「史志·事件」按钮展开史志时，若点地溯源开着，则先关闭点地溯源并展开史志
-    function onUserToggleChronicle(e) {
-      if (!genCard.classList.contains('is-hidden')) {
-        if (app && typeof app.closeGenealogyCard === 'function') {
-          app.closeGenealogyCard();
-        } else {
-          genCard.classList.add('is-hidden');
-        }
-        body.classList.remove('has-genealogy-open');
-        // 确保史志展开
-        workBody.classList.remove('is-pane-collapsed');
-      }
-    }
-    if (togglePaneBtn) togglePaneBtn.addEventListener('click', onUserToggleChronicle, true);
-    if (mobileChronBtn) mobileChronBtn.addEventListener('click', onUserToggleChronicle, true);
-    if (bannerBar) {
-      bannerBar.addEventListener('click', function () {
-        if (window.innerWidth <= 900 && !genCard.classList.contains('is-hidden')) {
-          if (app && typeof app.closeGenealogyCard === 'function') app.closeGenealogyCard();
-          body.classList.remove('has-genealogy-open');
-        }
-      }, true);
-    }
-
-    /* =========================================================================
-     * 2. 点击地图时弹窗透明度变为 50%，点击弹窗内部恢复 100%
-     * ========================================================================= */
-    var floatingPopups = [chronPane, genCard, document.getElementById('journey-card'), document.getElementById('milestone-balloon')];
-
-    viewport.addEventListener('pointerdown', function (e) {
-      // 如果点击落在弹窗、搜索框、图例或按钮上，则恢复 100% 不透明
-      var t = e.target;
-      if (t && t.closest && t.closest('#genealogy-card, #chronicle-pane, #journey-card, #milestone-balloon, #map-search-box, #map-key, #canvas-br-dock, #act-toggle-pane')) {
-        body.classList.remove('map-active-50');
-        return;
-      }
-      // 点击在地图画布上：将已打开的悬浮弹窗切换为 50% 透明度
-      body.classList.add('map-active-50');
-    }, { passive: true });
-
-    floatingPopups.forEach(function (el) {
-      if (!el) return;
-      el.addEventListener('pointerdown', function (e) {
-        body.classList.remove('map-active-50');
-        body.classList.remove('ui-recede');
-        body.classList.remove('ui-move');
-      }, { passive: true });
-    });
-
-    /* =========================================================================
-     * 3. 修复长卷 ⇄ 地图联动偏差（精准年份跳转 + 人物最近生平站点匹配 + 实时状态回报）
-     * ========================================================================= */
-    function notifyParentState() {
-      if (typeof window.__atlasSync === 'function') window.__atlasSync();
-      try {
-        if (window.parent && window.parent !== window) {
-          var p = (app.activePerson && app.activePerson.profiles && app.activePerson.profiles[0]) || null;
-          var d = (app.dynasties && app.dynasties[app.dynastyIdx]) || null;
-          window.parent.postMessage({
-            __atlasState: 1,
-            year: typeof app.year === 'number' ? app.year : null,
-            person: p ? p.key : null,
-            personName: p ? (p.zh || p.nameZh || '') : null,
-            dyn: d ? (d.nameZh || d.name || '') : '',
-            playing: !!app.playing
-          }, '*');
-        }
-      } catch (err) {}
-    }
-
-    // 包装 jumpToYear 与 setYear，确保任何年份变化都实时同步回长卷并闭合过期的点地溯源重叠
-    if (typeof app.jumpToYear === 'function' && !app.__v14Wrapped) {
-      app.__v14Wrapped = true;
-      var origJumpToYear = app.jumpToYear.bind(app);
-      app.jumpToYear = function (yr, opts) {
-        var res = origJumpToYear(yr, opts);
-        notifyParentState();
-        return res;
-      };
-    }
-
-    // 增强下行消息处理：当长卷传来 { __atlas: 1, year, person } 时精准对齐年份与人物站点
-    window.addEventListener('message', function (e) {
-      var d = e.data;
-      if (typeof d === 'string') {
-        try { d = JSON.parse(d); } catch (err) { return; }
-      }
-      if (!d || d.__atlas !== 1 || d.__atlasQuery) return;
-
-      if (app.stopAutoplay) app.stopAutoplay();
-      body.classList.remove('map-active-50');
-
-      var targetYear = (typeof d.year === 'number' && isFinite(d.year)) ? Math.round(d.year) : null;
-
-      if (d.person && typeof app.openPersonChronicle === 'function') {
-        // 先打开人物轨迹，再查找与 targetYear 最接近的生平节点索引
-        app.openPersonChronicle(d.person, 0);
-        if (targetYear !== null && app.activePerson && Array.isArray(app.activePerson.events) && app.activePerson.events.length > 0) {
-          var bestIdx = 0;
-          var minDiff = Infinity;
-          app.activePerson.events.forEach(function (ev, idx) {
-            var evYr = typeof ev.year === 'number' ? ev.year : (typeof ev.y === 'number' ? ev.y : null);
-            if (evYr !== null) {
-              var diff = Math.abs(evYr - targetYear);
-              if (diff < minDiff) {
-                minDiff = diff;
-                bestIdx = idx;
-              }
-            }
-          });
-          if (bestIdx > 0) {
-            app.openPersonChronicle(d.person, bestIdx);
-          }
-        }
-      } else if (targetYear !== null) {
-        if (app.activePerson && typeof app.closeGenealogyCard === 'function') {
-          app.closeGenealogyCard();
-        }
-        if (typeof app.jumpToYear === 'function') {
-          app.jumpToYear(targetYear);
-        }
-      }
-      syncRightPanelMutex();
-      notifyParentState();
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootAtlasV14Patch);
-  } else {
-    bootAtlasV14Patch();
-  }
 })();
 </script>
 </body>
