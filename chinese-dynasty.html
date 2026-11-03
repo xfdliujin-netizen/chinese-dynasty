@@ -2011,10 +2011,6 @@
     }
     /* 不透明样式不叠加玻璃高光 */
     .bottom-tabs::before { display: none; }
-    /* 地图页：主导航与时间轴一起靠近屏幕底部，二者保留少量间隙 */
-    body[data-view="map"] .bottom-tabs {
-      bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-    }
     .bottom-tabs .view-tab {
       position: relative;
       z-index: 1;
@@ -2046,8 +2042,8 @@
     }
     .bottom-tabs .view-tab.active {
       color: var(--tint);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 252, 246, 0.80));
-      box-shadow: 0 3px 10px rgba(120, 92, 60, 0.14), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+      background: #FFFDF8;
+      box-shadow: 0 3px 10px rgba(120, 92, 60, 0.14), 0 1px 0 #FFFFFF inset;
     }
     .bottom-tabs .view-tab.active svg { transform: scale(1.06); }
     .bottom-tabs .view-tab:not(.active):active { transform: scale(0.94); color: #6D6D72; }

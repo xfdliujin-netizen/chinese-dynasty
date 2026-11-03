@@ -264,12 +264,12 @@ body.atlas-embed #nav-bar {
   body.atlas-embed #workspace-body.is-mobile-chronicle-open #map-key { display: none; }
 }
 
-/* 时间轴：靠近底部主导航，保留 4px 视觉间隙 + 安全区 */
+/* 时间轴：直接贴屏幕底部，仅保留 8px 安全间隙 */
 body.atlas-embed #scrubber-dock {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 70px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
   z-index: 66;
   width: min(880px, calc(100vw - 20px));
   border: 1px solid rgba(255, 255, 255, 0.6);
@@ -587,6 +587,72 @@ body.atlas-embed .archive-folder-tabs { display: none; }
   }
   body.atlas-embed #workspace-body.is-pane-collapsed:not(.is-mobile-chronicle-open) #chronicle-pane {
     width: min(340px, 34vw);
+  }
+}
+
+/* ================= 不透明界面（v14）：取消所有背景透明度与淡出效果 ================= */
+body.atlas-embed,
+body.atlas-embed * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+body.atlas-embed #nav-bar,
+body.atlas-embed #scrubber-dock,
+body.atlas-embed #map-key,
+body.atlas-embed #chronicle-pane,
+body.atlas-embed #milestone-balloon,
+body.atlas-embed #act-toggle-pane {
+  opacity: 1;
+  background-color: #F7F2E8;
+  background-image: none;
+}
+body.atlas-embed #nav-bar { border-color: #D8CBB6; }
+body.atlas-embed .brand-group .home-link {
+  background: #E9DFCE;
+}
+body.atlas-embed #act-toggle-pane:hover {
+  background: #FFFDF8;
+}
+body.atlas-embed #canvas-br-dock .canvas-reset-btn {
+  background: #F7F2E8;
+  border-color: #D8CBB6;
+}
+body.atlas-embed #scale-bar-box {
+  padding: 4px 6px;
+  border: 1px solid #D8CBB6;
+  border-radius: 8px;
+  background: #F7F2E8;
+}
+body.atlas-embed .scale-label { text-shadow: none; }
+body.atlas-embed .archive-folder-tab small { opacity: 1; }
+
+/* 触碰或拖动地图时不再把任何面板变淡 */
+body.atlas-embed.ui-recede #nav-bar,
+body.atlas-embed.ui-recede #scrubber-dock,
+body.atlas-embed.ui-recede #chronicle-pane,
+body.atlas-embed.ui-recede #map-key,
+body.atlas-embed.ui-recede #canvas-br-dock,
+body.atlas-embed.ui-recede #act-toggle-pane,
+body.atlas-embed.ui-move #nav-bar,
+body.atlas-embed.ui-move #scrubber-dock,
+body.atlas-embed.ui-move #chronicle-pane,
+body.atlas-embed.ui-move #map-key,
+body.atlas-embed.ui-move #canvas-br-dock,
+body.atlas-embed.ui-move #act-toggle-pane {
+  opacity: 1;
+}
+
+/* 平板 / 电脑的档案夹同样使用不透明马尼拉纸色 */
+@media (min-width: 768px) {
+  body.atlas-embed #chronicle-pane,
+  body.atlas-embed #milestone-balloon {
+    background-color: #EAD9AE;
+    background-image: repeating-linear-gradient(
+      0deg,
+      #EAD9AE 0,
+      #EAD9AE 27px,
+      #E2CF9E 28px
+    );
   }
 }
 
