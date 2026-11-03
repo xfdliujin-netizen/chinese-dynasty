@@ -100,31 +100,8 @@
     .ancient-scroll::-webkit-scrollbar-track { background: transparent; }
     .ancient-scroll::-webkit-scrollbar-thumb { background: rgba(60, 60, 67, 0.28); border-radius: 4px; }
 
-    /* ================= 顶部标题栏（iOS 半透明毛玻璃导航栏） ================= */
-    .app-header {
-      flex: 0 0 auto;
-      position: relative;
-      z-index: 30;
-      background: rgba(245, 240, 230, 0.78);
-      -webkit-backdrop-filter: blur(20px) saturate(1.8);
-      backdrop-filter: blur(20px) saturate(1.8);
-      border-bottom: 1px solid var(--sep);
-      padding-top: calc(8px + env(safe-area-inset-top, 0px));
-      padding-bottom: 8px;
-      padding-left: calc(var(--page-pad) + env(safe-area-inset-left, 0px));
-      padding-right: calc(var(--page-pad) + env(safe-area-inset-right, 0px));
-    }
-
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
+    /* ================= 品牌印记与纪年基礎样式 ================= */
     .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
-
     .seal {
       width: 28px; height: 28px; flex: 0 0 auto;
       display: flex; align-items: center; justify-content: center;
@@ -137,9 +114,7 @@
       box-shadow: 0 1px 3px rgba(142, 36, 29, 0.28);
       padding-bottom: 2px;
     }
-
     .brand-text { min-width: 0; }
-
     .app-title {
       margin: 0;
       font-size: clamp(15px, 1.55vw, 20px);
@@ -149,26 +124,12 @@
       color: var(--ink-black);
       white-space: nowrap;
     }
-
     .app-sub {
       margin: 2px 0 0;
       font-size: clamp(9px, 0.95vw, 11px);
       font-weight: 500;
       letter-spacing: 0.06em;
       color: var(--gray-label);
-      white-space: nowrap;
-    }
-
-    .header-tools { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
-
-    .year-badge {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      padding: 5px 11px;
-      border-radius: 999px;
-      background: var(--fill);
-      border: none;
       white-space: nowrap;
     }
     #center-era-badge { font-size: clamp(10px, 1.05vw, 13px); font-weight: 600; color: var(--tint); }
@@ -178,27 +139,6 @@
       font-variant-numeric: tabular-nums;
       font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
     }
-
-    .zoom-box {
-      display: flex;
-      align-items: center;
-      gap: 1px;
-      padding: 2px;
-      border-radius: 999px;
-      background: var(--fill);
-      border: none;
-    }
-    .zoom-btn {
-      width: 28px; height: 24px;
-      display: flex; align-items: center; justify-content: center;
-      border: none; border-radius: 999px;
-      background: transparent;
-      color: var(--ink-black);
-      font-size: 14px; font-weight: 700; line-height: 1;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.15s ease;
-    }
-    .zoom-btn:active { background: var(--fill-strong); transform: scale(0.92); }
     #zoom-label {
       min-width: 42px;
       text-align: center;
@@ -209,67 +149,6 @@
       transition: color 0.25s ease;
     }
     #zoom-label.zoom-active { color: var(--cinnabar); }
-
-    /* 朝代快速检索条 */
-    .header-nav { display: flex; align-items: center; }
-
-    .nav-arrow {
-      flex: 0 0 auto;
-      width: 30px; height: 34px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid #C5B698;
-      background: rgba(229, 222, 201, 0.92);
-      color: var(--ink-secondary);
-      font-size: 15px; font-weight: 900; line-height: 1;
-      cursor: pointer;
-    }
-    .nav-arrow:first-child { border-radius: 6px 0 0 6px; }
-    .nav-arrow:last-child { border-radius: 0 6px 6px 0; }
-    .nav-arrow:active { background: #D6CCB4; }
-
-    .dynasty-nav-scroll {
-      flex: 1 1 auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      min-width: 0;
-      overflow-x: auto;
-      overflow-y: hidden;
-      white-space: nowrap;
-      padding: 3px 8px;
-      background: rgba(232, 224, 206, 0.62);
-      border-top: 1px solid rgba(197, 182, 152, 0.7);
-      border-bottom: 1px solid rgba(197, 182, 152, 0.7);
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x;
-      scroll-behavior: smooth;
-      scrollbar-width: none;
-    }
-    .dynasty-nav-scroll::-webkit-scrollbar { display: none; }
-
-    .dyn-nav-pill {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      min-height: 28px;
-      padding: 5px 11px;
-      border-radius: 6px;
-      border: 1px solid #C9B99B;
-      background: #FAF6EE;
-      color: var(--ink-black);
-      font-family: inherit;
-      font-size: clamp(11px, 1.1vw, 13.5px);
-      font-weight: 900;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-    }
-    .dyn-nav-pill.active {
-      background: var(--cinnabar);
-      color: #FAF6EE;
-      border-color: #8E241D;
-      box-shadow: 0 1px 4px rgba(184, 51, 42, 0.3);
-    }
 
     /* ================= 画卷时间轴 ================= */
     .timeline-band {
@@ -319,15 +198,6 @@
         rgba(184, 51, 42, 0.85) 100%);
       pointer-events: none;
       z-index: 40;
-    }
-    .center-dot {
-      position: absolute; top: -2px; left: 50%;
-      width: 11px; height: 11px;
-      margin-left: -5.5px;
-      border-radius: 999px;
-      background: var(--cinnabar);
-      border: 2px solid #FAF6EE;
-      box-shadow: 0 1px 4px rgba(184, 51, 42, 0.35);
     }
 
     /* ================= 疏朗自适应年份刻度尺与 iPad 中央红线 Apple Dock 透镜 ================= */
@@ -386,26 +256,13 @@
     .tick-label .yr-num {
       letter-spacing: -0.02em;
     }
-    .tick-mark {
-      width: 1.25px;
-      height: calc(6px * var(--v));
-      margin-top: calc(2px * var(--v));
-      background: rgba(154, 138, 116, 0.65);
-      border-radius: 1px;
-      transform-origin: 50% 100%;
-      will-change: transform, background-color;
-    }
     /* 细分刻度：仅在屏幕缩放足够宽裕且远离主刻度碰撞区时才优雅浮现 */
     .minor-year .tick-label {
       font-size: max(8.5px, calc(8.8px * var(--v)));
       font-weight: 600;
       color: #8E7F6B;
     }
-    .minor-year .tick-mark {
-      width: 1px;
-      height: calc(4px * var(--v));
-      background: rgba(168, 152, 130, 0.45);
-    }
+    .minor-year
     /* 中央红线 Dock 焦点峰值态：独立悬浮胶囊光晕，每个放大的年份都端庄美观 */
     .tick.hot .tick-label,
     .minor-year.hot .tick-label {
@@ -419,10 +276,7 @@
       color: var(--cinnabar);
     }
     .tick.hot .tick-mark,
-    .minor-year.hot .tick-mark {
-      background: var(--cinnabar);
-      width: 1.8px;
-    }
+    .minor-year.hot
 
     /* 顶部大朝代块 */
     .macro-dynasty-block {
@@ -785,191 +639,6 @@
       border: 2px solid var(--cinnabar);
       animation: pulse-ring 1.7s infinite;
     }
-
-    /* ================= 图层开关：左下角悬浮胶囊 =================
-       竖屏竖向排列 / 横屏横向排列；原铺底控制栏已取消 */
-    .app-controls {
-      position: fixed;
-      left: calc(env(safe-area-inset-left, 0px) + 12px);
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-      z-index: 80;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-      padding: 8px 10px;
-      border-radius: 20px;
-      background: rgba(250, 246, 238, 0.72);
-      -webkit-backdrop-filter: blur(24px) saturate(1.8);
-      backdrop-filter: blur(24px) saturate(1.8);
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      box-shadow: 0 10px 30px rgba(30, 27, 24, 0.18), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
-      max-width: calc(100vw - 24px);
-    }
-    .controls-row {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-    }
-    .layer-switches {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1px;
-      min-width: 0;
-    }
-    .app-controls .layer-count {
-      align-self: flex-start;
-      padding-left: 3px;
-      margin-top: 2px;
-    }
-    /* 横屏（中宽以上）：改为一行横向排列，用短名 + 隐藏计数，避免碰到居中的主导航 */
-    @media (orientation: landscape) and (min-width: 700px) {
-      .app-controls {
-        flex-direction: row;
-        align-items: center;
-        gap: 3px;
-        padding: 6px 12px 6px 8px;
-      }
-      .controls-row { flex-direction: row; align-items: center; gap: 3px; }
-      .layer-switches { flex-direction: row; gap: 0; }
-      .layer-switch { gap: 5px; padding: 3px 8px 3px 3px; }
-      .app-controls .layer-switch .full { display: none; }
-      .app-controls .layer-switch .short { display: inline; }
-      .app-controls .layer-count { display: none; }
-    }
-    /* 手机竖屏：底部中间是主导航，图层胶囊抬到其上方左侧 */
-    @media (orientation: portrait) and (max-width: 560px) {
-      .app-controls { bottom: calc(env(safe-area-inset-bottom, 0px) + 82px); }
-    }
-
-    /* 整块「开关 + 标签」即按钮：触控区更大，符合 iOS 习惯 */
-    .layer-switch {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex: 0 0 auto;
-      padding: 3px 9px 3px 3px;
-      border: none;
-      border-radius: 999px;
-      background: transparent;
-      color: var(--gray-label);
-      font-family: inherit;
-      font-size: clamp(12px, 1.06vw, 13.5px);
-      font-weight: 500;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.22s ease, color 0.22s ease, transform 0.14s ease;
-    }
-    .layer-switch .switch { pointer-events: none; }
-    .layer-switch .switch-label { font-size: inherit; font-weight: inherit; }
-    .layer-switch:active { transform: scale(0.96); }
-    .layer-switch.on {
-      color: var(--ink-black);
-      font-weight: 700;
-      background: rgba(255, 255, 255, 0.62);
-    }
-    /* 四个图层各自的主题色（仅作用于开关开启态，保持克制） */
-    .layer-switch[data-layer="events"].on .switch { background: #34C759; }
-    .layer-switch[data-layer="figures"].on .switch { background: #3C6E8F; }
-    .layer-switch[data-layer="literati"].on .switch { background: #7A5AA8; }
-    .layer-switch[data-layer="eras"].on .switch { background: #C09020; }
-
-    .layer-count {
-      flex: 0 0 auto;
-      font-size: 11px;
-      font-weight: 600;
-      color: #8A7C68;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-    .layer-switch .short { display: none; }
-
-    /* 小屏：简称 + 紧凑开关 + 隐藏计数，保证四个开关一行放下 */
-    @media (max-width: 560px) {
-      .layer-switch { gap: 4px; padding: 2px 6px 2px 2px; font-size: 12px; }
-      .layer-switch .full { display: none; }
-      .layer-switch .short { display: inline; }
-      .layer-switch .switch { width: 34px; height: 21px; }
-      .layer-switch .switch .knob { width: 17px; height: 17px; }
-      .layer-switch.on .switch .knob { transform: translateX(13px); }
-      .layer-switch.on:active .switch .knob { transform: translateX(13px) scale(1.08); }
-      .layer-count { display: none; }
-    }
-
-    /* UISwitch 原生样式：开启为系统绿、白色圆钮带投影 */
-    .switch {
-      position: relative;
-      width: 46px; height: 28px;
-      flex: 0 0 auto;
-      border: none;
-      border-radius: 999px;
-      background: rgba(120, 120, 128, 0.32);
-      padding: 0;
-      cursor: pointer;
-      transition: background 0.25s ease;
-    }
-    .switch.on { background: #34C759; }
-    .knob {
-      position: absolute; top: 2px; left: 2px;
-      width: 24px; height: 24px;
-      border-radius: 999px;
-      background: #FFFFFF;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
-      transition: transform 0.25s var(--ios-ease);
-    }
-    .switch.on .knob { transform: translateX(18px); }
-    .switch:active .knob { transform: scale(1.08); }
-    .switch.on:active .knob { transform: translateX(18px) scale(1.08); }
-
-    .switch-label { font-size: clamp(12px, 1.1vw, 14px); font-weight: 600; white-space: nowrap; }
-
-    .status-pill {
-      font-size: clamp(10px, 0.95vw, 12px);
-      font-weight: 600;
-      padding: 3px 9px;
-      border-radius: 999px;
-      white-space: nowrap;
-      background: rgba(52, 199, 89, 0.16);
-      color: #248A3D;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-    .status-pill[data-state="folded"] { background: rgba(184, 134, 59, 0.2); color: #8C5818; }
-    .status-pill[data-state="off"] { background: var(--fill); color: var(--gray-label); }
-
-    .filter-bar {
-      flex: 1 1 auto;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 6px;
-      min-width: 0;
-      overflow-x: auto;
-      overflow-y: hidden;
-      padding: 2px 0;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x;
-      scrollbar-width: none;
-    }
-    .filter-bar::-webkit-scrollbar { display: none; }
-
-    .cat-pill {
-      flex: 0 0 auto;
-      min-height: 26px;
-      padding: 4px 12px;
-      border: none;
-      border-radius: 999px;
-      background: var(--fill);
-      color: var(--ink-secondary);
-      font-family: inherit;
-      font-size: clamp(10.5px, 1.05vw, 13px);
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-    .cat-pill.active { background: var(--tint); color: #FFFFFF; }
 
     /* ============================================================
        详情弹窗：由屏幕下方升起，悬浮于卷轴画面之上
@@ -1513,64 +1182,6 @@
     /* ============================================================
        帝王档案页
        ============================================================ */
-    .archive-shell {
-      flex: 1 1 auto;
-      min-height: 0;
-      display: grid;
-      grid-template-columns: 206px minmax(0, 1fr);
-      gap: 10px;
-      padding: 8px var(--page-pad) calc(8px + env(safe-area-inset-bottom, 0px));
-      width: 100%;
-      max-width: var(--page-max);
-      margin: 0 auto;
-    }
-
-    .archive-rail {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      padding-right: 2px;
-      scrollbar-width: none;
-    }
-    .archive-rail::-webkit-scrollbar { display: none; }
-
-    .rail-item {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 1px;
-      padding: 7px 10px;
-      border-radius: 7px;
-      border: 1px solid transparent;
-      background: transparent;
-      font-family: inherit;
-      text-align: left;
-      cursor: pointer;
-      transition: background 0.18s ease, border-color 0.18s ease;
-    }
-    .rail-item .r-name { font-size: 15px; font-weight: 900; color: var(--ink-black); white-space: nowrap; }
-    .rail-item .r-range { font-size: 11.5px; color: #8A7C68; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .rail-item.active {
-      background: #FAF6EE;
-      border-color: var(--border-ancient);
-      box-shadow: 0 2px 8px rgba(30, 27, 24, 0.08);
-    }
-    .rail-item.active .r-name { color: var(--cinnabar); }
-
-    .archive-body {
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      background: #FAF6EE;
-      border: 1px solid var(--sep);
-      border-radius: 14px;
-      box-shadow: 0 2px 10px rgba(30, 27, 24, 0.05);
-      padding: 14px 16px 20px;
-    }
-
     .arch-hero { padding-bottom: 12px; border-bottom: 1px solid #E2D6BF; }
     .arch-hero-top {
       display: flex;
@@ -2917,19 +2528,8 @@
         rgba(184, 51, 42, 0.65) 100%) !important;
       box-shadow: 0 0 10px rgba(184, 51, 42, 0.18);
     }
-    .center-dot {
-      display: none; /* 已由顶部中央罗盘的朱砂菱形针尖接管，画面更干净 */
-    }
 
     /* 1.4 刻度尺底栏：温润的宣纸暗金丝线标尺 */
-    #ticks-layer::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0;
-      bottom: calc(2px * var(--v));
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(168, 146, 114, 0.42) 5%, rgba(168, 146, 114, 0.42) 95%, transparent);
-    }
 
     /* 1.5 顶层大朝代块：宋锦织金宣纸卡质感 */
     .macro-dynasty-block {
@@ -3306,87 +2906,6 @@
     }
 
     /* =========================================================================
-       3. 长卷左下方图层按钮区域（.app-controls）：
-          - 静态半透明（无动态闪烁位移，静止温润通透）
-          - 智能防碰撞自适应横排/竖排：
-            * 宽屏（>= 880px）：左下角空间充足（左侧距居中 Tab 栏超过 280px），自动采用精巧横排，与底部 Tab 栏处于同一水平线但互不触碰；
-            * 中小屏或竖屏（< 880px）：若横排会与居中的 Tab 栏碰撞，自动切换为紧凑竖排贴左边缘，且底边精确避开 Tab 栏，绝不遮挡。
-       ========================================================================= */
-    .app-controls {
-      position: fixed !important;
-      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
-      z-index: 82 !important;
-      padding: 4px 6px !important;
-      border-radius: 18px !important;
-      background: rgba(246, 240, 228, 0.42) !important;
-      -webkit-backdrop-filter: blur(8px) saturate(1.35) !important;
-      backdrop-filter: blur(8px) saturate(1.35) !important;
-      border: 1px solid rgba(255, 255, 255, 0.45) !important;
-      box-shadow: 0 4px 16px rgba(30, 24, 16, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
-      transition: none !important; /* 保持静态半透明稳定感 */
-    }
-    .app-controls .layer-count { display: none !important; }
-
-    /* 紧凑化每个开关胶囊，减少占地面积 */
-    .app-controls .layer-switch {
-      gap: 5px !important;
-      padding: 3px 8px 3px 4px !important;
-      font-size: 12px !important;
-      color: rgba(44, 36, 28, 0.76) !important;
-      transition: background 0.18s ease, color 0.18s ease !important;
-    }
-    .app-controls .layer-switch:active { transform: none !important; }
-    .app-controls .layer-switch .switch {
-      width: 30px !important;
-      height: 18px !important;
-    }
-    .app-controls .layer-switch .knob {
-      width: 14px !important;
-      height: 14px !important;
-      top: 2px !important;
-      left: 2px !important;
-      transition: transform 0.2s ease !important;
-    }
-    .app-controls .layer-switch.on .switch .knob {
-      transform: translateX(12px) !important;
-    }
-    .app-controls .layer-switch .full { display: none !important; }
-    .app-controls .layer-switch .short { display: inline !important; }
-
-    /* 宽屏（如 iPad 横屏 / 桌面 >= 880px）：左侧净空 > 290px，自动采用横排，与居中 Tab 栏同高并列且零遮挡 */
-    @media (min-width: 880px) {
-      .app-controls,
-      .app-controls .controls-row,
-      .app-controls .layer-switches {
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 3px !important;
-      }
-      .app-controls {
-        border-radius: 999px !important;
-        padding: 4px 7px !important;
-      }
-    }
-
-    /* 中小屏或竖屏（< 880px）：自动切换为紧凑竖排，若屏幕过窄（< 540px）则自动上移至 Tab 栏左上方，彻底杜绝遮挡 */
-    @media (max-width: 879px) {
-      .app-controls,
-      .app-controls .controls-row,
-      .app-controls .layer-switches {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 2px !important;
-      }
-    }
-    @media (max-width: 540px) {
-      .app-controls {
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 72px) !important;
-      }
-    }
-
-  
-    /* =========================================================================
        V6 终极进化：
        1. 全面对标 Apple iOS 26 / visionOS 液态玻璃（Liquid Glass）悬浮导航栏与控件
        2. 长卷时间轴 Apple Watch Crown 级立体放大光晕、刻度尺阶梯脉冲与竹简 3D 托举
@@ -3478,15 +2997,6 @@
         width 0.38s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    @keyframes liquidDropletMorph {
-      0%   { transform: var(--glider-tx, translate3d(0,0,0)) scaleX(1) scaleY(1); }
-      38%  { filter: brightness(1.06); }
-      100% { transform: var(--glider-tx, translate3d(0,0,0)) scaleX(1) scaleY(1); }
-    }
-    .bottom-tabs .tab-glider.glider-morph {
-      animation: liquidDropletMorph 0.46s var(--apple-spring);
-    }
-
     .bottom-tabs .view-tab {
       position: relative !important;
       z-index: 2 !important;
@@ -3559,11 +3069,7 @@
       letter-spacing: -0.01em !important;
     }
     .tick.hot .tick-mark,
-    .minor-year.hot .tick-mark {
-      background: linear-gradient(180deg, #C8382E 0%, rgba(184, 51, 42, 0.2) 100%) !important;
-      width: 2px !important;
-      box-shadow: 0 0 6px rgba(184, 51, 42, 0.45);
-    }
+    .minor-year.hot
 
     /* 中央天头罗盘刻度跳动微脉冲（模拟 Apple Watch 数码表冠齿轮感） */
     @keyframes compassCrownPulse {
@@ -3687,26 +3193,506 @@
         inset 0 1.5px 1px rgba(255, 255, 255, 0.9) !important;
     }
 
+  
+    /* =========================================================================
+       V8 交互与动效精修：
+       1. 修复底部 Tab 栏点击误触与回弹卡壳（移除冲突的关键帧覆盖与容器缩放，采用临界阻尼丝滑过渡）
+       2. 默认隐藏第二层/第三层政权轴，光标落到对应第一层主流朝代时以「下拉展开」动效自然弹出重叠支系
+       3. 竖向时间光标落到第一层大朝代块时产生温润统一的悬浮抬升效果
+       ========================================================================= */
+
+    /* --- 1. 底部 Tab 栏防误触与丝滑无卡壳过渡 --- */
+    .bottom-tabs.liquid-glass-bar {
+      touch-action: manipulation !important;
+      user-select: none !important;
+      /* 去除 :active 整体缩放，防止手指抬起瞬间坐标偏移造成误触或闪烁 */
+      transition: box-shadow 0.28s ease !important;
+    }
+    .bottom-tabs.liquid-glass-bar:active {
+      transform: translate3d(-50%, 0, 0) !important;
+    }
+
+    /* 移除原先与 transform 冲突导致回弹卡壳的 animation，改用纯硬件加速临界阻尼曲线 */
+    .bottom-tabs .tab-glider,
+    .bottom-tabs .tab-glider.glider-morph {
+      animation: none !important;
+      will-change: transform, width;
+      transition:
+        transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.34s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+
+    /* 扩大每个 Tab 按钮的有效热区，消除按钮之间的死角缝隙，杜绝点不中或点偏 */
+    .bottom-tabs.liquid-glass-bar {
+      gap: 0 !important;
+      padding: 4px 5px !important;
+    }
+    .bottom-tabs .view-tab {
+      min-width: 72px !important;
+      min-height: 44px !important;
+      padding: 5px 16px 4px !important;
+      margin: 0 !important;
+      touch-action: manipulation !important;
+      /* 仅保留极轻微柔和的色彩与图标过渡，不缩放按钮盒子本身，彻底告别回弹卡顿 */
+      transition: color 0.2s ease !important;
+    }
+    .bottom-tabs .view-tab:active {
+      transform: none !important;
+    }
+    .bottom-tabs .view-tab svg {
+      pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease !important;
+    }
+    .bottom-tabs .view-tab span {
+      pointer-events: none;
+    }
+    .bottom-tabs .view-tab:active svg {
+      transform: scale(0.92) !important;
+    }
+    .bottom-tabs .view-tab.active svg {
+      transform: translateY(-1px) scale(1.08) !important;
+    }
+
+    /* --- 3. 竖向时间光标落到第一层大朝代块时的统一悬浮效果 --- */
+    .macro-dynasty-block {
+      transform-origin: center bottom;
+      will-change: transform, box-shadow, filter;
+      transition:
+        transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.3s ease !important;
+    }
+    .macro-dynasty-block.cursor-hover-macro {
+      transform: translate3d(0, -4px, 0) scale(1.018) !important;
+      z-index: 18 !important;
+      filter: brightness(1.03) saturate(1.08);
+      box-shadow:
+        0 10px 24px -4px rgba(184, 51, 42, 0.22),
+        0 4px 10px rgba(30, 24, 16, 0.10),
+        0 0 0 1.5px rgba(184, 51, 42, 0.45),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.92) !important;
+    }
+    .macro-dynasty-block.active-dynasty.cursor-hover-macro {
+      box-shadow:
+        0 12px 26px -4px rgba(184, 51, 42, 0.28),
+        0 0 0 2px var(--cinnabar),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95) !important;
+    }
+
+    /* --- 2. 第二层与第三层细分政权：默认隐藏，随第一层主流朝代往下拉动效弹出 --- */
+    .sub-regime-block {
+      transform-origin: center top !important;
+      will-change: transform, opacity, filter;
+      transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.3s ease,
+        filter 0.28s ease !important;
+    }
+
+    /* 隐藏态：向上收拢回第一层朝代块底部背侧，透明且不响应误触 */
+    .sub-regime-block.sub-pulldown-hide {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translate3d(0, -28px, 0) scaleY(0.45) scaleX(0.96) !important;
+      filter: blur(2px);
+    }
+
+    /* 下拉弹出态：从第一层主流朝代下方柔顺下拉展开，第1轨、第2轨、第3轨带微妙的阶梯瀑布层次 */
+    .sub-regime-block.sub-pulldown-show {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translate3d(0, 0, 0) scaleY(1) scaleX(1) !important;
+      filter: blur(0);
+    }
+    .sub-regime-block.sub-cursor-linked {
+      box-shadow:
+        0 5px 14px rgba(24, 20, 14, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+    }
+
+    /* 左下角「联动支系」开关开启态采用温润琥珀金古铜色调，与事件/人物开关自然区分 */
+    #toggle-smart-subs.on .switch {
+      background: #B85D2A !important;
+    }
+
+  
+    /* =========================================================================
+       V9 四大核心交互升级：
+       1. 第一层主流朝代悬浮时彻底去除红色外框，加入温润有机的呼吸律动（macroFloatBreathe）
+       2. 支系独立三档滑动式开关（a.触碰弹出 / b.常驻展开 / c.关闭隐藏）
+       3. 左下角图层面板全面升级为 iOS 液态玻璃滑动式分段开关（支持点按与手指滑动连选）
+       4. 上方朝代轴与下方人物/事件时间轴动态向屏幕中央靠拢，彻底消除中间大面积空当
+       ========================================================================= */
+
+    /* --- 1. 去除第一层朝代块悬浮/选中时的红色外框，赋予温润呼吸感 --- */
+
+    .macro-dynasty-block.active-dynasty,
+    .macro-dynasty-block.cursor-hover-macro,
+    .macro-dynasty-block.active-dynasty.cursor-hover-macro {
+      /* 彻底去除红色外框（0 0 0 2px var(--cinnabar)），保留原朝代雅致细边框与立体悬浮呼吸阴影 */
+      box-shadow:
+        0 12px 26px -4px rgba(42, 32, 20, 0.18),
+        0 4px 10px rgba(30, 24, 16, 0.09),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.94) !important;
+    }
+
+    .macro-dynasty-block.cursor-hover-macro {
+      animation: macroFloatBreathe 2.8s ease-in-out infinite !important;
+      z-index: 18 !important;
+    }
+
+    /* --- 4. 上方朝代轴与下方人物/事件时间轴动态向屏幕中央靠拢，消除中间空当 --- */
+    #ticks-layer,
+    #lens-layer,
+    #macro-dynasty-layer,
+    #sub-regime-layer {
+      transform: translate3d(0, var(--upper-shift-y, 0px), 0);
+      transition: transform 0.46s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    #events-axis-line,
+    #events-layer {
+      transform: translate3d(0, var(--lower-shift-y, 0px), 0);
+      transition: transform 0.46s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      will-change: transform, opacity;
+    }
+
+    /* --- 左下角滑动式分段轨道与胶囊公共基础样式 --- */
+    .slide-track {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 1px;
+    }
+    .slide-pill {
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      left: 0;
+      z-index: 1;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 250, 242, 0.76) 100%);
+      box-shadow:
+        0 2px 8px rgba(30, 24, 16, 0.14),
+        inset 0 1px 0.5px rgba(255, 255, 255, 0.98),
+        0 0 0 0.5px rgba(184, 152, 102, 0.25);
+      pointer-events: none;
+      will-change: transform, width;
+      transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.25s ease;
+    }
+    #sub-mode-pill[data-mode="auto"] {
+      box-shadow: 0 2px 8px rgba(184, 93, 42, 0.20), inset 0 1px 0.5px #FFF, 0 0 0 1px rgba(184, 93, 42, 0.28);
+    }
+    #sub-mode-pill[data-mode="always"] {
+      box-shadow: 0 2px 8px rgba(46, 110, 94, 0.20), inset 0 1px 0.5px #FFF, 0 0 0 1px rgba(46, 110, 94, 0.28);
+    }
+    .slide-opt {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 26px;
+      padding: 0 10px;
+      border: none;
+      border-radius: 999px;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: rgba(52, 43, 33, 0.72);
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s ease;
+    }
+    .slide-opt.active {
+      color: #1E1B18 !important;
+      font-weight: 900 !important;
+    }
+    #sub-mode-track .slide-opt[data-submode="auto"].active   { color: #A84319 !important; }
+    #sub-mode-track .slide-opt[data-submode="always"].active { color: #246353 !important; }
+    #sub-mode-track .slide-opt[data-submode="off"].active    { color: #6E6254 !important; }
+
+    /* =========================================================================
+       V10 四项核心体验精修：
+       1. 第一/二/三层朝代与政权块文字、时间全比例尺始终保持在屏幕可见区正中间，移出屏幕时自然随边缘滑出
+       2. 彻底去除顶部时间轴的横线与竖向刻度短线，只保留纯粹的数字，放大时绝不侵入下方朝代图
+       3. 第一层朝代在光标接近/停留期间持续保持轻盈Q弹的微弹跳呼吸动效（macroBounceBreathe），直至光标离开
+       4. 左下角控制器重构为「一体化晶透双轨控制台（含一键收折圆钮）」，层次分明、紧凑优雅
+       ========================================================================= */
+
+    /* --- 1. 确保第一/二/三层朝代文字与时间位移时硬件加速且不换行 --- */
+    .macro-name,
+    .macro-period,
+    .sub-name,
+    .sub-period {
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    
+
+    /* --- 3. 第一层朝代在光标停留期间持续保持轻微弹跳呼吸感（直至光标离开该朝代） --- */
+    @keyframes macroElasticBreathe {
+      0%, 100% {
+        transform: translate3d(0, -4px, 0) scale(1.02);
+        box-shadow:
+          0 10px 24px -4px rgba(42, 32, 20, 0.18),
+          0 4px 10px rgba(30, 24, 16, 0.09),
+          inset 0 1.5px 1px rgba(255, 255, 255, 0.94);
+      }
+      35% {
+        transform: translate3d(0, -9.5px, 0) scale(1.042, 1.055);
+        box-shadow:
+          0 22px 42px -4px rgba(184, 51, 42, 0.28),
+          0 8px 18px rgba(30, 24, 16, 0.14),
+          inset 0 2.5px 2px rgba(255, 255, 255, 1);
+      }
+      70% {
+        transform: translate3d(0, -5px, 0) scale(1.025, 1.02);
+      }
+    }
+
+    .macro-dynasty-block.cursor-hover-macro {
+      animation: macroElasticBreathe 1.45s cubic-bezier(0.34, 1.56, 0.64, 1) infinite !important;
+      z-index: 19 !important;
+    }
+
+    /* --- 下轴图层选中时滑块主题光晕与文字着色 --- */
+    #axis-layer-pill[data-theme="events"]   { box-shadow: 0 2px 7px rgba(184, 51, 42, 0.22), 0 0 0 1px rgba(184, 51, 42, 0.25); }
+    #axis-layer-pill[data-theme="figures"]  { box-shadow: 0 2px 7px rgba(60, 110, 143, 0.22), 0 0 0 1px rgba(60, 110, 143, 0.25); }
+    #axis-layer-pill[data-theme="literati"] { box-shadow: 0 2px 7px rgba(122, 90, 168, 0.22), 0 0 0 1px rgba(122, 90, 168, 0.25); }
+    #axis-layer-pill[data-theme="eras"]     { box-shadow: 0 2px 7px rgba(192, 144, 32, 0.24), 0 0 0 1px rgba(192, 144, 32, 0.28); }
+    #axis-layer-track .slide-opt[data-layer="events"].active   { color: #B8332A !important; }
+    #axis-layer-track .slide-opt[data-layer="figures"].active  { color: #2D5B7A !important; }
+    #axis-layer-track .slide-opt[data-layer="literati"].active { color: #644490 !important; }
+    #axis-layer-track .slide-opt[data-layer="eras"].active     { color: #9E6E10 !important; }
+    #axis-layer-track .slide-opt[data-layer="off"].active      { color: #6E6254 !important; }
+
+    /* =========================================================================
+       V11 东方雅集极简悬浮控制浮岛（Zen Floating Dock）CSS：
+       - 精致半透明晶透双轨滑块卡片，带侧边精致的收折/展开圆钮
+       - 完美适配各尺寸屏幕，绝不喧宾夺主
+       ========================================================================= */
+    .app-controls.zen-floating-dock {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 12px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+      z-index: 88 !important;
+      display: inline-flex !important;
+      flex-direction: row-reverse !important;
+      align-items: flex-end !important;
+      gap: 6px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      pointer-events: none;
+    }
+
+    .zen-fab {
+      pointer-events: auto;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      background: rgba(251, 247, 238, 0.82);
+      -webkit-backdrop-filter: blur(14px) saturate(170%);
+      backdrop-filter: blur(14px) saturate(170%);
+      box-shadow: 0 4px 14px rgba(28, 22, 14, 0.12);
+      color: #6B5B48;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, color 0.2s ease;
+    }
+    .zen-fab:active { transform: scale(0.9); }
+    .zen-floating-dock:not(.is-collapsed) .zen-fab { color: var(--cinnabar); background: rgba(255, 252, 245, 0.95); }
+
+    .zen-dock-card {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 6px 8px;
+      border-radius: 14px;
+      background: rgba(250, 246, 238, 0.78);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 10px 28px -4px rgba(28, 22, 14, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transform-origin: left bottom;
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease, visibility 0.24s;
+    }
+
+    .zen-floating-dock.is-collapsed .zen-dock-card {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate3d(-12px, 8px, 0) scale(0.85);
+    }
+
+    .zen-dock-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .zen-tag {
+      width: 32px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(78, 64, 48, 0.75);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .zen-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(184, 152, 102, 0.08), rgba(184, 152, 102, 0.28) 20%, rgba(184, 152, 102, 0.28) 80%, rgba(184, 152, 102, 0.08));
+    }
+
+    .zen-track {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 1.5px;
+      border-radius: 9px;
+      background: rgba(168, 148, 122, 0.12);
+      box-shadow: inset 0 1px 2px rgba(30, 24, 16, 0.06);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .zen-track .slide-pill {
+      top: 1.5px;
+      bottom: 1.5px;
+      border-radius: 7.5px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(30, 24, 16, 0.12), 0 0 0 0.5px rgba(184, 152, 102, 0.25);
+    }
+
+    .zen-opt {
+      height: 24px;
+      padding: 0 8.5px;
+      border-radius: 7.5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(62, 51, 39, 0.76);
+    }
+
+    @media (max-width: 900px) {
+      .app-controls.zen-floating-dock {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 68px) !important;
+      }
+    }
+
+  
+    /* =========================================================================
+       V12 三项关键 Bug 修复与体验升级：
+       1. 修复时间轴线条在第一层朝代图放大时侵入朝代图内的 Bug：
+          - 将竖向时间游标线（.center-indicator）置于画卷背景层（z-index: 5），
+            使第一层朝代块（#macro-dynasty-layer）在呼吸放大时完整覆盖在线条上方，线条绝不刺入朝代图内部；
+          - 顶部年份刻度严格以底边向上放大（transform-origin: 50% 100%），并与第一层朝代留出充裕净空。
+       2. 下方轴上圆点与牌子联动 + 被遮蔽牌子自动置顶显现：
+          - 当竖向光标接近轴上圆点时，圆点（.pulse-circle）与下方牌子同步产生弹性放大与光晕；
+          - 若该节点因密集避让被隐藏（.label-hidden）或被相邻牌子遮挡，触发 .cursor-unmask-node
+            自动解除遮蔽并置顶（z-index 动态提升至最前），完整展示动效。
+       3. 修复下方牌子放大时向上侵入轴线与圆点的 Bug：
+          - 强制所有竹简（.vertical-bamboo-slip）与人物竖卡（.axis-person-card）以顶部中心
+            （transform-origin: 50% 0%）为原点向下放大，杜绝任何向上越界侵入轴线或圆点的现象。
+       ========================================================================= */
+
+    /* --- 1. 防止时间轴线条侵入第一层朝代放大效果图 --- */
+    .center-indicator {
+      z-index: 5 !important;
+    }
+    #timeline-canvas {
+      z-index: 10 !important;
+    }
+    #macro-dynasty-layer {
+      z-index: 22 !important;
+    }
+    #sub-regime-layer {
+      z-index: 20 !important;
+    }
+    #events-axis-line {
+      z-index: 24 !important;
+    }
+    #events-layer {
+      z-index: 30 !important;
+    }
+
+    /* 顶部纯数字刻度：严格向上放大，底部距第一层朝代留足安全净空 */
+    #ticks-layer, #lens-layer {
+      height: calc(34px * var(--v)) !important;
+      z-index: 15 !important;
+    }
+    .tick, .minor-year {
+      bottom: calc(6px * var(--v)) !important;
+      transform-origin: 50% 100% !important;
+    }
+    .tick-label {
+      transform-origin: 50% 100% !important;
+    }
+
+    /* --- 2. 光标接近轴上圆点时：被遮蔽/隐藏的牌子自动置顶弹出 + 圆点联动光晕 --- */
+    .event-node.label-hidden.cursor-unmask-node .slip-fold-wrapper,
+    .event-node.folded-by-zoom.cursor-unmask-node .slip-fold-wrapper {
+      display: flex !important;
+      opacity: 1 !important;
+      transform: none !important;
+      pointer-events: auto !important;
+    }
+
+    .pulse-circle {
+      transform-origin: 50% 50% !important;
+      z-index: 3 !important;
+      transition: box-shadow 0.2s ease !important;
+    }
+    .pulse-circle.dock-dot-active {
+      box-shadow:
+        0 0 0 3px rgba(184, 51, 42, 0.24),
+        0 2px 8px rgba(184, 51, 42, 0.45) !important;
+    }
+
+    /* --- 3. 牌子放大严格以顶部中心（50% 0%）向下延展，绝不向上侵入轴线与圆点 --- */
+    .slip-fold-wrapper {
+      position: relative;
+      z-index: 1;
+    }
+    .stem-line {
+      flex: 0 0 auto;
+      min-height: calc(10px * var(--v));
+    }
+    .vertical-bamboo-slip,
+    .axis-person-card {
+      transform-origin: 50% 0% !important;
+    }
+    .event-node.selected .vertical-bamboo-slip,
+    .event-node.selected .axis-person-card {
+      transform-origin: 50% 0% !important;
+      transform: translate3d(0, 3px, 0) scale(1.06) !important;
+    }
+
   </style>
 </head>
 <body data-view="scroll">
-
-  <!-- 顶部：标题 + 三页签 + 长卷专用工具 -->
-  <header class="app-header">
-    <div class="page-wrap header-top">
-      <div class="brand">
-        <div class="seal font-calligraphy">史</div>
-        <div class="brand-text">
-          <h1 class="app-title">华夏千年历史长卷</h1>
-          <p class="app-sub">五千年 · 长卷 · 帝王 · 事件</p>
-        </div>
-      </div>
-
-      <!-- 顶部工具已整合至长卷沉浸式天头 HUD -->
-    </div>
-  </header>
-
-  <!-- 长卷搜索面板（挂在 body 下，长卷专属） -->
+<!-- 长卷搜索面板（挂在 body 下，长卷专属） -->
   <div id="axis-search-panel" class="axis-search-panel" hidden>
     <div class="as-box">
       <div class="as-input-row">
@@ -3756,7 +3742,7 @@
         <div class="edge-fade edge-fade-l"></div>
         <div class="edge-fade edge-fade-r"></div>
 
-        <div class="center-indicator"><div class="center-dot"></div></div>
+        <div class="center-indicator"></div>
         <div class="band-hint" id="band-hint">轻点竹简 · 查看<b>史事详述</b></div>
 
         <div id="timeline-canvas">
@@ -3769,28 +3755,55 @@
         </div>
       </div>
 
-      <section class="app-controls">
-        <div class="page-wrap controls-row">
-          <div class="layer-switches" role="group" aria-label="时间轴图层">
-            <button id="layer-events" class="layer-switch on" data-layer="events" type="button" role="switch" aria-checked="true">
-              <span class="switch on"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">重大事件</span><span class="short">事件</span></span>
-            </button>
-            <button id="layer-figures" class="layer-switch" data-layer="figures" type="button" role="switch" aria-checked="false">
-              <span class="switch"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">重要人物</span><span class="short">人物</span></span>
-            </button>
-            <button id="layer-literati" class="layer-switch" data-layer="literati" type="button" role="switch" aria-checked="false">
-              <span class="switch"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">文学大家</span><span class="short">文豪</span></span>
-            </button>
-            <button id="layer-eras" class="layer-switch" data-layer="eras" type="button" role="switch" aria-checked="false">
-              <span class="switch"><span class="knob"></span></span>
-              <span class="switch-label"><span class="full">各朝盛世</span><span class="short">盛世</span></span>
-            </button>
+      <!-- 左下角重构：东方雅集极简悬浮控制浮岛（一键收折 + 禅意双轨滑块） -->
+      <section class="app-controls zen-floating-dock" id="unified-console" aria-label="长卷视图控制舱">
+        <div class="zen-dock-card" id="console-body">
+          <!-- 第一轨：上轴支系三档（触碰 / 常驻 / 关闭） -->
+          <div class="zen-dock-row">
+            <span class="zen-tag">支系</span>
+            <div class="slide-track zen-track" id="sub-mode-track" role="radiogroup" aria-label="二三层政权支系模式">
+              <div class="slide-pill zen-pill" id="sub-mode-pill" data-mode="auto" aria-hidden="true"></div>
+              <button class="slide-opt zen-opt active" data-submode="auto" type="button" role="radio" aria-checked="true" title="光标接触时下拉弹出">触碰</button>
+              <button class="slide-opt zen-opt" data-submode="always" type="button" role="radio" aria-checked="false" title="常驻展开二三层政权">常驻</button>
+              <button class="slide-opt zen-opt" data-submode="off" type="button" role="radio" aria-checked="false" title="关闭隐藏二三层政权">关闭</button>
+            </div>
           </div>
-          <span id="layer-count" class="layer-count">124 事件</span>
+
+          <div class="zen-divider" aria-hidden="true"></div>
+
+          <!-- 第二轨：下轴图层五档（事件 / 人物 / 文豪 / 盛世 / 关闭） -->
+          <div class="zen-dock-row">
+            <span class="zen-tag">下轴</span>
+            <div class="slide-track zen-track" id="axis-layer-track" role="radiogroup" aria-label="下方时间轴图层">
+              <div class="slide-pill zen-pill" id="axis-layer-pill" data-theme="events" aria-hidden="true"></div>
+              <button id="layer-events" class="slide-opt zen-opt layer-switch on active" data-layer="events" type="button" role="radio" aria-checked="true">
+                <span>事件</span>
+              </button>
+              <button id="layer-figures" class="slide-opt zen-opt layer-switch" data-layer="figures" type="button" role="radio" aria-checked="false">
+                <span>人物</span>
+              </button>
+              <button id="layer-literati" class="slide-opt zen-opt layer-switch" data-layer="literati" type="button" role="radio" aria-checked="false">
+                <span>文豪</span>
+              </button>
+              <button id="layer-eras" class="slide-opt zen-opt layer-switch" data-layer="eras" type="button" role="radio" aria-checked="false">
+                <span>盛世</span>
+              </button>
+              <button id="layer-off" class="slide-opt zen-opt" data-layer="off" type="button" role="radio" aria-checked="false" title="收起下方时间轴">
+                <span>关闭</span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- 极简收折切换圆钮（悬浮于浮岛左下角或侧边，点击顺滑收起/展开） -->
+        <button class="zen-fab" id="console-fab-btn" type="button" aria-expanded="true" title="展开/收起控制面板">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </button>
+        <span id="layer-count" class="layer-count" hidden>124 事件</span>
       </section>
 
       <!-- 底部详情弹窗：点击事件竹简后由屏幕下方升起，悬浮于卷轴之上 -->
@@ -4096,7 +4109,6 @@
       <span>地图</span>
     </button>
   </nav>
-
 
   <script>
     /********************************************************************
@@ -5025,8 +5037,6 @@
       { id: 'c70', year: 1901, period: '清朝', shortTitle: '辛丑条约', title: '清廷与十一国签订《辛丑条约》', category: '政治变革', figure: '李鸿章、奕劻、列强十一国',
         desc: '清廷与十一国签订《辛丑条约》：赔款四亿五千万两、分三十九年偿还，划东交民巷为使馆界驻兵，拆大沽炮台，禁止中国人民反帝。' },
     ];
-
-
 
     HISTORICAL_EVENTS.push(...EXTRA_EVENTS, ...WAR_EVENTS, ...COMPAT_EVENTS);
     HISTORICAL_EVENTS.sort((a, b) => (a.year - b.year) || a.id.localeCompare(b.id));
@@ -6301,6 +6311,10 @@
       lastMapYear: 1800,          // 疆域图谱：上次查看的年份（默认清中期）
       activeCategory: 'all',
       activeDynastyId: 'sanguo',
+      cursorDynastyId: 'sanguo',
+      subMode: 'auto',           // 支系三档：'auto'(默认接触弹出) | 'always'(二三层常驻) | 'off'(二三层关闭)
+      smartSubFold: true,
+      subExpandedNow: false,     // 当前时刻二三层支系是否处于展开态（用于动态收拢上下轴间距，消除大面积空当）
       activeSubId: 'caowei',
       isDragging: false,
       hasMoved: false,
@@ -6335,22 +6349,26 @@
       GEOM.v = v;
 
       const px = (n) => Math.round(n * v);
-      GEOM.macroTop = px(38);
+      GEOM.macroTop = px(44);
       GEOM.macroH = Math.max(px(52), 36);
       GEOM.subH = Math.max(px(34), 24);
-      GEOM.subTops = [0, 1, 2].map((i) => px(96 + i * 38));
-      GEOM.axisY = px(216);
+      GEOM.subTops = [0, 1, 2].map((i) => px(102 + i * 38));
+      GEOM.axisY = px(222);
       GEOM.slipW = Math.max(20, px(24));
-      GEOM.stems = [px(8), px(22), px(36), px(50)];
+      GEOM.stems = [px(12), px(24), px(38), px(52)];
+
+      // 二三层政权完整三轨高度（用于当二三层收起或部分展开时，将上方朝代轴与下方人物/事件时间轴动态向屏幕中央靠拢，彻底消除中间大面积空当）
+      GEOM.subTrackStep = px(38);
+      GEOM.fullSubZoneH = px(114);
 
       const contentH = GEOM.axisY + px(139);
       // 顶部净空 52px：避开悬浮品牌与搜索胶囊；其余空间适度下移、视觉居中偏上
       const topFree = 52;
       GEOM.offsetY = Math.max(topFree, Math.round((bandH - contentH) * 0.45));
 
-      // 折叠态（仅朝代，无事件）内容高度：三轨细分底缘 + 呼吸空间 → 折叠时重新定位
-      const foldedH = GEOM.subTops[2] + GEOM.subH + px(18);
-      GEOM.foldedOffsetY = Math.max(topFree, Math.round((bandH - foldedH) / 2));
+      // 折叠态（仅朝代，无事件）内容高度：根据当前支系高度动态居中
+      const foldedH = GEOM.macroTop + GEOM.macroH + px(28);
+      GEOM.foldedOffsetY = Math.max(topFree, Math.round((bandH - foldedH) * 0.48));
 
       // 字号档位缓存失效（v 变化后必须重测文本宽度）
       domCache.macros.forEach((m) => { m.el.__tier = -1; });
@@ -6457,8 +6475,6 @@
     /********************************************************************
      * 7. 顶部朝代快速检索
      ********************************************************************/
-    /* 顶部朝代快捷导航已移除；占位空函数保持旧调用兼容 */
-    function scrollActiveNavIntoView() {}
 
     /********************************************************************
      * 8. 画布节点构建
@@ -6474,15 +6490,14 @@
         const tick = document.createElement('div');
         tick.className = 'tick';
         tick.style.display = 'none';
-        tick.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span><span class="tick-mark"></span>';
+        tick.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span>';
         ticksLayer.appendChild(tick);
         const labelEl = tick.firstElementChild;
         domCache.ticks.push({
           yr: null, baseX: 0, estW: 36, el: tick,
           labelEl,
           eraEl: labelEl.firstElementChild,
-          numEl: labelEl.lastElementChild,
-          markEl: tick.lastElementChild
+          numEl: labelEl.lastElementChild
         });
       }
 
@@ -6494,15 +6509,14 @@
         const m = document.createElement('div');
         m.className = 'minor-year';
         m.style.display = 'none';
-        m.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span><span class="tick-mark"></span>';
+        m.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span>';
         lensLayer.appendChild(m);
         const labelEl = m.firstElementChild;
         domCache.minors.push({
           yr: null, baseX: 0, estW: 32, baseAlpha: 0, el: m,
           labelEl,
           eraEl: labelEl.firstElementChild,
-          numEl: labelEl.lastElementChild,
-          markEl: m.lastElementChild
+          numEl: labelEl.lastElementChild
         });
       }
 
@@ -6536,7 +6550,6 @@
           state.selectedEventId = null;
           showDynastyDetail(dyn, '朝代总览');
           updateActiveHighlights();
-          scrollActiveNavIntoView(dyn.id);
         });
 
         macroLayer.appendChild(block);
@@ -6717,8 +6730,10 @@
           else selectHistoricalEvent(item.id, true);
         });
 
+        const cardEl = node.querySelector('.vertical-bamboo-slip, .axis-person-card');
+        const dotEl = node.querySelector('.pulse-circle');
         eventsLayer.appendChild(node);
-        return { data: item, kind: item.kind || 'event', ev: isPerson ? null : item, el: node, stemEl };
+        return { data: item, kind: item.kind || 'event', ev: isPerson ? null : item, el: node, stemEl, cardEl, dotEl };
       });
 
       canvasEl.dataset.layer = state.axisLayer || 'none';
@@ -6849,34 +6864,70 @@
       tickRange.step = 1;
     }
 
-    /* 放大后朝代块可能宽过一屏：让「朝代名 + 年代」贴着视野左侧跟随，始终看得见 */
+    /* =========================================================================
+       全层级朝代文字与时间动态居中引擎（第一层、第二层、第三层通用）：
+       - 无论缩放比例多大或多小，每个朝代/政权块内的「文字 + 时间」始终保持在
+         当前屏幕可见交集区（或屏幕正中央）的正中间；
+       - 当朝代块跨过屏幕正中央时，文字与时间稳稳锚定在屏幕正中间；
+       - 当朝代块即将移出屏幕左/右边缘时，文字与时间保持在剩余可见段的正中间，
+         并贴着朝代块内缘自然随块一同移出屏幕。
+       ========================================================================= */
+    function computeViewportCenteredShift(geo, viewLeft, viewRight, screenCenterX) {
+      if (!geo || geo.w <= 12) return '';
+      const blockLeft = geo.x;
+      const blockRight = geo.x + geo.w;
+      if (blockRight < viewLeft - 2 || blockLeft > viewRight + 2) return '';
+
+      const labelW = Math.min(geo.w - 4, Math.max(16, geo.labelW || Math.max(geo.nameW || 0, geo.periodW || 0) || 30));
+      if (geo.w <= labelW + 4) return '';
+
+      // 当前朝代/政权块在当前视口内的可见交集区间 [visL, visR]
+      const visL = Math.max(blockLeft, viewLeft + 6);
+      const visR = Math.min(blockRight, viewRight - 6);
+      if (visL >= visR) return '';
+
+      // 核心规则：文字与时间始终保持在当前所显示的屏幕正中间（若色块在屏幕内，则严格对准视口正中心 screenCenterX；
+      // 若色块部分移出屏幕，则对准当前可见交集段的正中间，直到整个色块完全移除屏幕）
+      let targetCenterX = (blockLeft <= screenCenterX && blockRight >= screenCenterX)
+        ? screenCenterX
+        : (visL + visR) * 0.5;
+
+      const naturalCenterX = blockLeft + geo.w * 0.5;
+      const maxShift = Math.max(0, (geo.w - labelW) * 0.5 - 3);
+      const rawShift = targetCenterX - naturalCenterX;
+      const clampedShift = Math.max(-maxShift, Math.min(maxShift, rawShift));
+      return Math.abs(clampedShift) > 0.2 ? `translate3d(${clampedShift.toFixed(1)}px, 0, 0)` : '';
+    }
+
     function syncMacroSticky() {
       const vw = viewportEl.clientWidth;
       const pad = getCenterPad();
       const viewLeft = state.scrollX - pad;
       const viewRight = viewLeft + vw;
+      const screenCenterX = viewLeft + vw * 0.5;
 
-      domCache.macros.forEach(({ el, nameEl, periodEl }) => {
-        const geo = el.__geo;
-        if (!geo) return;
-        if (geo.x + geo.w < viewLeft - 4 || geo.x > viewRight + 4) {
-          nameEl.style.transform = '';
-          periodEl.style.transform = '';
-          return;
+      // 1) 第一层主流朝代：文字与时间动态保持在当前屏幕可见段/正中央
+      for (let i = 0; i < domCache.macros.length; i++) {
+        const { el, nameEl, periodEl } = domCache.macros[i];
+        const t = computeViewportCenteredShift(el.__geo, viewLeft, viewRight, screenCenterX);
+        if (el.__lastShift !== t) {
+          el.__lastShift = t;
+          nameEl.style.transform = t;
+          periodEl.style.transform = t;
         }
-        const labelW = Math.max(geo.nameW || 0, geo.periodW || 0);
-        if (!labelW) return;
-        const naturalLeft = Math.max(0, (geo.w - labelW) / 2);
-        // 把名称夹在「朝代块 ∩ 视野」区间内：贴左缘或贴右缘都能看见
-        const minLeft = Math.max(10, viewLeft - geo.x + 12);
-        let maxLeft = Math.min(geo.w - labelW - 10, viewRight - geo.x - labelW - 12);
-        if (maxLeft < minLeft) maxLeft = minLeft;
-        const desiredLeft = Math.min(Math.max(naturalLeft, minLeft), maxLeft);
-        const shift = Math.round(desiredLeft - naturalLeft);
-        const t = shift !== 0 ? `translateX(${shift}px)` : '';
-        nameEl.style.transform = t;
-        periodEl.style.transform = t;
-      });
+      }
+
+      // 2) 第二层与第三层细分政权：同样遵循动态居中规则
+      for (let i = 0; i < domCache.subs.length; i++) {
+        const { el, nameSpan, periodSpan } = domCache.subs[i];
+        if (el.classList.contains('sub-pulldown-hide')) continue;
+        const t = computeViewportCenteredShift(el.__geo, viewLeft, viewRight, screenCenterX);
+        if (el.__lastShift !== t) {
+          el.__lastShift = t;
+          nameSpan.style.transform = t;
+          periodSpan.style.transform = t;
+        }
+      }
     }
 
     /********************************************************************
@@ -6986,6 +7037,17 @@
             periodSpan.className = 'sub-period inline-badge';
             periodSpan.style.fontSize = `${Math.round(10 * v)}px`;
           }
+          const nw = nameSpan.scrollWidth || 0;
+          const pw = periodSpan.style.display === 'none' ? 0 : (periodSpan.scrollWidth || 0);
+          el.__geo = {
+            x: x1, w: width,
+            labelW: tier === 3 ? (nw + pw + 8) : Math.max(nw, pw)
+          };
+        } else if (el.__geo) {
+          el.__geo.x = x1;
+          el.__geo.w = width;
+        } else {
+          el.__geo = { x: x1, w: width, labelW: 36 };
         }
       });
 
@@ -6996,19 +7058,25 @@
       const nodeTop = GEOM.axisY - Math.round(6 * v);
       const isCardLayer = !!CARD_LAYERS[state.axisLayer];
 
-      /* 统一水平避让池：与左侧已放节点间距不足 gap 时降级为纯圆点 */
+      /* 统一水平避让池：与左侧已放节点间距不足 gap 时默认收起标签（只留圆点），
+         但保留引线高度，一旦竖向光标接近该轴上圆点时，被遮蔽的牌子即可置顶弹出并享受同款放大动效 */
       function placeNodes(items, gap, apply) {
         let lastX = -Infinity;
+        const isCard = !!CARD_LAYERS[state.axisLayer];
+        const stemRows = [Math.round(8 * v), Math.round(32 * v)];
         items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
           const forced = item.el.classList.contains('selected');
+          const stemH = isCard ? stemRows[idx % 2] : GEOM.stems[idx % GEOM.stems.length];
+          item.defaultStemH = stemH;
           if (x - lastX < gap && !forced) {
             item.el.classList.add('label-hidden');
             item.x = x;
             item.row = -1;
             item.el.style.left = `${x}px`;
             item.el.style.top = `${nodeTop}px`;
-            item.stemEl.style.height = '0px';
+            item.stemEl.style.height = `${stemH}px`;
+            item.el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
             return;
           }
           lastX = x;
@@ -7030,7 +7098,7 @@
         });
       } else {
         const cardW = CARD_W * v;
-        const stemRows = [Math.round(4 * v), Math.round(32 * v)];
+        const stemRows = [Math.round(10 * v), Math.round(34 * v)];
         placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
           const { el, stemEl } = item;
           item.x = x;
@@ -7952,6 +8020,82 @@
       });
     }
 
+    /* =========================================================================
+       竖向时间光标联动引擎：
+       1. 光标落到第一层大朝代（.macro-dynasty-block）时赋予统一自然的悬浮抬升效果（.cursor-hover-macro）
+       2. 当「联动支系」（state.smartSubFold）开启时，默认隐藏第二层、第三层细分政权，
+          仅将与当前光标所在第一层主流朝代有时间交叉重叠（sub.start < curDyn.end && sub.end > curDyn.start）
+          的第二层和第三层政权以阶梯下拉动效（pull-down）自然弹出
+       ========================================================================= */
+    function syncCursorDynastyAndSubs(curDyn) {
+      if (!curDyn) return;
+      const dynChanged = state.cursorDynastyId !== curDyn.id;
+      state.cursorDynastyId = curDyn.id;
+      const mode = state.subMode || 'auto';
+
+      // 1. 第一层主流朝代：竖向时间光标落入时触发无红框、带柔和呼吸感的悬浮态
+      for (let i = 0; i < domCache.macros.length; i++) {
+        const m = domCache.macros[i];
+        const isUnderCursor = m.dyn.id === curDyn.id;
+        if (m.el.__underCursor !== isUnderCursor) {
+          m.el.__underCursor = isUnderCursor;
+          m.el.classList.toggle('cursor-hover-macro', isUnderCursor);
+        }
+      }
+
+      // 2. 第二层与第三层细分政权：支持三档模式
+      //    - 'auto'  ：默认档，仅在光标接触对应第一层主流朝代时下拉弹出时间重叠的二三层
+      //    - 'always'：常驻档，二三层常驻显示
+      //    - 'off'   ：关闭档，二三层全部隐藏
+      let maxVisibleTrack = -1;
+      for (let i = 0; i < domCache.subs.length; i++) {
+        const s = domCache.subs[i];
+        const sub = s.sub;
+        const isOverlapping = (sub.start <= curDyn.end) && (sub.end >= curDyn.start);
+        let shouldReveal = false;
+        if (mode === 'always') {
+          shouldReveal = true;
+        } else if (mode === 'auto') {
+          shouldReveal = isOverlapping;
+        } else {
+          shouldReveal = false;
+        }
+
+        if (shouldReveal && isOverlapping) {
+          const tr = sub.track || 0;
+          if (tr > maxVisibleTrack) maxVisibleTrack = tr;
+        }
+
+        if (s.el.__revealed !== shouldReveal || dynChanged) {
+          s.el.__revealed = shouldReveal;
+          s.el.classList.toggle('sub-pulldown-show', shouldReveal);
+          s.el.classList.toggle('sub-pulldown-hide', !shouldReveal);
+          s.el.classList.toggle('sub-cursor-linked', mode === 'auto' && isOverlapping);
+        }
+      }
+
+      // 3. 动态双向收拢上下轴间距（消除朝代轴与下方人物/事件时间轴之间的大面积空当）：
+      //    - 当 mode === 'always' 时，预留完整三轨空间（activeTracks = 3）
+      //    - 当 mode === 'off' 时，0 轨展开（activeTracks = 0），上下轴向屏幕中央紧密靠拢
+      //    - 当 mode === 'auto' 时，根据当前光标所在朝代实际弹出的支系层数（0~3轨）动态伸缩！
+      //      例如在夏/商/西周/秦/隋/唐/元/明/清等无支系大一统朝代，activeTracks = 0，上下轴自动向中央合拢；
+      //      滑入东周/三国/两晋/南北朝/五代/宋辽金时，上下轴柔顺推开恰好的高度迎接下拉支系！
+      const activeTracks = mode === 'always' ? 3 : (mode === 'off' ? 0 : (maxVisibleTrack + 1));
+      const unusedTracks = Math.max(0, 3 - activeTracks);
+      const trackStep = GEOM.subTrackStep || Math.round(38 * (GEOM.v || 1));
+      // 预留 10px 呼吸间隙，其余未用轨道高度由上轴下移 + 下轴上移共同向屏幕中央聚拢
+      const totalClosePx = Math.max(0, unusedTracks * trackStep - (activeTracks === 0 ? Math.round(8 * (GEOM.v || 1)) : 0));
+      const upperDownPx = Math.round(totalClosePx * 0.42);
+      const lowerUpPx = -Math.round(totalClosePx * 0.58);
+
+      if (canvasEl.__upperDownPx !== upperDownPx || canvasEl.__lowerUpPx !== lowerUpPx) {
+        canvasEl.__upperDownPx = upperDownPx;
+        canvasEl.__lowerUpPx = lowerUpPx;
+        canvasEl.style.setProperty('--upper-shift-y', `${upperDownPx}px`);
+        canvasEl.style.setProperty('--lower-shift-y', `${lowerUpPx}px`);
+      }
+    }
+
     function applyScrollTransform() {
       state.scrollX = clampScrollX(state.scrollX);
       const pad = getCenterPad();
@@ -7976,6 +8120,7 @@
       }
       centerEraBadge.textContent = curDyn.name.replace('(春秋战国)', '');
 
+      syncCursorDynastyAndSubs(curDyn);
       syncMacroSticky();
       layoutTicks();
       updateMinorYears();
@@ -8132,11 +8277,9 @@
 
         const scale = 1 + weight * DOCK_MAX_ADD_SCALE;
         const liftY = -weight * 4.2; // 向上优雅拱起，形成饱满的 Dock 弧线
-        const markScaleY = 1 + weight * 1.15;
 
         tick.el.style.transform = `translate3d(${(tick.baseX + pushX).toFixed(2)}px, ${liftY.toFixed(2)}px, 0) translateX(-50%)`;
         tick.labelEl.style.transform = `scale(${scale.toFixed(3)})`;
-        tick.markEl.style.transform = `scaleY(${markScaleY.toFixed(2)})`;
         const isHot = weight > 0.56;
         tick.el.classList.toggle('hot', isHot);
         if (weight > currentPeakWeight) {
@@ -8154,11 +8297,9 @@
 
         const scale = 0.92 + weight * 1.48;
         const liftY = -weight * 3.6;
-        const markScaleY = 0.85 + weight * 0.95;
 
         m.el.style.transform = `translate3d(${(m.baseX + pushX).toFixed(2)}px, ${liftY.toFixed(2)}px, 0) translateX(-50%)`;
         m.labelEl.style.transform = `scale(${scale.toFixed(3)})`;
-        m.markEl.style.transform = `scaleY(${markScaleY.toFixed(2)})`;
         m.el.style.opacity = m.baseAlpha.toFixed(3);
         m.el.classList.toggle('hot', weight > 0.65);
         if (weight > currentPeakWeight && m.baseAlpha > 0.6) {
@@ -8178,39 +8319,89 @@
         }
       }
 
-      // 3. 事件竹简与人物玉牌：经过中央红线时产生明显的 Apple Dock 波浪托举 + 轴点呼吸光环
-      if (state.axisLayer && state.zoomScale >= EVENT_UNFOLD_THRESHOLD) {
+      // 3. 下方轴上的圆点与牌子联动引擎（以竖向光标接近轴上圆点为基准）：
+      //    - 光标接近轴上圆点时，圆点与下方牌子同步产生放大动效；
+      //    - 若光标接近到被密度抽样隐藏（.label-hidden）或被邻近牌子遮蔽的节点时，
+      //      自动将该被遮蔽的牌子置顶显示（.cursor-unmask-node + 动态高 z-index），并同步施加圆点与牌子动效；
+      //    - 牌子以顶部中心（50% 0%）为原点向下放大（dropY >= 0），绝不向上侵入轴线与圆点！
+      if (state.axisLayer) {
+        const CIRCLE_SENSE_RADIUS = 76; // 以轴上圆点为基准的感应半径（px）
+        // 先找出当前距离中央光标最近的主焦点圆点（用于精准唤醒被遮蔽的牌子）
+        let closestIdx = -1;
+        let closestDist = Infinity;
+        for (let i = 0; i < domCache.events.length; i++) {
+          const item = domCache.events[i];
+          if (!item || typeof item.x !== 'number') continue;
+          const d = Math.abs((item.x - viewLeft) - cx);
+          if (d < closestDist) {
+            closestDist = d;
+            closestIdx = i;
+          }
+        }
+
         for (let i = 0; i < domCache.events.length; i++) {
           const item = domCache.events[i];
           if (!item || typeof item.x !== 'number') continue;
           const screenX = item.x - viewLeft;
-          if (screenX < -180 || screenX > vw + 180) continue;
-
-          const card = item.el.querySelector('.vertical-bamboo-slip, .axis-person-card');
-          const dot = item.el.querySelector('.pulse-circle');
+          const card = item.cardEl || item.el.querySelector('.vertical-bamboo-slip, .axis-person-card');
+          const dot = item.dotEl || item.el.querySelector('.pulse-circle');
           if (!card) continue;
 
-          if (item.el.classList.contains('selected')) {
-            card.style.transform = '';
-            card.classList.remove('dock-focus');
-            if (dot) dot.style.transform = '';
+          if (screenX < -200 || screenX > vw + 200) {
+            if (item.__dockActive) {
+              item.__dockActive = false;
+              card.style.transform = '';
+              card.classList.remove('dock-focus');
+              item.el.classList.remove('cursor-unmask-node');
+              item.el.style.zIndex = '';
+              if (dot) {
+                dot.style.transform = '';
+                dot.classList.remove('dock-dot-active');
+              }
+            }
             continue;
           }
 
-          const { weight, pushX } = evalCenterRedLineDock(screenX, cx);
-          if (weight > 0.01) {
-            const cardScale = 1 + weight * 0.34; // 竹简在中央红线处最高放大 1.34x，极具互动感
-            const cardLift = -weight * 7.5;      // 向上轻盈托举 7.5px
-            card.style.transform = `translate3d(${(pushX * 0.42).toFixed(2)}px, ${cardLift.toFixed(2)}px, 0) scale(${cardScale.toFixed(3)})`;
-            card.classList.toggle('dock-focus', weight > 0.62);
+          const dist = screenX - cx;
+          const absD = Math.abs(dist);
+
+          if (absD < CIRCLE_SENSE_RADIUS) {
+            item.__dockActive = true;
+            const u = dist / CIRCLE_SENSE_RADIUS;
+            const c = Math.cos(u * Math.PI * 0.5);
+            const weight = c * c; // 0 ~ 1 升余弦平滑权重（以圆点到光标距离为基准）
+            const pushX = Math.sin(u * Math.PI) * 14 * (1 - Math.abs(u) * 0.45);
+
+            // 若光标已接近该圆点（weight > 0.32 或为最近圆点且距离 < 38px），将被遮蔽/隐藏的牌子置顶显现
+            const isUnmasked = (weight > 0.35) || (i === closestIdx && absD < 42);
+            item.el.classList.toggle('cursor-unmask-node', isUnmasked);
+            // 按接近程度动态分配层级（36 ~ 85），确保越靠近光标的牌子越在最上层，绝不被旁边牌子遮挡
+            item.el.style.zIndex = String(36 + Math.round(weight * 48) + (i === closestIdx ? 10 : 0));
+
+            // 牌子以顶部中心（50% 0%）为基准向下自然放大并微下垂（dropY >= 0），严禁向上侵入轴线与圆点
+            const cardScale = 1 + weight * 0.34;
+            const cardDropY = weight * 3.0;
+            card.style.transform = `translate3d(${pushX.toFixed(2)}px, ${cardDropY.toFixed(2)}px, 0) scale(${cardScale.toFixed(3)})`;
+            card.classList.toggle('dock-focus', weight > 0.48);
+
+            // 轴上圆点同步放大并泛起呼吸光晕
             if (dot) {
-              const dotScale = 1 + weight * 0.48;
+              const dotScale = 1 + weight * 0.58;
               dot.style.transform = `scale(${dotScale.toFixed(3)})`;
+              dot.classList.toggle('dock-dot-active', weight > 0.42);
             }
           } else {
-            card.style.transform = '';
-            card.classList.remove('dock-focus');
-            if (dot) dot.style.transform = '';
+            if (item.__dockActive) {
+              item.__dockActive = false;
+              card.style.transform = '';
+              card.classList.remove('dock-focus');
+              item.el.classList.remove('cursor-unmask-node');
+              item.el.style.zIndex = '';
+              if (dot) {
+                dot.style.transform = '';
+                dot.classList.remove('dock-dot-active');
+              }
+            }
           }
         }
       }
@@ -8620,20 +8811,65 @@
       bandHintTimer = setTimeout(() => bandHintEl.classList.add('hide'), 4200);
     }
 
-    /* 切换时间轴图层：events / figures / literati，点当前已开启的图层则收起 */
+    /* 同步左下角两个滑动式开关的滑块位置与尺寸 */
+    function syncSlidingSwitchPills() {
+      // 1) 支系三档滑块
+      const subTrack = document.getElementById('sub-mode-track');
+      const subPill = document.getElementById('sub-mode-pill');
+      if (subTrack && subPill) {
+        const activeSubBtn = subTrack.querySelector(`.slide-opt[data-submode="${state.subMode || 'auto'}"]`);
+        if (activeSubBtn) {
+          subPill.style.width = `${activeSubBtn.offsetWidth}px`;
+          subPill.style.transform = `translate3d(${activeSubBtn.offsetLeft}px, 0, 0)`;
+          subPill.dataset.mode = state.subMode || 'auto';
+        }
+      }
+
+      // 2) 图层五档滑块
+      const layerTrack = document.getElementById('axis-layer-track');
+      const layerPill = document.getElementById('axis-layer-pill');
+      if (layerTrack && layerPill) {
+        const key = state.axisLayer || 'off';
+        const activeLayerBtn = layerTrack.querySelector(`.slide-opt[data-layer="${key}"]`);
+        if (activeLayerBtn) {
+          layerPill.style.width = `${activeLayerBtn.offsetWidth}px`;
+          layerPill.style.transform = `translate3d(${activeLayerBtn.offsetLeft}px, 0, 0)`;
+          layerPill.dataset.theme = key;
+        }
+      }
+    }
+
+    function setSubMode(mode) {
+      if (!['auto', 'always', 'off'].includes(mode)) return;
+      state.subMode = mode;
+      state.smartSubFold = (mode === 'auto');
+      document.querySelectorAll('#sub-mode-track .slide-opt').forEach((btn) => {
+        const on = btn.dataset.submode === mode;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-checked', String(on));
+      });
+      syncSlidingSwitchPills();
+      state.cursorDynastyId = null;
+      applyScrollTransform();
+    }
+
+    /* 切换时间轴图层：events / figures / literati / eras / off，支持点击与手指滑动切换 */
     function setAxisLayer(layer, opts = {}) {
-      const next = (state.axisLayer === layer && !opts.force) ? null : layer;
+      const targetLayer = (layer === 'off') ? null : layer;
+      const next = (state.axisLayer === targetLayer && !opts.force && !opts.fromSlide) ? null : targetLayer;
       const layerChanged = next !== state.axisLayer;
 
       state.axisLayer = next;
       state.showEventsMaster = !!next;
 
-      document.querySelectorAll('.layer-switch').forEach((btn) => {
-        const on = btn.dataset.layer === next;
+      const activeKey = next || 'off';
+      document.querySelectorAll('#axis-layer-track .slide-opt').forEach((btn) => {
+        const on = btn.dataset.layer === activeKey;
         btn.classList.toggle('on', on);
-        btn.querySelector('.switch').classList.toggle('on', on);
+        btn.classList.toggle('active', on);
         btn.setAttribute('aria-checked', String(on));
       });
+      syncSlidingSwitchPills();
 
       if (!next) {
         // 收起：只折叠下方卷轴，朝代带纹丝不动
@@ -8675,10 +8911,84 @@
       else selectPersonItem(item, true);
     }
 
-    function initControls() {
-      document.querySelectorAll('.layer-switch').forEach((btn) => {
-        btn.addEventListener('click', () => setAxisLayer(btn.dataset.layer));
+    /* 为滑动式开关轨道绑定「点按 + 左右手指拖拽滑选」手势 */
+    function bindSlidingTrackGesture(trackEl, onSelectBtn) {
+      if (!trackEl) return;
+      let isSliding = false;
+      let hasDragged = false;
+
+      const pickButtonAt = (clientX, clientY) => {
+        const opts = Array.from(trackEl.querySelectorAll('.slide-opt'));
+        for (const btn of opts) {
+          const r = btn.getBoundingClientRect();
+          if (clientX >= r.left && clientX <= r.right) return btn;
+        }
+        return null;
+      };
+
+      trackEl.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        isSliding = true;
+        hasDragged = false;
+        try { trackEl.setPointerCapture(e.pointerId); } catch (_) {}
       });
+
+      trackEl.addEventListener('pointermove', (e) => {
+        if (!isSliding) return;
+        e.stopPropagation();
+        hasDragged = true;
+        const hit = pickButtonAt(e.clientX, e.clientY);
+        if (hit && !hit.classList.contains('active')) {
+          onSelectBtn(hit, true);
+        }
+      });
+
+      const endSlide = (e) => {
+        if (!isSliding) return;
+        isSliding = false;
+        try { trackEl.releasePointerCapture(e.pointerId); } catch (_) {}
+      };
+      trackEl.addEventListener('pointerup', endSlide);
+      trackEl.addEventListener('pointercancel', endSlide);
+
+      trackEl.querySelectorAll('.slide-opt').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (hasDragged) {
+            hasDragged = false;
+            return;
+          }
+          onSelectBtn(btn, false);
+        });
+      });
+    }
+
+    function initControls() {
+      const subTrack = document.getElementById('sub-mode-track');
+      bindSlidingTrackGesture(subTrack, (btn) => {
+        setSubMode(btn.dataset.submode);
+      });
+
+      const layerTrack = document.getElementById('axis-layer-track');
+      bindSlidingTrackGesture(layerTrack, (btn, fromSlide) => {
+        setAxisLayer(btn.dataset.layer, { fromSlide });
+      });
+
+      const consoleEl = document.getElementById('unified-console');
+      const fabBtn = document.getElementById('console-fab-btn');
+      if (consoleEl && fabBtn) {
+        fabBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const collapsed = consoleEl.classList.toggle('is-collapsed');
+          fabBtn.setAttribute('aria-expanded', String(!collapsed));
+          if (!collapsed) {
+            requestAnimationFrame(() => syncSlidingSwitchPills());
+          }
+        });
+      }
+
+      requestAnimationFrame(() => syncSlidingSwitchPills());
+      window.addEventListener('resize', () => requestAnimationFrame(syncSlidingSwitchPills), { passive: true });
 
       document.getElementById('zoom-in-btn').addEventListener('click', () => {
         animateZoomTo(state.zoomScale * 1.4);
@@ -8739,19 +9049,13 @@
     /* 底部 Dock 滑动指示块：跟随当前激活页签的位置与宽度 */
     const bottomTabsEl = document.querySelector('.bottom-tabs');
     const tabGliderEl = bottomTabsEl ? bottomTabsEl.querySelector('.tab-glider') : null;
-    function syncTabGlider(withStretch = false) {
+    function syncTabGlider() {
       if (!tabGliderEl || !bottomTabsEl) return;
       const active = bottomTabsEl.querySelector('.view-tab.active');
       if (!active) return;
       const targetW = active.offsetWidth;
       const targetX = active.offsetLeft;
       tabGliderEl.style.width = `${targetW}px`;
-      if (withStretch) {
-        // 苹果液态玻璃水滴拉伸回弹动效
-        tabGliderEl.classList.remove('glider-morph');
-        void tabGliderEl.offsetWidth;
-        tabGliderEl.classList.add('glider-morph');
-      }
       tabGliderEl.style.transform = `translate3d(${targetX}px, 0, 0)`;
     }
 
@@ -8802,7 +9106,6 @@
         });
       }
     }
-
 
       /********************************************************************
      * 16. 多页面视图：长卷 / 帝王档案 / 事件年表
@@ -9648,8 +9951,25 @@
         });
       }
 
+      // 防误触优化：阻止在 Tab 栏上的触摸事件穿透到底层画卷，且仅在干净点按（移动距离 < 10px）时立即触发切换
+      if (bottomTabsEl) {
+        ['pointerdown', 'touchstart', 'mousedown'].forEach((evt) => {
+          bottomTabsEl.addEventListener(evt, (e) => e.stopPropagation(), { passive: true });
+        });
+      }
       document.querySelectorAll('.view-tab').forEach((btn) => {
-        btn.addEventListener('click', () => switchView(btn.dataset.view));
+        let downX = 0, downY = 0;
+        btn.addEventListener('pointerdown', (e) => {
+          downX = e.clientX;
+          downY = e.clientY;
+        }, { passive: true });
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (downX && Math.hypot(e.clientX - downX, e.clientY - downY) > 14) return;
+          if (currentView !== btn.dataset.view) {
+            switchView(btn.dataset.view);
+          }
+        });
       });
 
       document.getElementById('open-archive-btn').addEventListener('click', () => {
