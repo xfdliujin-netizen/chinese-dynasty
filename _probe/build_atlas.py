@@ -238,7 +238,7 @@ body.atlas-embed #nav-bar {
     left: 10px;
     right: 10px;
     top: auto;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 184px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 128px);
     height: auto !important;
     max-height: min(46vh, 340px);
     z-index: 62;
@@ -256,7 +256,7 @@ body.atlas-embed #nav-bar {
   body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane { max-height: none; }
   /* 竖屏：图例叠在朝代横幅上方，互不压叠；展开史志卡时隐藏图例 */
   body.atlas-embed #map-key {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 244px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 188px);
     max-height: 40vh;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -1023,13 +1023,16 @@ BRIDGE = r'''
       layoutRaf = requestAnimationFrame(function () {
         layoutRaf = 0;
         var dr = dock.getBoundingClientRect();
+        var dockClear = 0;
         if (dr.height > 0) {
-          setVar('--dock-clearance', Math.max(72, Math.round(window.innerHeight - dr.top + 6)) + 'px');
+          dockClear = Math.max(72, Math.round(window.innerHeight - dr.top + 6));
+          setVar('--dock-clearance', dockClear + 'px');
         }
         if (pane && window.innerWidth < 768) {
           var pr = pane.getBoundingClientRect();
-          if (pr.height > 0) {
-            setVar('--phone-pane-clearance', Math.round(window.innerHeight - pr.top + 6) + 'px');
+          if (pr.height > 0 && dockClear) {
+            /* 面板底边贴时间轴上方；图例再贴面板上缘，全部按实测高度推算 */
+            setVar('--phone-pane-clearance', Math.round(dockClear + pr.height + 6) + 'px');
           }
         }
       });
