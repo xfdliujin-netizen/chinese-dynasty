@@ -5368,20 +5368,20 @@ body.atlas-embed #nav-bar {
 
 /* 时间轴：悬浮玻璃胶囊，让开主程序底部导航（约 62px）+ 安全区 */
 body.atlas-embed #scrubber-dock {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
-  z-index: 66;
-  width: min(880px, calc(100vw - 20px));
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(252, 249, 242, 0.74), rgba(246, 240, 229, 0.62));
-  -webkit-backdrop-filter: blur(26px) saturate(1.8);
-  backdrop-filter: blur(26px) saturate(1.8);
-  box-shadow: 0 12px 32px rgba(30, 27, 24, 0.2);
-  transition: opacity 0.35s ease;
-}
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
+    width: min(980px, calc(100vw - 12px)) !important;
+    padding: 8px 16px 10px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(184, 134, 45, 0.34) !important;
+    background: linear-gradient(180deg, rgba(252, 249, 242, 0.95), rgba(244, 237, 224, 0.92)) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(1.9) !important;
+    backdrop-filter: blur(26px) saturate(1.9) !important;
+    box-shadow: 0 12px 32px rgba(28, 20, 12, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+    z-index: 68 !important;
+  }
 /* 时间轴触摸拖动：交给指针事件，避免被浏览器手势抢走 */
 body.atlas-embed #scrubber-track { touch-action: none; }
 /* 详情卡收起/展开手柄：贴在卡片左缘，收起后滑到屏幕右缘 */
@@ -5417,15 +5417,24 @@ body.atlas-embed #act-toggle-pane:hover {
   background: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(250, 246, 238, 0.88));
 }
 
-/* 左下角图例：抬到时间轴胶囊上方，避免重叠；禁原生拖拽/选区（防 dragstart 劫持滑动手势） */
-@media (min-width: 901px) {
-  body.atlas-embed #map-key {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 198px);
-    max-height: calc(100vh - 268px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
+/* 左下角图例与右下角比例尺同步下移，紧贴在沉底时间轴上方 8px 处 */
+  @media (min-width: 901px) {
+    body.atlas-embed #map-key {
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 82px) !important;
+      max-height: calc(100dvh - 150px) !important;
+    }
+    body.atlas-embed #canvas-br-dock {
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 82px) !important;
+    }
   }
-}
+  @media (max-width: 900px) {
+    body.atlas-embed #map-key {
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 92px) !important;
+    }
+    body.atlas-embed #canvas-br-dock {
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 92px) !important;
+    }
+  }
 body.atlas-embed #map-key {
   user-select: none;
   -webkit-user-select: none;
