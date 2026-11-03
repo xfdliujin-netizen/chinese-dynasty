@@ -100,8 +100,31 @@
     .ancient-scroll::-webkit-scrollbar-track { background: transparent; }
     .ancient-scroll::-webkit-scrollbar-thumb { background: rgba(60, 60, 67, 0.28); border-radius: 4px; }
 
-    /* ================= 品牌印记与纪年基礎样式 ================= */
+    /* ================= 顶部标题栏（iOS 半透明毛玻璃导航栏） ================= */
+    .app-header {
+      flex: 0 0 auto;
+      position: relative;
+      z-index: 30;
+      background: rgba(245, 240, 230, 0.78);
+      -webkit-backdrop-filter: blur(20px) saturate(1.8);
+      backdrop-filter: blur(20px) saturate(1.8);
+      border-bottom: 1px solid var(--sep);
+      padding-top: calc(8px + env(safe-area-inset-top, 0px));
+      padding-bottom: 8px;
+      padding-left: calc(var(--page-pad) + env(safe-area-inset-left, 0px));
+      padding-right: calc(var(--page-pad) + env(safe-area-inset-right, 0px));
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
     .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
     .seal {
       width: 28px; height: 28px; flex: 0 0 auto;
       display: flex; align-items: center; justify-content: center;
@@ -114,7 +137,9 @@
       box-shadow: 0 1px 3px rgba(142, 36, 29, 0.28);
       padding-bottom: 2px;
     }
+
     .brand-text { min-width: 0; }
+
     .app-title {
       margin: 0;
       font-size: clamp(15px, 1.55vw, 20px);
@@ -124,12 +149,26 @@
       color: var(--ink-black);
       white-space: nowrap;
     }
+
     .app-sub {
       margin: 2px 0 0;
       font-size: clamp(9px, 0.95vw, 11px);
       font-weight: 500;
       letter-spacing: 0.06em;
       color: var(--gray-label);
+      white-space: nowrap;
+    }
+
+    .header-tools { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+    .year-badge {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: var(--fill);
+      border: none;
       white-space: nowrap;
     }
     #center-era-badge { font-size: clamp(10px, 1.05vw, 13px); font-weight: 600; color: var(--tint); }
@@ -139,6 +178,27 @@
       font-variant-numeric: tabular-nums;
       font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
     }
+
+    .zoom-box {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      padding: 2px;
+      border-radius: 999px;
+      background: var(--fill);
+      border: none;
+    }
+    .zoom-btn {
+      width: 28px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      border: none; border-radius: 999px;
+      background: transparent;
+      color: var(--ink-black);
+      font-size: 14px; font-weight: 700; line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .zoom-btn:active { background: var(--fill-strong); transform: scale(0.92); }
     #zoom-label {
       min-width: 42px;
       text-align: center;
@@ -149,6 +209,67 @@
       transition: color 0.25s ease;
     }
     #zoom-label.zoom-active { color: var(--cinnabar); }
+
+    /* 朝代快速检索条 */
+    .header-nav { display: flex; align-items: center; }
+
+    .nav-arrow {
+      flex: 0 0 auto;
+      width: 30px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid #C5B698;
+      background: rgba(229, 222, 201, 0.92);
+      color: var(--ink-secondary);
+      font-size: 15px; font-weight: 900; line-height: 1;
+      cursor: pointer;
+    }
+    .nav-arrow:first-child { border-radius: 6px 0 0 6px; }
+    .nav-arrow:last-child { border-radius: 0 6px 6px 0; }
+    .nav-arrow:active { background: #D6CCB4; }
+
+    .dynasty-nav-scroll {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      padding: 3px 8px;
+      background: rgba(232, 224, 206, 0.62);
+      border-top: 1px solid rgba(197, 182, 152, 0.7);
+      border-bottom: 1px solid rgba(197, 182, 152, 0.7);
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+    }
+    .dynasty-nav-scroll::-webkit-scrollbar { display: none; }
+
+    .dyn-nav-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 11px;
+      border-radius: 6px;
+      border: 1px solid #C9B99B;
+      background: #FAF6EE;
+      color: var(--ink-black);
+      font-family: inherit;
+      font-size: clamp(11px, 1.1vw, 13.5px);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    }
+    .dyn-nav-pill.active {
+      background: var(--cinnabar);
+      color: #FAF6EE;
+      border-color: #8E241D;
+      box-shadow: 0 1px 4px rgba(184, 51, 42, 0.3);
+    }
 
     /* ================= 画卷时间轴 ================= */
     .timeline-band {
@@ -198,6 +319,15 @@
         rgba(184, 51, 42, 0.85) 100%);
       pointer-events: none;
       z-index: 40;
+    }
+    .center-dot {
+      position: absolute; top: -2px; left: 50%;
+      width: 11px; height: 11px;
+      margin-left: -5.5px;
+      border-radius: 999px;
+      background: var(--cinnabar);
+      border: 2px solid #FAF6EE;
+      box-shadow: 0 1px 4px rgba(184, 51, 42, 0.35);
     }
 
     /* ================= 疏朗自适应年份刻度尺与 iPad 中央红线 Apple Dock 透镜 ================= */
@@ -256,13 +386,26 @@
     .tick-label .yr-num {
       letter-spacing: -0.02em;
     }
+    .tick-mark {
+      width: 1.25px;
+      height: calc(6px * var(--v));
+      margin-top: calc(2px * var(--v));
+      background: rgba(154, 138, 116, 0.65);
+      border-radius: 1px;
+      transform-origin: 50% 100%;
+      will-change: transform, background-color;
+    }
     /* 细分刻度：仅在屏幕缩放足够宽裕且远离主刻度碰撞区时才优雅浮现 */
     .minor-year .tick-label {
       font-size: max(8.5px, calc(8.8px * var(--v)));
       font-weight: 600;
       color: #8E7F6B;
     }
-    .minor-year
+    .minor-year .tick-mark {
+      width: 1px;
+      height: calc(4px * var(--v));
+      background: rgba(168, 152, 130, 0.45);
+    }
     /* 中央红线 Dock 焦点峰值态：独立悬浮胶囊光晕，每个放大的年份都端庄美观 */
     .tick.hot .tick-label,
     .minor-year.hot .tick-label {
@@ -276,7 +419,10 @@
       color: var(--cinnabar);
     }
     .tick.hot .tick-mark,
-    .minor-year.hot
+    .minor-year.hot .tick-mark {
+      background: var(--cinnabar);
+      width: 1.8px;
+    }
 
     /* 顶部大朝代块 */
     .macro-dynasty-block {
@@ -639,6 +785,191 @@
       border: 2px solid var(--cinnabar);
       animation: pulse-ring 1.7s infinite;
     }
+
+    /* ================= 图层开关：左下角悬浮胶囊 =================
+       竖屏竖向排列 / 横屏横向排列；原铺底控制栏已取消 */
+    .app-controls {
+      position: fixed;
+      left: calc(env(safe-area-inset-left, 0px) + 12px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      padding: 8px 10px;
+      border-radius: 20px;
+      background: rgba(250, 246, 238, 0.72);
+      -webkit-backdrop-filter: blur(24px) saturate(1.8);
+      backdrop-filter: blur(24px) saturate(1.8);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 10px 30px rgba(30, 27, 24, 0.18), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+      max-width: calc(100vw - 24px);
+    }
+    .controls-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+    .layer-switches {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+      min-width: 0;
+    }
+    .app-controls .layer-count {
+      align-self: flex-start;
+      padding-left: 3px;
+      margin-top: 2px;
+    }
+    /* 横屏（中宽以上）：改为一行横向排列，用短名 + 隐藏计数，避免碰到居中的主导航 */
+    @media (orientation: landscape) and (min-width: 700px) {
+      .app-controls {
+        flex-direction: row;
+        align-items: center;
+        gap: 3px;
+        padding: 6px 12px 6px 8px;
+      }
+      .controls-row { flex-direction: row; align-items: center; gap: 3px; }
+      .layer-switches { flex-direction: row; gap: 0; }
+      .layer-switch { gap: 5px; padding: 3px 8px 3px 3px; }
+      .app-controls .layer-switch .full { display: none; }
+      .app-controls .layer-switch .short { display: inline; }
+      .app-controls .layer-count { display: none; }
+    }
+    /* 手机竖屏：底部中间是主导航，图层胶囊抬到其上方左侧 */
+    @media (orientation: portrait) and (max-width: 560px) {
+      .app-controls { bottom: calc(env(safe-area-inset-bottom, 0px) + 82px); }
+    }
+
+    /* 整块「开关 + 标签」即按钮：触控区更大，符合 iOS 习惯 */
+    .layer-switch {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+      padding: 3px 9px 3px 3px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--gray-label);
+      font-family: inherit;
+      font-size: clamp(12px, 1.06vw, 13.5px);
+      font-weight: 500;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.22s ease, color 0.22s ease, transform 0.14s ease;
+    }
+    .layer-switch .switch { pointer-events: none; }
+    .layer-switch .switch-label { font-size: inherit; font-weight: inherit; }
+    .layer-switch:active { transform: scale(0.96); }
+    .layer-switch.on {
+      color: var(--ink-black);
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.62);
+    }
+    /* 四个图层各自的主题色（仅作用于开关开启态，保持克制） */
+    .layer-switch[data-layer="events"].on .switch { background: #34C759; }
+    .layer-switch[data-layer="figures"].on .switch { background: #3C6E8F; }
+    .layer-switch[data-layer="literati"].on .switch { background: #7A5AA8; }
+    .layer-switch[data-layer="eras"].on .switch { background: #C09020; }
+
+    .layer-count {
+      flex: 0 0 auto;
+      font-size: 11px;
+      font-weight: 600;
+      color: #8A7C68;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .layer-switch .short { display: none; }
+
+    /* 小屏：简称 + 紧凑开关 + 隐藏计数，保证四个开关一行放下 */
+    @media (max-width: 560px) {
+      .layer-switch { gap: 4px; padding: 2px 6px 2px 2px; font-size: 12px; }
+      .layer-switch .full { display: none; }
+      .layer-switch .short { display: inline; }
+      .layer-switch .switch { width: 34px; height: 21px; }
+      .layer-switch .switch .knob { width: 17px; height: 17px; }
+      .layer-switch.on .switch .knob { transform: translateX(13px); }
+      .layer-switch.on:active .switch .knob { transform: translateX(13px) scale(1.08); }
+      .layer-count { display: none; }
+    }
+
+    /* UISwitch 原生样式：开启为系统绿、白色圆钮带投影 */
+    .switch {
+      position: relative;
+      width: 46px; height: 28px;
+      flex: 0 0 auto;
+      border: none;
+      border-radius: 999px;
+      background: rgba(120, 120, 128, 0.32);
+      padding: 0;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+    .switch.on { background: #34C759; }
+    .knob {
+      position: absolute; top: 2px; left: 2px;
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      background: #FFFFFF;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+      transition: transform 0.25s var(--ios-ease);
+    }
+    .switch.on .knob { transform: translateX(18px); }
+    .switch:active .knob { transform: scale(1.08); }
+    .switch.on:active .knob { transform: translateX(18px) scale(1.08); }
+
+    .switch-label { font-size: clamp(12px, 1.1vw, 14px); font-weight: 600; white-space: nowrap; }
+
+    .status-pill {
+      font-size: clamp(10px, 0.95vw, 12px);
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+      background: rgba(52, 199, 89, 0.16);
+      color: #248A3D;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .status-pill[data-state="folded"] { background: rgba(184, 134, 59, 0.2); color: #8C5818; }
+    .status-pill[data-state="off"] { background: var(--fill); color: var(--gray-label); }
+
+    .filter-bar {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 2px 0;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+
+    .cat-pill {
+      flex: 0 0 auto;
+      min-height: 26px;
+      padding: 4px 12px;
+      border: none;
+      border-radius: 999px;
+      background: var(--fill);
+      color: var(--ink-secondary);
+      font-family: inherit;
+      font-size: clamp(10.5px, 1.05vw, 13px);
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .cat-pill.active { background: var(--tint); color: #FFFFFF; }
 
     /* ============================================================
        详情弹窗：由屏幕下方升起，悬浮于卷轴画面之上
@@ -1182,6 +1513,64 @@
     /* ============================================================
        帝王档案页
        ============================================================ */
+    .archive-shell {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 206px minmax(0, 1fr);
+      gap: 10px;
+      padding: 8px var(--page-pad) calc(8px + env(safe-area-inset-bottom, 0px));
+      width: 100%;
+      max-width: var(--page-max);
+      margin: 0 auto;
+    }
+
+    .archive-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 2px;
+      scrollbar-width: none;
+    }
+    .archive-rail::-webkit-scrollbar { display: none; }
+
+    .rail-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 1px;
+      padding: 7px 10px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .rail-item .r-name { font-size: 15px; font-weight: 900; color: var(--ink-black); white-space: nowrap; }
+    .rail-item .r-range { font-size: 11.5px; color: #8A7C68; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .rail-item.active {
+      background: #FAF6EE;
+      border-color: var(--border-ancient);
+      box-shadow: 0 2px 8px rgba(30, 27, 24, 0.08);
+    }
+    .rail-item.active .r-name { color: var(--cinnabar); }
+
+    .archive-body {
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: #FAF6EE;
+      border: 1px solid var(--sep);
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(30, 27, 24, 0.05);
+      padding: 14px 16px 20px;
+    }
+
     .arch-hero { padding-bottom: 12px; border-bottom: 1px solid #E2D6BF; }
     .arch-hero-top {
       display: flex;
@@ -2528,8 +2917,19 @@
         rgba(184, 51, 42, 0.65) 100%) !important;
       box-shadow: 0 0 10px rgba(184, 51, 42, 0.18);
     }
+    .center-dot {
+      display: none; /* 已由顶部中央罗盘的朱砂菱形针尖接管，画面更干净 */
+    }
 
     /* 1.4 刻度尺底栏：温润的宣纸暗金丝线标尺 */
+    #ticks-layer::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      bottom: calc(2px * var(--v));
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(168, 146, 114, 0.42) 5%, rgba(168, 146, 114, 0.42) 95%, transparent);
+    }
 
     /* 1.5 顶层大朝代块：宋锦织金宣纸卡质感 */
     .macro-dynasty-block {
@@ -2906,6 +3306,87 @@
     }
 
     /* =========================================================================
+       3. 长卷左下方图层按钮区域（.app-controls）：
+          - 静态半透明（无动态闪烁位移，静止温润通透）
+          - 智能防碰撞自适应横排/竖排：
+            * 宽屏（>= 880px）：左下角空间充足（左侧距居中 Tab 栏超过 280px），自动采用精巧横排，与底部 Tab 栏处于同一水平线但互不触碰；
+            * 中小屏或竖屏（< 880px）：若横排会与居中的 Tab 栏碰撞，自动切换为紧凑竖排贴左边缘，且底边精确避开 Tab 栏，绝不遮挡。
+       ========================================================================= */
+    .app-controls {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+      z-index: 82 !important;
+      padding: 4px 6px !important;
+      border-radius: 18px !important;
+      background: rgba(246, 240, 228, 0.42) !important;
+      -webkit-backdrop-filter: blur(8px) saturate(1.35) !important;
+      backdrop-filter: blur(8px) saturate(1.35) !important;
+      border: 1px solid rgba(255, 255, 255, 0.45) !important;
+      box-shadow: 0 4px 16px rgba(30, 24, 16, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+      transition: none !important; /* 保持静态半透明稳定感 */
+    }
+    .app-controls .layer-count { display: none !important; }
+
+    /* 紧凑化每个开关胶囊，减少占地面积 */
+    .app-controls .layer-switch {
+      gap: 5px !important;
+      padding: 3px 8px 3px 4px !important;
+      font-size: 12px !important;
+      color: rgba(44, 36, 28, 0.76) !important;
+      transition: background 0.18s ease, color 0.18s ease !important;
+    }
+    .app-controls .layer-switch:active { transform: none !important; }
+    .app-controls .layer-switch .switch {
+      width: 30px !important;
+      height: 18px !important;
+    }
+    .app-controls .layer-switch .knob {
+      width: 14px !important;
+      height: 14px !important;
+      top: 2px !important;
+      left: 2px !important;
+      transition: transform 0.2s ease !important;
+    }
+    .app-controls .layer-switch.on .switch .knob {
+      transform: translateX(12px) !important;
+    }
+    .app-controls .layer-switch .full { display: none !important; }
+    .app-controls .layer-switch .short { display: inline !important; }
+
+    /* 宽屏（如 iPad 横屏 / 桌面 >= 880px）：左侧净空 > 290px，自动采用横排，与居中 Tab 栏同高并列且零遮挡 */
+    @media (min-width: 880px) {
+      .app-controls,
+      .app-controls .controls-row,
+      .app-controls .layer-switches {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 3px !important;
+      }
+      .app-controls {
+        border-radius: 999px !important;
+        padding: 4px 7px !important;
+      }
+    }
+
+    /* 中小屏或竖屏（< 880px）：自动切换为紧凑竖排，若屏幕过窄（< 540px）则自动上移至 Tab 栏左上方，彻底杜绝遮挡 */
+    @media (max-width: 879px) {
+      .app-controls,
+      .app-controls .controls-row,
+      .app-controls .layer-switches {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 2px !important;
+      }
+    }
+    @media (max-width: 540px) {
+      .app-controls {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 72px) !important;
+      }
+    }
+
+  
+    /* =========================================================================
        V6 终极进化：
        1. 全面对标 Apple iOS 26 / visionOS 液态玻璃（Liquid Glass）悬浮导航栏与控件
        2. 长卷时间轴 Apple Watch Crown 级立体放大光晕、刻度尺阶梯脉冲与竹简 3D 托举
@@ -2997,6 +3478,15 @@
         width 0.38s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    @keyframes liquidDropletMorph {
+      0%   { transform: var(--glider-tx, translate3d(0,0,0)) scaleX(1) scaleY(1); }
+      38%  { filter: brightness(1.06); }
+      100% { transform: var(--glider-tx, translate3d(0,0,0)) scaleX(1) scaleY(1); }
+    }
+    .bottom-tabs .tab-glider.glider-morph {
+      animation: liquidDropletMorph 0.46s var(--apple-spring);
+    }
+
     .bottom-tabs .view-tab {
       position: relative !important;
       z-index: 2 !important;
@@ -3069,7 +3559,11 @@
       letter-spacing: -0.01em !important;
     }
     .tick.hot .tick-mark,
-    .minor-year.hot
+    .minor-year.hot .tick-mark {
+      background: linear-gradient(180deg, #C8382E 0%, rgba(184, 51, 42, 0.2) 100%) !important;
+      width: 2px !important;
+      box-shadow: 0 0 6px rgba(184, 51, 42, 0.45);
+    }
 
     /* 中央天头罗盘刻度跳动微脉冲（模拟 Apple Watch 数码表冠齿轮感） */
     @keyframes compassCrownPulse {
@@ -3326,6 +3820,24 @@
        ========================================================================= */
 
     /* --- 1. 去除第一层朝代块悬浮/选中时的红色外框，赋予温润呼吸感 --- */
+    @keyframes macroFloatBreathe {
+      0%, 100% {
+        transform: translate3d(0, -4px, 0) scale(1.018);
+        box-shadow:
+          0 10px 24px -4px rgba(42, 32, 20, 0.16),
+          0 3px 8px rgba(30, 24, 16, 0.08),
+          inset 0 1.5px 1px rgba(255, 255, 255, 0.92);
+        filter: brightness(1.02) saturate(1.06);
+      }
+      50% {
+        transform: translate3d(0, -6.5px, 0) scale(1.028);
+        box-shadow:
+          0 16px 32px -4px rgba(42, 32, 20, 0.22),
+          0 6px 14px rgba(30, 24, 16, 0.11),
+          inset 0 2px 2px rgba(255, 255, 255, 0.98);
+        filter: brightness(1.05) saturate(1.12);
+      }
+    }
 
     .macro-dynasty-block.active-dynasty,
     .macro-dynasty-block.cursor-hover-macro,
@@ -3359,7 +3871,55 @@
       will-change: transform, opacity;
     }
 
-    /* --- 左下角滑动式分段轨道与胶囊公共基础样式 --- */
+    /* --- 2 & 3. 左下角双轨液态玻璃滑动式开关（支系三档 + 图层五档） --- */
+    .app-controls.sliding-controls-dock {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+      z-index: 86 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 6px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      pointer-events: none;
+    }
+
+    .slide-switch-pod {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3.5px 5px;
+      border-radius: 999px;
+      background:
+        linear-gradient(165deg, rgba(255, 255, 255, 0.46) 0%, rgba(250, 245, 235, 0.22) 52%, rgba(242, 234, 218, 0.34) 100%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.64);
+      box-shadow:
+        0 8px 22px -4px rgba(28, 22, 14, 0.12),
+        inset 0 1.2px 0.8px rgba(255, 255, 255, 0.88),
+        inset 0 -1px 1px rgba(184, 152, 102, 0.15);
+      user-select: none;
+      touch-action: none;
+    }
+
+    .pod-caption {
+      padding-left: 7px;
+      padding-right: 2px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(68, 56, 42, 0.72);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
     .slide-track {
       position: relative;
       display: inline-flex;
@@ -3367,6 +3927,8 @@
       border-radius: 999px;
       padding: 1px;
     }
+
+    /* 滑动胶囊指示器 */
     .slide-pill {
       position: absolute;
       top: 1px;
@@ -3386,12 +3948,15 @@
         width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
         background 0.25s ease;
     }
+
+    /* 支系三档滑块主题色点缀 */
     #sub-mode-pill[data-mode="auto"] {
       box-shadow: 0 2px 8px rgba(184, 93, 42, 0.20), inset 0 1px 0.5px #FFF, 0 0 0 1px rgba(184, 93, 42, 0.28);
     }
     #sub-mode-pill[data-mode="always"] {
       box-shadow: 0 2px 8px rgba(46, 110, 94, 0.20), inset 0 1px 0.5px #FFF, 0 0 0 1px rgba(46, 110, 94, 0.28);
     }
+
     .slide-opt {
       position: relative;
       z-index: 2;
@@ -3418,10 +3983,41 @@
       color: #1E1B18 !important;
       font-weight: 900 !important;
     }
-    #sub-mode-track .slide-opt[data-submode="auto"].active   { color: #A84319 !important; }
+    #sub-mode-track .slide-opt[data-submode="auto"].active { color: #A84319 !important; }
     #sub-mode-track .slide-opt[data-submode="always"].active { color: #246353 !important; }
-    #sub-mode-track .slide-opt[data-submode="off"].active    { color: #6E6254 !important; }
+    #sub-mode-track .slide-opt[data-submode="off"].active { color: #6E6254 !important; }
 
+    /* 图层圆点指示 */
+    .opt-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      opacity: 0.65;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+    .slide-opt.active .opt-dot {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    .opt-dot[data-c="events"]   { background: #B8332A; }
+    .opt-dot[data-c="figures"]  { background: #3C6E8F; }
+    .opt-dot[data-c="literati"] { background: #7A5AA8; }
+    .opt-dot[data-c="eras"]     { background: #C09020; }
+
+    /* 手机竖屏或窄屏（< 860px）：左下角滑动开关组自动抬高至主导航 Tab 栏左上方，绝不与居中 Tab 栏碰撞重叠 */
+    @media (max-width: 860px) {
+      .app-controls.sliding-controls-dock {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 68px) !important;
+        gap: 5px !important;
+      }
+      .slide-opt {
+        height: 24px;
+        padding: 0 8.5px;
+        font-size: 11px;
+      }
+    }
+
+  
     /* =========================================================================
        V10 四项核心体验精修：
        1. 第一/二/三层朝代与政权块文字、时间全比例尺始终保持在屏幕可见区正中间，移出屏幕时自然随边缘滑出
@@ -3439,7 +4035,28 @@
       backface-visibility: hidden;
     }
 
-    
+    /* --- 2. 彻底去除顶部时间轴的底栏横线与每个年份下方的刻度线，只保留纯数字 --- */
+    #ticks-layer::after {
+      display: none !important;
+      content: none !important;
+    }
+    .tick-mark,
+    .minor-year .tick-mark,
+    .tick.hot .tick-mark,
+    .minor-year.hot .tick-mark {
+      display: none !important;
+      height: 0 !important;
+      margin: 0 !important;
+      opacity: 0 !important;
+    }
+    /* 纯数字略微上提 4px，放大 2.68x 时向下留出充裕净空，绝不侵入第一层朝代图 */
+    .tick, .minor-year {
+      bottom: calc(8px * var(--v)) !important;
+      transform-origin: 50% 65% !important;
+    }
+    .tick-label {
+      transform-origin: 50% 65% !important;
+    }
 
     /* --- 3. 第一层朝代在光标停留期间持续保持轻微弹跳呼吸感（直至光标离开该朝代） --- */
     @keyframes macroElasticBreathe {
@@ -3467,17 +4084,158 @@
       z-index: 19 !important;
     }
 
-    /* --- 下轴图层选中时滑块主题光晕与文字着色 --- */
+    /* --- 4. 左下角全新「一体化晶透双轨控制台」设计 --- */
+    .app-controls.unified-glass-console {
+      position: fixed !important;
+      left: calc(env(safe-area-inset-left, 0px) + 14px) !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+      z-index: 88 !important;
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: flex-end !important;
+      gap: 8px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      pointer-events: none;
+    }
+
+    /* 左下角独立小圆钮：轻点可一键收起/展开右侧控制面板 */
+    .console-fab {
+      pointer-events: auto;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.68);
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.56) 0%, rgba(246, 239, 225, 0.36) 100%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      backdrop-filter: blur(14px) saturate(180%);
+      box-shadow:
+        0 6px 18px rgba(28, 22, 14, 0.14),
+        inset 0 1.2px 0.8px rgba(255, 255, 255, 0.9);
+      color: #5C4D3C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease, background 0.2s ease;
+    }
+    .console-fab:active {
+      transform: scale(0.9);
+    }
+    .unified-glass-console:not(.is-collapsed) .console-fab {
+      color: var(--cinnabar);
+    }
+
+    /* 一体化双轨圆角面板主体 */
+    .console-body {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 7px 9px;
+      border-radius: 16px;
+      background:
+        linear-gradient(165deg, rgba(255, 253, 248, 0.58) 0%, rgba(247, 240, 226, 0.38) 55%, rgba(240, 231, 214, 0.48) 100%);
+      -webkit-backdrop-filter: blur(16px) saturate(185%);
+      backdrop-filter: blur(16px) saturate(185%);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow:
+        0 12px 30px -6px rgba(28, 22, 14, 0.16),
+        0 3px 8px rgba(28, 22, 14, 0.06),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.92);
+      transform-origin: left bottom;
+      transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.26s ease,
+        visibility 0.26s;
+    }
+
+    .unified-glass-console.is-collapsed .console-body {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate3d(-10px, 6px, 0) scale(0.86);
+    }
+
+    .console-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .console-tag {
+      width: 48px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(72, 58, 42, 0.78);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .console-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(168, 146, 114, 0.08), rgba(168, 146, 114, 0.28) 25%, rgba(168, 146, 114, 0.28) 75%, rgba(168, 146, 114, 0.08));
+    }
+
+    /* 内嵌滑动凹槽轨道 */
+    .console-track {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px;
+      border-radius: 10px;
+      background: rgba(142, 126, 102, 0.13);
+      box-shadow: inset 0 1px 2px rgba(30, 24, 16, 0.08);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .console-track .slide-pill {
+      top: 2px;
+      bottom: 2px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FDF9F1 100%);
+      box-shadow:
+        0 2px 6px rgba(30, 24, 16, 0.14),
+        0 0 0 0.5px rgba(184, 152, 102, 0.28);
+    }
+
+    /* 下轴图层选中时滑块呈现对应高雅淡彩光晕 */
     #axis-layer-pill[data-theme="events"]   { box-shadow: 0 2px 7px rgba(184, 51, 42, 0.22), 0 0 0 1px rgba(184, 51, 42, 0.25); }
     #axis-layer-pill[data-theme="figures"]  { box-shadow: 0 2px 7px rgba(60, 110, 143, 0.22), 0 0 0 1px rgba(60, 110, 143, 0.25); }
     #axis-layer-pill[data-theme="literati"] { box-shadow: 0 2px 7px rgba(122, 90, 168, 0.22), 0 0 0 1px rgba(122, 90, 168, 0.25); }
     #axis-layer-pill[data-theme="eras"]     { box-shadow: 0 2px 7px rgba(192, 144, 32, 0.24), 0 0 0 1px rgba(192, 144, 32, 0.28); }
+
+    .console-track .slide-opt {
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: rgba(58, 48, 36, 0.72);
+    }
+
     #axis-layer-track .slide-opt[data-layer="events"].active   { color: #B8332A !important; }
     #axis-layer-track .slide-opt[data-layer="figures"].active  { color: #2D5B7A !important; }
     #axis-layer-track .slide-opt[data-layer="literati"].active { color: #644490 !important; }
     #axis-layer-track .slide-opt[data-layer="eras"].active     { color: #9E6E10 !important; }
     #axis-layer-track .slide-opt[data-layer="off"].active      { color: #6E6254 !important; }
 
+    /* 窄屏与手机竖屏自适应避让底部主导航栏 */
+    @media (max-width: 900px) {
+      .app-controls.unified-glass-console {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 68px) !important;
+      }
+    }
+
+  
     /* =========================================================================
        V11 东方雅集极简悬浮控制浮岛（Zen Floating Dock）CSS：
        - 精致半透明晶透双轨滑块卡片，带侧边精致的收折/展开圆钮
@@ -3692,7 +4450,23 @@
   </style>
 </head>
 <body data-view="scroll">
-<!-- 长卷搜索面板（挂在 body 下，长卷专属） -->
+
+  <!-- 顶部：标题 + 三页签 + 长卷专用工具 -->
+  <header class="app-header">
+    <div class="page-wrap header-top">
+      <div class="brand">
+        <div class="seal font-calligraphy">史</div>
+        <div class="brand-text">
+          <h1 class="app-title">华夏千年历史长卷</h1>
+          <p class="app-sub">五千年 · 长卷 · 帝王 · 事件</p>
+        </div>
+      </div>
+
+      <!-- 顶部工具已整合至长卷沉浸式天头 HUD -->
+    </div>
+  </header>
+
+  <!-- 长卷搜索面板（挂在 body 下，长卷专属） -->
   <div id="axis-search-panel" class="axis-search-panel" hidden>
     <div class="as-box">
       <div class="as-input-row">
@@ -3742,7 +4516,7 @@
         <div class="edge-fade edge-fade-l"></div>
         <div class="edge-fade edge-fade-r"></div>
 
-        <div class="center-indicator"></div>
+        <div class="center-indicator"><div class="center-dot"></div></div>
         <div class="band-hint" id="band-hint">轻点竹简 · 查看<b>史事详述</b></div>
 
         <div id="timeline-canvas">
@@ -3777,15 +4551,19 @@
             <div class="slide-track zen-track" id="axis-layer-track" role="radiogroup" aria-label="下方时间轴图层">
               <div class="slide-pill zen-pill" id="axis-layer-pill" data-theme="events" aria-hidden="true"></div>
               <button id="layer-events" class="slide-opt zen-opt layer-switch on active" data-layer="events" type="button" role="radio" aria-checked="true">
+                <span class="switch on" hidden><span class="knob"></span></span>
                 <span>事件</span>
               </button>
               <button id="layer-figures" class="slide-opt zen-opt layer-switch" data-layer="figures" type="button" role="radio" aria-checked="false">
+                <span class="switch" hidden><span class="knob"></span></span>
                 <span>人物</span>
               </button>
               <button id="layer-literati" class="slide-opt zen-opt layer-switch" data-layer="literati" type="button" role="radio" aria-checked="false">
+                <span class="switch" hidden><span class="knob"></span></span>
                 <span>文豪</span>
               </button>
               <button id="layer-eras" class="slide-opt zen-opt layer-switch" data-layer="eras" type="button" role="radio" aria-checked="false">
+                <span class="switch" hidden><span class="knob"></span></span>
                 <span>盛世</span>
               </button>
               <button id="layer-off" class="slide-opt zen-opt" data-layer="off" type="button" role="radio" aria-checked="false" title="收起下方时间轴">
@@ -4109,6 +4887,7 @@
       <span>地图</span>
     </button>
   </nav>
+
 
   <script>
     /********************************************************************
@@ -5037,6 +5816,8 @@
       { id: 'c70', year: 1901, period: '清朝', shortTitle: '辛丑条约', title: '清廷与十一国签订《辛丑条约》', category: '政治变革', figure: '李鸿章、奕劻、列强十一国',
         desc: '清廷与十一国签订《辛丑条约》：赔款四亿五千万两、分三十九年偿还，划东交民巷为使馆界驻兵，拆大沽炮台，禁止中国人民反帝。' },
     ];
+
+
 
     HISTORICAL_EVENTS.push(...EXTRA_EVENTS, ...WAR_EVENTS, ...COMPAT_EVENTS);
     HISTORICAL_EVENTS.sort((a, b) => (a.year - b.year) || a.id.localeCompare(b.id));
@@ -6475,6 +7256,8 @@
     /********************************************************************
      * 7. 顶部朝代快速检索
      ********************************************************************/
+    /* 顶部朝代快捷导航已移除；占位空函数保持旧调用兼容 */
+    function scrollActiveNavIntoView() {}
 
     /********************************************************************
      * 8. 画布节点构建
@@ -6490,14 +7273,15 @@
         const tick = document.createElement('div');
         tick.className = 'tick';
         tick.style.display = 'none';
-        tick.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span>';
+        tick.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span><span class="tick-mark"></span>';
         ticksLayer.appendChild(tick);
         const labelEl = tick.firstElementChild;
         domCache.ticks.push({
           yr: null, baseX: 0, estW: 36, el: tick,
           labelEl,
           eraEl: labelEl.firstElementChild,
-          numEl: labelEl.lastElementChild
+          numEl: labelEl.lastElementChild,
+          markEl: tick.lastElementChild
         });
       }
 
@@ -6509,14 +7293,15 @@
         const m = document.createElement('div');
         m.className = 'minor-year';
         m.style.display = 'none';
-        m.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span>';
+        m.innerHTML = '<span class="tick-label"><span class="yr-era"></span><span class="yr-num"></span></span><span class="tick-mark"></span>';
         lensLayer.appendChild(m);
         const labelEl = m.firstElementChild;
         domCache.minors.push({
           yr: null, baseX: 0, estW: 32, baseAlpha: 0, el: m,
           labelEl,
           eraEl: labelEl.firstElementChild,
-          numEl: labelEl.lastElementChild
+          numEl: labelEl.lastElementChild,
+          markEl: m.lastElementChild
         });
       }
 
@@ -6550,6 +7335,7 @@
           state.selectedEventId = null;
           showDynastyDetail(dyn, '朝代总览');
           updateActiveHighlights();
+          scrollActiveNavIntoView(dyn.id);
         });
 
         macroLayer.appendChild(block);
@@ -8277,9 +9063,11 @@
 
         const scale = 1 + weight * DOCK_MAX_ADD_SCALE;
         const liftY = -weight * 4.2; // 向上优雅拱起，形成饱满的 Dock 弧线
+        const markScaleY = 1 + weight * 1.15;
 
         tick.el.style.transform = `translate3d(${(tick.baseX + pushX).toFixed(2)}px, ${liftY.toFixed(2)}px, 0) translateX(-50%)`;
         tick.labelEl.style.transform = `scale(${scale.toFixed(3)})`;
+        tick.markEl.style.transform = `scaleY(${markScaleY.toFixed(2)})`;
         const isHot = weight > 0.56;
         tick.el.classList.toggle('hot', isHot);
         if (weight > currentPeakWeight) {
@@ -8297,9 +9085,11 @@
 
         const scale = 0.92 + weight * 1.48;
         const liftY = -weight * 3.6;
+        const markScaleY = 0.85 + weight * 0.95;
 
         m.el.style.transform = `translate3d(${(m.baseX + pushX).toFixed(2)}px, ${liftY.toFixed(2)}px, 0) translateX(-50%)`;
         m.labelEl.style.transform = `scale(${scale.toFixed(3)})`;
+        m.markEl.style.transform = `scaleY(${markScaleY.toFixed(2)})`;
         m.el.style.opacity = m.baseAlpha.toFixed(3);
         m.el.classList.toggle('hot', weight > 0.65);
         if (weight > currentPeakWeight && m.baseAlpha > 0.6) {
@@ -8867,6 +9657,8 @@
         const on = btn.dataset.layer === activeKey;
         btn.classList.toggle('on', on);
         btn.classList.toggle('active', on);
+        const sw = btn.querySelector('.switch');
+        if (sw) sw.classList.toggle('on', on);
         btn.setAttribute('aria-checked', String(on));
       });
       syncSlidingSwitchPills();
@@ -9106,6 +9898,7 @@
         });
       }
     }
+
 
       /********************************************************************
      * 16. 多页面视图：长卷 / 帝王档案 / 事件年表
