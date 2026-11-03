@@ -39,6 +39,24 @@ const { chromium } = require('playwright');
     console.log(`[${name}] initial`, JSON.stringify(initial));
     await page.screenshot({ path: `C:/Users/Lenovo/Desktop/MyProject/Chinese-history/_probe/archive_${name}_chronicle.png` });
 
+    if (width < 768) {
+      await frame.locator('#act-mobile-chronicle').click();
+      await page.waitForTimeout(700);
+      const expanded = await frame.evaluate(() => {
+        const pane = document.getElementById('chronicle-pane').getBoundingClientRect();
+        const dock = document.getElementById('scrubber-dock').getBoundingClientRect();
+        return {
+          paneBottom: Math.round(pane.bottom), dockTop: Math.round(dock.top),
+          gap: Math.round(dock.top - pane.bottom),
+          keyDisplay: getComputedStyle(document.getElementById('map-key')).display,
+        };
+      });
+      console.log(`[${name}] expanded`, JSON.stringify(expanded));
+      await page.screenshot({ path: `C:/Users/Lenovo/Desktop/MyProject/Chinese-history/_probe/archive_${name}_expanded.png` });
+      await frame.locator('#act-mobile-chronicle').click();
+      await page.waitForTimeout(400);
+    }
+
     if (width >= 768) {
       await frame.locator('.archive-folder-tab[data-tab="event"]').click();
       await page.waitForTimeout(500);
