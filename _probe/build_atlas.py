@@ -500,8 +500,10 @@ body.atlas-embed .archive-folder-tabs { display: none; }
     text-align: right;
   }
   body.atlas-embed #milestone-balloon {
+    bottom: auto !important;
     height: auto;
     min-height: 150px;
+    max-height: calc(100dvh - 102px - var(--dock-clearance, 190px));
     font-size: 13px;
     line-height: 1.75;
     transition: opacity .2s ease;
@@ -894,7 +896,7 @@ BRIDGE = r'''
     window.addEventListener('pointerup', endDrag, { passive: true });
     window.addEventListener('pointercancel', endDrag, { passive: true });
 
-    ['nav-bar', 'scrubber-dock', 'chronicle-pane', 'map-key', 'canvas-br-dock'].forEach(function (id) {
+    ['nav-bar', 'scrubber-dock', 'chronicle-pane', 'map-key', 'canvas-br-dock', 'milestone-balloon'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.addEventListener('pointerdown', function () { recede(false); moving(false); dragging = false; }, { passive: true });
     });
@@ -937,6 +939,133 @@ BRIDGE = r'''
       }
       window.addEventListener('pointerup', settle, { passive: true });
       window.addEventListener('pointercancel', settle, { passive: true });
+    }
+
+    /* ===== v13：档案夹双标签 + 浮卡对时间轴的实测避让 ===== */
+    var pane = document.getElementById('chronicle-pane');
+    var balloon = document.getElementById('milestone-balloon');
+    var root = document.documentElement;
+    var archivePlaceholder = false;
+    var layoutRaf = 0;
+
+    function archiveMode() { return window.innerWidth >= 768; }
+    function setVar(name, value) {
+      if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
+    }
+    function scheduleLayout() {
+      if (layoutRaf) return;
+      layoutRaf = requestAnimationFrame(function () {
+        layoutRaf = 0;
+        var dr = dock.getBoundingClientRect();
+        if (dr.height > 0) {
+          setVar('--dock-clearance', Math.max(72, Math.round(window.innerHeight - dr.top + 6)) + 'px');
+        }
+        if (pane && window.innerWidth < 768) {
+          var pr = pane.getBoundingClientRect();
+          if (pr.height > 0) {
+            setVar('--phone-pane-clearance', Math.round(window.innerHeight - pr.top + 6) + 'px');
+          }
+        }
+      });
+    }
+
+    if (pane && balloon) {
+      var tabs = document.createElement('div');
+      tabs.className = 'archive-folder-tabs';
+      tabs.setAttribute('role', 'tablist');
+      tabs.setAttribute('aria-label', '历史档案分类');
+      tabs.innerHTML =
+        '<button type="button" class="archive-folder-tab is-active" data-tab="chronicle" role="tab" aria-selected="true">史志<small>CHRONICLE</small></button>' +
+        '<button type="button" class="archive-folder-tab" data-tab="event" role="tab" aria-selected="false">事件<small>EVENT</small></button>';
+      body.appendChild(tabs);
+      body.setAttribute('data-archive-tab', 'chronicle');
+
+      function paintTabs(name) {
+        tabs.querySelectorAll('.archive-folder-tab').forEach(function (btn) {
+          var on = btn.getAttribute('data-tab') === name;
+          btn.classList.toggle('is-active', on);
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      }
+      function showEventPlaceholder() {
+        archivePlaceholder = true;
+        balloon.innerHTML = '<div class="archive-empty"><strong>事件档案</strong>点击地图上的事件圆点，或切换到「史志」签点击重大事件，这里就会展开对应的年份、地点与史事。</div>';
+        balloon.classList.remove('is-hidden', 'is-offscreen');
+      }
+      function selectArchive(name) {
+        if (!archiveMode()) return;
+        if (name === 'chronicle') {
+          var workspace = document.getElementById('workspace-body');
+          if (workspace && workspace.classList.contains('is-pane-collapsed')) {
+            var toggle = document.getElementById('act-toggle-pane');
+            if (toggle) toggle.click();
+          }
+          if (archivePlaceholder) {
+            archivePlaceholder = false;
+            balloon.classList.add('is-hidden');
+          }
+        } else if (!balloon.querySelector('.ep-text')) {
+          showEventPlaceholder();
+        }
+        body.setAttribute('data-archive-tab', name);
+        paintTabs(name);
+        recede(false);
+        moving(false);
+        scheduleLayout();
+      }
+      tabs.addEventListener('pointerdown', function (e) {
+        e.stopPropagation();
+        recede(false); moving(false); dragging = false;
+      }, { passive: true });
+      tabs.querySelectorAll('.archive-folder-tab').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          selectArchive(btn.getAttribute('data-tab'));
+        });
+      });
+
+      /* 点击地图事件后自动翻到「事件」签；关闭事件后回到「史志」签 */
+      var balloonObserver = new MutationObserver(function () {
+        if (!archiveMode()) return;
+        var hidden = balloon.classList.contains('is-hidden');
+        if (!hidden && balloon.querySelector('.ep-text')) {
+          archivePlaceholder = false;
+          var atlas = window.atlasApp;
+          var automatic = atlas && atlas.activeMilestone && atlas.activeMilestone.isAuto;
+          if (!automatic) {
+            body.setAttribute('data-archive-tab', 'event');
+            paintTabs('event');
+          }
+        } else if (hidden && !archivePlaceholder && body.getAttribute('data-archive-tab') === 'event') {
+          body.setAttribute('data-archive-tab', 'chronicle');
+          paintTabs('chronicle');
+        }
+        scheduleLayout();
+      });
+      balloonObserver.observe(balloon, { attributes: true, attributeFilter: ['class'], childList: true });
+
+      function onResize() {
+        if (!archiveMode()) {
+          if (archivePlaceholder) {
+            archivePlaceholder = false;
+            balloon.classList.add('is-hidden');
+          }
+          body.setAttribute('data-archive-tab', 'chronicle');
+          paintTabs('chronicle');
+        }
+        scheduleLayout();
+      }
+      window.addEventListener('resize', onResize, { passive: true });
+      window.addEventListener('orientationchange', function () { setTimeout(scheduleLayout, 260); }, { passive: true });
+      if (window.ResizeObserver) {
+        var layoutObserver = new ResizeObserver(scheduleLayout);
+        layoutObserver.observe(dock);
+        layoutObserver.observe(pane);
+        if (key) layoutObserver.observe(key);
+      }
+      scheduleLayout();
+      setTimeout(scheduleLayout, 350);
+      setTimeout(scheduleLayout, 1100);
     }
   }
   boot();

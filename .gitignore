@@ -15,6 +15,10 @@ desktop.ini
 # ===== Python 运行残留 =====
 __pycache__/
 *.pyc
+
+# ===== 构建中间产物与本地测试截图（不上传）=====
+jiangshan-atlas.src.html
+_probe/*.png
 *.log
 
 # ===== 敏感信息（令牌/密钥/凭据，一律不上传）=====

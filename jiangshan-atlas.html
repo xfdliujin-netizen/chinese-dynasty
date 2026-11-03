@@ -5368,22 +5368,44 @@ body.atlas-embed #nav-bar {
 
 /* 时间轴：悬浮玻璃胶囊，让开主程序底部导航（约 62px）+ 安全区 */
 body.atlas-embed #scrubber-dock {
-    position: fixed !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
-    width: min(980px, calc(100vw - 12px)) !important;
-    padding: 8px 16px 10px !important;
-    border-radius: 18px !important;
-    border: 1px solid rgba(184, 134, 45, 0.34) !important;
-    background: linear-gradient(180deg, rgba(252, 249, 242, 0.95), rgba(244, 237, 224, 0.92)) !important;
-    -webkit-backdrop-filter: blur(26px) saturate(1.9) !important;
-    backdrop-filter: blur(26px) saturate(1.9) !important;
-    box-shadow: 0 12px 32px rgba(28, 20, 12, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
-    z-index: 68 !important;
-  }
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  z-index: 66;
+  width: min(880px, calc(100vw - 20px));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(252, 249, 242, 0.74), rgba(246, 240, 229, 0.62));
+  -webkit-backdrop-filter: blur(26px) saturate(1.8);
+  backdrop-filter: blur(26px) saturate(1.8);
+  box-shadow: 0 12px 32px rgba(30, 27, 24, 0.2);
+  transition: opacity 0.35s ease;
+}
 /* 时间轴触摸拖动：交给指针事件，避免被浏览器手势抢走 */
 body.atlas-embed #scrubber-track { touch-action: none; }
+
+/* 触碰地图：悬浮面板淡到 75%；拖动/滚轮缩放地图：全部降到 15%，松手恢复 */
+body.atlas-embed.ui-recede #nav-bar,
+body.atlas-embed.ui-recede #scrubber-dock,
+body.atlas-embed.ui-recede #chronicle-pane,
+body.atlas-embed.ui-recede #map-key,
+body.atlas-embed.ui-recede #canvas-br-dock,
+body.atlas-embed.ui-recede #act-toggle-pane { opacity: 0.75; }
+
+body.atlas-embed #map-key,
+body.atlas-embed #canvas-br-dock { transition: opacity 0.3s ease, transform 0.28s ease; }
+
+body.atlas-embed.ui-move #nav-bar,
+body.atlas-embed.ui-move #scrubber-dock,
+body.atlas-embed.ui-move #chronicle-pane,
+body.atlas-embed.ui-move #map-key,
+body.atlas-embed.ui-move #canvas-br-dock,
+body.atlas-embed.ui-move #act-toggle-pane {
+  opacity: 0.15;
+  transition-duration: 0.18s;
+}
+
 /* 详情卡收起/展开手柄：贴在卡片左缘，收起后滑到屏幕右缘 */
 body.atlas-embed #act-toggle-pane {
   position: fixed;
@@ -5417,34 +5439,15 @@ body.atlas-embed #act-toggle-pane:hover {
   background: linear-gradient(180deg, rgba(255, 253, 248, 0.95), rgba(250, 246, 238, 0.88));
 }
 
-/* 将右下角的复位视图按钮和比例尺移动到屏幕右上角（避开右侧的史志/溯源弹窗） */
-  @media (min-width: 901px) {
-    body.atlas-embed #canvas-br-dock {
-      position: fixed !important;
-      top: calc(env(safe-area-inset-top, 0px) + 68px) !important;
-      right: 14px !important;
-      bottom: auto !important;
-      left: auto !important;
-      z-index: 62 !important;
-      background: rgba(252, 249, 242, 0.88) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-      backdrop-filter: blur(12px) !important;
-      padding: 5px 10px !important;
-      border-radius: 12px !important;
-      border: 1px solid rgba(181, 69, 47, 0.2) !important;
-      box-shadow: 0 4px 12px rgba(30, 24, 18, 0.12) !important;
-    }
+/* 左下角图例：抬到时间轴胶囊上方，避免重叠；禁原生拖拽/选区（防 dragstart 劫持滑动手势） */
+@media (min-width: 901px) {
+  body.atlas-embed #map-key {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 198px);
+    max-height: calc(100vh - 268px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
-
-  @media (max-width: 900px) {
-    body.atlas-embed #canvas-br-dock {
-      top: calc(env(safe-area-inset-top, 0px) + 60px) !important;
-      right: 10px !important;
-      bottom: auto !important;
-      left: auto !important;
-      z-index: 62 !important;
-    }
-  }
+}
 body.atlas-embed #map-key {
   user-select: none;
   -webkit-user-select: none;
@@ -5461,6 +5464,232 @@ body.atlas-embed #map-key::after {
   letter-spacing: 0.06em;
   text-align: center;
   color: #9A8A74;
+}
+
+/* ================= 响应式档案夹 + 实测时间轴避让（v13） ================= */
+/* 复位视图与比例尺：固定在地图右上角，纵向紧凑排列 */
+body.atlas-embed #canvas-br-dock {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 6px);
+  right: calc(env(safe-area-inset-right, 0px) + 6px);
+  bottom: auto;
+  z-index: 74;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+body.atlas-embed #canvas-br-dock .canvas-reset-btn {
+  padding: 5px 8px;
+  border-radius: 9px;
+  background: rgba(247, 242, 232, 0.88);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+body.atlas-embed #scale-bar-box { padding-right: 2px; }
+
+/* 所有底部浮卡共用时间轴实测留白，JS 在尺寸变化时更新 --dock-clearance */
+@media (min-width: 768px) {
+  body.atlas-embed #map-key {
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 198px));
+    max-height: min(42vh, 360px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* 手机：史志条贴时间轴上缘，图例再贴史志条上缘；位置全部由实际矩形计算 */
+@media (max-width: 767px) {
+  body.atlas-embed #chronicle-pane {
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 184px));
+    max-height: min(43vh, 340px);
+  }
+  body.atlas-embed #map-key {
+    bottom: var(--phone-pane-clearance, calc(env(safe-area-inset-bottom, 0px) + 244px));
+    max-height: min(30vh, 230px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  body.atlas-embed #map-key::after { display: none; }
+}
+
+/* 平板 / 电脑：史志与事件共用右侧美式马尼拉档案夹，顶部索引签切换 */
+body.atlas-embed .archive-folder-tabs { display: none; }
+@media (min-width: 768px) {
+  body.atlas-embed .archive-folder-tabs {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 62px);
+    right: calc(env(safe-area-inset-right, 0px) + 14px);
+    z-index: 65;
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 34px;
+    pointer-events: auto;
+  }
+  body.atlas-embed .archive-folder-tab {
+    position: relative;
+    min-width: 106px;
+    height: 29px;
+    padding: 0 18px 3px;
+    border: 1px solid rgba(105, 82, 45, 0.34);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    clip-path: polygon(0 100%, 0 10px, 11px 0, calc(100% - 11px) 0, 100% 10px, 100% 100%);
+    background: #cbb887;
+    color: #665433;
+    font-family: var(--serif-stack);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    cursor: pointer;
+    box-shadow: 0 -3px 9px rgba(65, 48, 25, 0.10);
+    transition: height .16s ease, background .16s ease, color .16s ease;
+  }
+  body.atlas-embed .archive-folder-tab small {
+    margin-left: 5px;
+    font-family: var(--sans-stack);
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    opacity: .64;
+  }
+  body.atlas-embed .archive-folder-tab.is-active {
+    height: 34px;
+    background: #ead9ae;
+    color: #4f3c20;
+    z-index: 2;
+  }
+  body.atlas-embed .archive-folder-tab:active { transform: translateY(1px); }
+
+  body.atlas-embed #chronicle-pane,
+  body.atlas-embed #milestone-balloon {
+    box-sizing: border-box;
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 96px) !important;
+    right: calc(env(safe-area-inset-right, 0px) + 14px) !important;
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 190px));
+    left: auto !important;
+    width: min(340px, 34vw);
+    max-width: min(340px, 34vw);
+    max-height: none;
+    margin: 0;
+    padding: 20px 20px 16px;
+    border: 1px solid rgba(105, 82, 45, 0.34);
+    border-top: 2px solid rgba(105, 82, 45, 0.42);
+    border-radius: 4px 4px 12px 12px;
+    background-color: rgba(234, 217, 174, 0.95);
+    background-image: linear-gradient(rgba(255,255,255,.16), rgba(255,255,255,0)),
+      repeating-linear-gradient(0deg, transparent 0, transparent 27px, rgba(113,91,50,.055) 28px);
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    backdrop-filter: blur(20px) saturate(1.25);
+    box-shadow: 0 15px 34px rgba(54, 40, 20, 0.23), inset 0 0 0 5px rgba(255, 250, 230, 0.16);
+    color: #44351f;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  body.atlas-embed #chronicle-pane::after,
+  body.atlas-embed #milestone-balloon::after {
+    content: 'HISTORICAL ARCHIVE';
+    display: block;
+    margin-top: 14px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(105, 82, 45, 0.25);
+    color: rgba(91, 69, 35, 0.58);
+    font-family: var(--sans-stack);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .22em;
+    text-align: right;
+  }
+  body.atlas-embed #milestone-balloon {
+    bottom: auto !important;
+    height: auto;
+    min-height: 150px;
+    max-height: calc(100dvh - 102px - var(--dock-clearance, 190px));
+    font-size: 13px;
+    line-height: 1.75;
+    transition: opacity .2s ease;
+  }
+  body.atlas-embed #milestone-balloon::before { display: none; }
+  body.atlas-embed #milestone-balloon .ep-head { padding-right: 24px; }
+  body.atlas-embed #milestone-balloon .ep-year { font-size: 13px; color: #87422d; }
+  body.atlas-embed #milestone-balloon .ep-text { margin-top: 10px; }
+  body.atlas-embed #milestone-balloon .archive-empty {
+    color: #75613e;
+    font-family: var(--serif-stack);
+    line-height: 1.9;
+  }
+  body.atlas-embed #milestone-balloon .archive-empty strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #513d20;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* 档案夹互斥显示：保留原应用状态，只切换可见性 */
+  body.atlas-embed[data-archive-tab="chronicle"] #milestone-balloon {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  body.atlas-embed[data-archive-tab="event"] #chronicle-pane {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  body.atlas-embed[data-archive-tab="event"] #act-toggle-pane { opacity: 0; pointer-events: none; }
+
+  /* iPad 竖屏原本落入 <=900px 手机紧凑规则，这里恢复完整档案内容 */
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane {
+    display: flex;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 20px 20px 16px !important;
+    border: 1px solid rgba(105, 82, 45, 0.34) !important;
+    overflow-y: auto !important;
+    opacity: 1;
+    pointer-events: auto;
+    gap: 14px;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .dynasty-banner {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border-bottom: none;
+    cursor: default;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .dynasty-title-row {
+    display: flex;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--dynasty-accent);
+    overflow: visible;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane #dynasty-title {
+    font-size: 32px;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane #dynasty-span { font-size: 12px; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .seat-row {
+    display: flex;
+    width: auto;
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane #dynasty-summary { display: block; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .milestone-section { display: block; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .disclaimer-box { display: block; }
+  body.atlas-embed #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane .mobile-chronicle-btn { display: none; }
+  body.atlas-embed[data-archive-tab="event"] #workspace-body:not(.is-mobile-chronicle-open) #chronicle-pane {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  body.atlas-embed #workspace-body.is-pane-collapsed:not(.is-mobile-chronicle-open) #chronicle-pane {
+    width: min(340px, 34vw);
+  }
 }
 
 /* 文字光晕：用描边代替 SVG 滤镜（iPad 上省掉大量 filter 重绘） */
@@ -5972,47 +6201,208 @@ body.atlas-embed #atlas-svg text[filter] {
 })();
 </script>
 <script id="atlas-float-ui">
-/* 左下角图例：左右滑动 = 时间轴上一站 / 下一站（已彻底移除所有动态透明度逻辑） */
+/* 悬浮 UI 状态：触碰地图 → 75%；拖动 / 滚轮缩放地图 → 15%；松手恢复 */
 (function () {
   function boot() {
-    var key = document.getElementById('map-key');
-    if (!key) { setTimeout(boot, 120); return; }
-
-    key.addEventListener('dragstart', function (e) { e.preventDefault(); });
-    var sx = 0, sy = 0, dx = 0, active = false, horiz = false;
-    key.addEventListener('pointerdown', function (e) {
-      if (e.button && e.button !== 0) return;
-      e.stopPropagation(); /* 不当作地图触摸，也不触发地图拖拽 */
-      active = true; horiz = false; dx = 0;
-      sx = e.clientX; sy = e.clientY;
+    var body = document.body;
+    var viewport = document.getElementById('viewport-frame');
+    var dock = document.getElementById('scrubber-dock');
+    if (!viewport || !dock) { setTimeout(boot, 120); return; }
+    var restoreTimer = 0;
+    var moveTimer = 0;
+    function recede(on) {
+      clearTimeout(restoreTimer);
+      if (on) body.classList.add('ui-recede');
+      else restoreTimer = setTimeout(function () { body.classList.remove('ui-recede'); }, 160);
+    }
+    function moving(on) {
+      clearTimeout(moveTimer);
+      if (on) body.classList.add('ui-move');
+      else moveTimer = setTimeout(function () { body.classList.remove('ui-move'); }, 220);
+    }
+    var dragging = false;
+    viewport.addEventListener('pointerdown', function () {
+      dragging = true; recede(true); moving(false);
     }, { passive: true });
     window.addEventListener('pointermove', function (e) {
-      if (!active) return;
-      if (e.pointerType === 'mouse' && e.buttons === 0) { settle(); return; }
-      dx = e.clientX - sx;
-      var dy = e.clientY - sy;
-      if (!horiz) {
-        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-        horiz = Math.abs(dx) > Math.abs(dy);
-        if (!horiz) { active = false; return; }
-      }
-      var off = Math.max(-44, Math.min(44, dx / 2.4));
-      key.style.transition = 'none';
-      key.style.transform = 'translateX(' + off.toFixed(1) + 'px)';
+      if (dragging && ((e.buttons && e.buttons > 0) || (e.touches && e.touches.length > 0))) moving(true);
     }, { passive: true });
-    function settle() {
-      if (!active) return;
-      active = false;
-      key.style.transition = '';
-      key.style.transform = '';
-      if (horiz && Math.abs(dx) > 36) {
-        var btn = document.getElementById(dx < 0 ? 'act-step-next' : 'act-step-prev');
-        if (btn) btn.click();
+    window.addEventListener('wheel', function () { moving(true); }, { passive: true });
+    function endDrag() { dragging = false; moving(false); recede(false); }
+    window.addEventListener('pointerup', endDrag, { passive: true });
+    window.addEventListener('pointercancel', endDrag, { passive: true });
+
+    ['nav-bar', 'scrubber-dock', 'chronicle-pane', 'map-key', 'canvas-br-dock', 'milestone-balloon'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('pointerdown', function () { recede(false); moving(false); dragging = false; }, { passive: true });
+    });
+
+    /* 左下角图例：左右滑动 = 时间轴上一站 / 下一站 */
+    var key = document.getElementById('map-key');
+    if (key) {
+      key.addEventListener('dragstart', function (e) { e.preventDefault(); });
+      var sx = 0, sy = 0, dx = 0, active = false, horiz = false;
+      key.addEventListener('pointerdown', function (e) {
+        if (e.button && e.button !== 0) return;
+        e.stopPropagation();               /* 不当作地图触摸，也不触发地图拖拽 */
+        active = true; horiz = false; dx = 0;
+        sx = e.clientX; sy = e.clientY;
+      }, { passive: true });
+      window.addEventListener('pointermove', function (e) {
+        if (!active) return;
+        if (e.pointerType === 'mouse' && e.buttons === 0) { settle(); return; }  /* 兜底：pointerup 丢失 */
+        dx = e.clientX - sx;
+        var dy = e.clientY - sy;
+        if (!horiz) {
+          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+          horiz = Math.abs(dx) > Math.abs(dy);
+          if (!horiz) { active = false; return; }
+        }
+        var off = Math.max(-44, Math.min(44, dx / 2.4));
+        key.style.transition = 'none';
+        key.style.transform = 'translateX(' + off.toFixed(1) + 'px)';
+      }, { passive: true });
+      function settle() {
+        if (!active) return;
+        active = false;
+        key.style.transition = '';
+        key.style.transform = '';
+        if (horiz && Math.abs(dx) > 36) {
+          var btn = document.getElementById(dx < 0 ? 'act-step-next' : 'act-step-prev');
+          if (btn) btn.click();
+        }
+        horiz = false;
       }
-      horiz = false;
+      window.addEventListener('pointerup', settle, { passive: true });
+      window.addEventListener('pointercancel', settle, { passive: true });
     }
-    window.addEventListener('pointerup', settle, { passive: true });
-    window.addEventListener('pointercancel', settle, { passive: true });
+
+    /* ===== v13：档案夹双标签 + 浮卡对时间轴的实测避让 ===== */
+    var pane = document.getElementById('chronicle-pane');
+    var balloon = document.getElementById('milestone-balloon');
+    var root = document.documentElement;
+    var archivePlaceholder = false;
+    var layoutRaf = 0;
+
+    function archiveMode() { return window.innerWidth >= 768; }
+    function setVar(name, value) {
+      if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
+    }
+    function scheduleLayout() {
+      if (layoutRaf) return;
+      layoutRaf = requestAnimationFrame(function () {
+        layoutRaf = 0;
+        var dr = dock.getBoundingClientRect();
+        if (dr.height > 0) {
+          setVar('--dock-clearance', Math.max(72, Math.round(window.innerHeight - dr.top + 6)) + 'px');
+        }
+        if (pane && window.innerWidth < 768) {
+          var pr = pane.getBoundingClientRect();
+          if (pr.height > 0) {
+            setVar('--phone-pane-clearance', Math.round(window.innerHeight - pr.top + 6) + 'px');
+          }
+        }
+      });
+    }
+
+    if (pane && balloon) {
+      var tabs = document.createElement('div');
+      tabs.className = 'archive-folder-tabs';
+      tabs.setAttribute('role', 'tablist');
+      tabs.setAttribute('aria-label', '历史档案分类');
+      tabs.innerHTML =
+        '<button type="button" class="archive-folder-tab is-active" data-tab="chronicle" role="tab" aria-selected="true">史志<small>CHRONICLE</small></button>' +
+        '<button type="button" class="archive-folder-tab" data-tab="event" role="tab" aria-selected="false">事件<small>EVENT</small></button>';
+      body.appendChild(tabs);
+      body.setAttribute('data-archive-tab', 'chronicle');
+
+      function paintTabs(name) {
+        tabs.querySelectorAll('.archive-folder-tab').forEach(function (btn) {
+          var on = btn.getAttribute('data-tab') === name;
+          btn.classList.toggle('is-active', on);
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      }
+      function showEventPlaceholder() {
+        archivePlaceholder = true;
+        balloon.innerHTML = '<div class="archive-empty"><strong>事件档案</strong>点击地图上的事件圆点，或切换到「史志」签点击重大事件，这里就会展开对应的年份、地点与史事。</div>';
+        balloon.classList.remove('is-hidden', 'is-offscreen');
+      }
+      function selectArchive(name) {
+        if (!archiveMode()) return;
+        if (name === 'chronicle') {
+          var workspace = document.getElementById('workspace-body');
+          if (workspace && workspace.classList.contains('is-pane-collapsed')) {
+            var toggle = document.getElementById('act-toggle-pane');
+            if (toggle) toggle.click();
+          }
+          if (archivePlaceholder) {
+            archivePlaceholder = false;
+            balloon.classList.add('is-hidden');
+          }
+        } else if (!balloon.querySelector('.ep-text')) {
+          showEventPlaceholder();
+        }
+        body.setAttribute('data-archive-tab', name);
+        paintTabs(name);
+        recede(false);
+        moving(false);
+        scheduleLayout();
+      }
+      tabs.addEventListener('pointerdown', function (e) {
+        e.stopPropagation();
+        recede(false); moving(false); dragging = false;
+      }, { passive: true });
+      tabs.querySelectorAll('.archive-folder-tab').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          selectArchive(btn.getAttribute('data-tab'));
+        });
+      });
+
+      /* 点击地图事件后自动翻到「事件」签；关闭事件后回到「史志」签 */
+      var balloonObserver = new MutationObserver(function () {
+        if (!archiveMode()) return;
+        var hidden = balloon.classList.contains('is-hidden');
+        if (!hidden && balloon.querySelector('.ep-text')) {
+          archivePlaceholder = false;
+          var atlas = window.atlasApp;
+          var automatic = atlas && atlas.activeMilestone && atlas.activeMilestone.isAuto;
+          if (!automatic) {
+            body.setAttribute('data-archive-tab', 'event');
+            paintTabs('event');
+          }
+        } else if (hidden && !archivePlaceholder && body.getAttribute('data-archive-tab') === 'event') {
+          body.setAttribute('data-archive-tab', 'chronicle');
+          paintTabs('chronicle');
+        }
+        scheduleLayout();
+      });
+      balloonObserver.observe(balloon, { attributes: true, attributeFilter: ['class'], childList: true });
+
+      function onResize() {
+        if (!archiveMode()) {
+          if (archivePlaceholder) {
+            archivePlaceholder = false;
+            balloon.classList.add('is-hidden');
+          }
+          body.setAttribute('data-archive-tab', 'chronicle');
+          paintTabs('chronicle');
+        }
+        scheduleLayout();
+      }
+      window.addEventListener('resize', onResize, { passive: true });
+      window.addEventListener('orientationchange', function () { setTimeout(scheduleLayout, 260); }, { passive: true });
+      if (window.ResizeObserver) {
+        var layoutObserver = new ResizeObserver(scheduleLayout);
+        layoutObserver.observe(dock);
+        layoutObserver.observe(pane);
+        if (key) layoutObserver.observe(key);
+      }
+      scheduleLayout();
+      setTimeout(scheduleLayout, 350);
+      setTimeout(scheduleLayout, 1100);
+    }
   }
   boot();
 })();
