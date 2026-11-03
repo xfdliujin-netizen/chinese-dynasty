@@ -2493,6 +2493,8 @@
        ============================================================ */
     /* 地图页隐藏应用标题栏，让疆域图铺满整个视口（进入沉浸模式） */
     body[data-view="map"] .app-header { display: none; }
+    /* 地图页为全屏沉浸状态，底部主导航已隐藏，时间轴直接贴屏幕底边 */
+    body[data-view="map"] .bottom-tabs { display: none; }
 
     .map-stage {
       position: relative;
