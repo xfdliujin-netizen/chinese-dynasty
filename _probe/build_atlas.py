@@ -210,7 +210,7 @@ body.atlas-embed #nav-bar {
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 62px);
     right: 12px;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 190px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 132px);
     width: min(330px, 30vw);
     z-index: 62;
     margin: 0;
@@ -340,7 +340,7 @@ body.atlas-embed #act-toggle-pane:hover {
 /* 左下角图例：抬到时间轴胶囊上方，避免重叠；禁原生拖拽/选区（防 dragstart 劫持滑动手势） */
 @media (min-width: 901px) {
   body.atlas-embed #map-key {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 198px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 132px);
     max-height: calc(100vh - 268px);
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -388,7 +388,7 @@ body.atlas-embed #scale-bar-box { padding-right: 2px; }
 /* 所有底部浮卡共用时间轴实测留白，JS 在尺寸变化时更新 --dock-clearance */
 @media (min-width: 768px) {
   body.atlas-embed #map-key {
-    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 198px));
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 132px));
     max-height: min(42vh, 360px);
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -398,11 +398,11 @@ body.atlas-embed #scale-bar-box { padding-right: 2px; }
 /* 手机：史志条贴时间轴上缘，图例再贴史志条上缘；位置全部由实际矩形计算 */
 @media (max-width: 767px) {
   body.atlas-embed #chronicle-pane {
-    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 184px));
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 128px));
     max-height: min(43vh, 340px);
   }
   body.atlas-embed #map-key {
-    bottom: var(--phone-pane-clearance, calc(env(safe-area-inset-bottom, 0px) + 244px));
+    bottom: var(--phone-pane-clearance, calc(env(safe-area-inset-bottom, 0px) + 188px));
     max-height: min(30vh, 230px);
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -465,7 +465,7 @@ body.atlas-embed .archive-folder-tabs { display: none; }
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 96px) !important;
     right: calc(env(safe-area-inset-right, 0px) + 14px) !important;
-    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 190px));
+    bottom: var(--dock-clearance, calc(env(safe-area-inset-bottom, 0px) + 132px));
     left: auto !important;
     width: min(340px, 34vw);
     max-width: min(340px, 34vw);
@@ -503,7 +503,7 @@ body.atlas-embed .archive-folder-tabs { display: none; }
     bottom: auto !important;
     height: auto;
     min-height: 150px;
-    max-height: calc(100dvh - 102px - var(--dock-clearance, 190px));
+    max-height: calc(100dvh - 102px - var(--dock-clearance, 132px));
     font-size: 13px;
     line-height: 1.75;
     transition: opacity .2s ease;
