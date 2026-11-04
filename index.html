@@ -520,6 +520,10 @@
     }
     .event-stack { display: flex; flex-direction: column; align-items: center; }
 
+    /* 帝王（上排）：卡片倒挂于轴线上方，圆点贴轴 */
+    .event-node.emperor .event-stack { flex-direction: column-reverse; }
+    .event-node.emperor .slip-fold-wrapper { transform-origin: bottom center; }
+
     .pulse-circle {
       position: relative;
       width: calc(14px * var(--v));
@@ -590,12 +594,12 @@
       overflow: hidden;
     }
 
-    /* 重要人物：石青 */
+    /* 关键人物（下排）：石青 */
     #timeline-canvas[data-layer="figures"] .axis-person-card { --ac: #86A0B2; --ac-soft: #E9EFF2; }
     #timeline-canvas[data-layer="figures"] .axis-person-card .ap-life { color: #4A6880; }
-    /* 文学大家：藕荷 */
-    #timeline-canvas[data-layer="literati"] .axis-person-card { --ac: #AE9CC4; --ac-soft: #F0EBF6; }
-    #timeline-canvas[data-layer="literati"] .axis-person-card .ap-life { color: #6A5686; }
+    /* 帝王（上排）：暗红朱砂，庄重肃穆 */
+    #timeline-canvas[data-layer="figures"] .event-node.emperor .axis-person-card { --ac: #B8332A; --ac-soft: #F6E4E0; }
+    #timeline-canvas[data-layer="figures"] .event-node.emperor .axis-person-card .ap-life { color: #9C3A2E; }
     /* 各朝盛世：鎏金 */
     #timeline-canvas[data-layer="eras"] .axis-person-card { --ac: #C09A3E; --ac-soft: #FAF1D8; }
     #timeline-canvas[data-layer="eras"] .axis-person-card .ap-life { color: #8A6A1C; }
@@ -2774,15 +2778,15 @@
     /* 中央天头纪年罗盘：精准悬于中央朱砂红线顶端 */
     .scroll-center-compass {
       position: fixed;
-      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      top: calc(env(safe-area-inset-top, 0px) + 60px);
       left: 50%;
       transform: translateX(-50%);
       z-index: 62;
       display: none;
       align-items: center;
-      gap: 7px;
-      height: 34px;
-      padding: 0 15px;
+      gap: 8px;
+      height: 38px;
+      padding: 0 18px;
       border-radius: 999px;
       background: rgba(252, 249, 242, 0.56);
       -webkit-backdrop-filter: blur(12px) saturate(1.5);
@@ -2825,6 +2829,53 @@
       color: #231D16;
       font-variant-numeric: tabular-nums;
     }
+
+    /* 顶部「长卷 / 史图」大胶囊切换按钮（悬浮于纪年罗盘上方） */
+    .view-switch-capsule {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 63;
+      display: none;
+      align-items: center;
+      gap: 3px;
+      height: 44px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(252, 249, 242, 0.72);
+      -webkit-backdrop-filter: blur(18px) saturate(1.5);
+      backdrop-filter: blur(18px) saturate(1.5);
+      border: 1px solid rgba(184, 51, 42, 0.24);
+      box-shadow: 0 6px 22px rgba(30, 24, 16, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    body[data-view="scroll"] .view-switch-capsule { display: flex; }
+    .view-switch-capsule .vsc-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 36px;
+      padding: 0 20px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: #6D5D47;
+      font-family: 'Noto Serif SC', 'Songti SC', serif;
+      font-size: 15.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.24s ease, color 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
+    }
+    .view-switch-capsule .vsc-item svg { flex: none; opacity: 0.9; }
+    .view-switch-capsule .vsc-item.active {
+      background: linear-gradient(145deg, #C8382E 0%, #9A241B 100%);
+      color: #FFF8F0;
+      box-shadow: 0 3px 10px rgba(184, 51, 42, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .view-switch-capsule .vsc-item:not(.active):active { transform: scale(0.95); }
+    body.canvas-dragging .view-switch-capsule,
+    body.search-open .view-switch-capsule { opacity: 0.18; pointer-events: none; }
 
     /* 右上角工具舱（缩放胶囊 + 检索按钮） */
     .scroll-float-RightTools {
@@ -4617,10 +4668,10 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     <div class="as-box">
       <div class="as-input-row">
         <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-        <input id="axis-search-input" type="search" enterkeyhint="search" autocomplete="off" placeholder="搜索：事件 / 人物 / 文豪 / 盛世…" />
+        <input id="axis-search-input" type="search" enterkeyhint="search" autocomplete="off" placeholder="搜索：事件 / 关键人物 / 盛世…" />
         <button id="axis-search-close" class="as-close" type="button" aria-label="关闭搜索">✕</button>
       </div>
-      <div class="as-hint" id="axis-search-hint">全库搜索：重大事件 · 重要人物 · 文学大家 · 各朝盛世</div>
+      <div class="as-hint" id="axis-search-hint">全库搜索：重大事件 · 关键人物 · 各朝盛世</div>
       <div class="as-results" id="axis-search-results"></div>
     </div>
   </div>
@@ -4636,6 +4687,18 @@ body.map-interacting #layers-popover:not(.popup-focused) {
           <h1 class="app-title">华夏千年历史长卷</h1>
           <p class="app-sub">五千年 · 帝王 · 史事 · 舆图</p>
         </div>
+      </div>
+
+      <!-- 顶部「长卷 / 史图」大胶囊切换按钮 -->
+      <div class="view-switch-capsule" role="tablist" aria-label="长卷与史图切换">
+        <button class="vsc-item active" data-switch-view="scroll" type="button" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z"/><path d="M12 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1"/><path d="M5 8.5h4M5 12h4"/></svg>
+          <span>长卷</span>
+        </button>
+        <button class="vsc-item" data-switch-view="map" type="button" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v14L9 18l6 2 6-2.5v-14L15 6 9 4z"/><path d="M9 4v14M15 6v14"/></svg>
+          <span>史图</span>
+        </button>
       </div>
 
       <!-- 中央天头纪年罗盘（实时联动屏幕中央朱砂红线，显示当前朝代与精确纪年） -->
@@ -4691,7 +4754,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
           <div class="zen-divider" aria-hidden="true"></div>
 
-          <!-- 第二轨：下轴图层五档（事件 / 人物 / 文豪 / 盛世 / 关闭） -->
+          <!-- 第二轨：下轴图层四档（事件 / 关键人物 / 盛世 / 关闭） -->
           <div class="zen-dock-row">
             <span class="zen-tag">下轴</span>
             <div class="slide-track zen-track" id="axis-layer-track" role="radiogroup" aria-label="下方时间轴图层">
@@ -4702,11 +4765,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
               </button>
               <button id="layer-figures" class="slide-opt zen-opt layer-switch" data-layer="figures" type="button" role="radio" aria-checked="false">
                 <span class="switch" hidden><span class="knob"></span></span>
-                <span>人物</span>
-              </button>
-              <button id="layer-literati" class="slide-opt zen-opt layer-switch" data-layer="literati" type="button" role="radio" aria-checked="false">
-                <span class="switch" hidden><span class="knob"></span></span>
-                <span>文豪</span>
+                <span>关键人物</span>
               </button>
               <button id="layer-eras" class="slide-opt zen-opt layer-switch" data-layer="eras" type="button" role="radio" aria-checked="false">
                 <span class="switch" hidden><span class="knob"></span></span>
@@ -4810,148 +4869,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       </footer>
     </section>
 
-    <!-- ============ 视图二：人物（单行极简顶栏：品牌标识 + 动画下拉选择窗 + 紧凑搜索框） ============ -->
-    <section id="view-archive" class="view">
-      <div class="people-shell">
-        <div class="people-toolbar compact-header-bar">
-          <!-- 左：保留品牌标识 -->
-          <div class="inline-brand">
-            <div class="seal font-calligraphy">史</div>
-            <span class="ib-title">华夏长卷</span>
-          </div>
-
-          <!-- 中：人物分类动画下拉窗 + 朝代选择 -->
-          <div class="compact-filters">
-            <div class="anim-dropdown" id="people-cat-dd">
-              <button class="anim-dd-trigger" id="people-cat-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                <span class="dd-dot" data-kind="rulers" id="people-cat-dot"></span>
-                <span id="people-cat-label">帝王</span>
-                <svg class="dd-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-              <div class="anim-dd-menu" id="people-cat-menu" role="listbox" aria-label="人物分类">
-                <button class="anim-dd-item active" data-ptab="rulers" type="button" role="option" aria-selected="true">
-                  <span class="dd-dot" data-kind="rulers"></span>
-                  <span class="dd-item-text"><b>帝王</b><small>历朝君主世系与在位功过</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-                <button class="anim-dd-item" data-ptab="figures" type="button" role="option" aria-selected="false">
-                  <span class="dd-dot" data-kind="figures"></span>
-                  <span class="dd-item-text"><b>重要人物</b><small>名相良将与《史记》专传人物</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-                <button class="anim-dd-item" data-ptab="literati" type="button" role="option" aria-selected="false">
-                  <span class="dd-dot" data-kind="literati"></span>
-                  <span class="dd-item-text"><b>文学大家</b><small>诸子百家与诗词曲赋名家</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- 保留原 #people-seg 隐藏节点以兼容外部调用 -->
-            <div id="people-seg" hidden aria-hidden="true">
-              <button class="seg-btn active" data-ptab="rulers" type="button"></button>
-              <button class="seg-btn" data-ptab="figures" type="button"></button>
-              <button class="seg-btn" data-ptab="literati" type="button"></button>
-            </div>
-
-            <!-- 朝代动画下拉选择窗（底层同步原 #dyn-select） -->
-            <div class="anim-dropdown" id="people-dyn-dd">
-              <button class="anim-dd-trigger dyn-trigger" id="people-dyn-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                <span id="people-dyn-label">三国</span>
-                <svg class="dd-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-              <div class="anim-dd-menu dyn-menu ancient-scroll" id="people-dyn-menu" role="listbox" aria-label="选择朝代"></div>
-            </div>
-            <div class="dyn-select-wrap" hidden aria-hidden="true">
-              <select id="dyn-select" class="dyn-select" aria-label="选择朝代"></select>
-            </div>
-          </div>
-
-          <!-- 右：缩小版紧凑搜索框 -->
-          <label class="search-box compact-search" id="people-search-box">
-            <svg class="s-svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-            <input id="people-search" type="search" inputmode="search" autocomplete="off"
-                   placeholder="查人物/帝王…" aria-label="查找人物" />
-            <button id="people-search-clear" class="search-clear" type="button" aria-label="清空">×</button>
-          </label>
-        </div>
-        <div id="people-body" class="people-body ancient-scroll"></div>
-      </div>
-    </section>
-
-    <!-- ============ 视图三：事件年表（单行极简顶栏：品牌标识 + 动画下拉选择窗 + 紧凑搜索框） ============ -->
-    <section id="view-events" class="view">
-      <div class="events-shell">
-        <div class="events-toolbar compact-header-bar">
-          <!-- 左：保留品牌标识 -->
-          <div class="inline-brand">
-            <div class="seal font-calligraphy">史</div>
-            <span class="ib-title">华夏长卷</span>
-          </div>
-
-          <!-- 中：事件类别动画下拉选择窗 + 条目数 -->
-          <div class="compact-filters">
-            <div class="anim-dropdown" id="event-cat-dd">
-              <button class="anim-dd-trigger" id="event-cat-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                <span class="dd-dot" data-cat="all" id="event-cat-dot"></span>
-                <span id="event-cat-label">全部事件</span>
-                <svg class="dd-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-              <div class="anim-dd-menu" id="event-cat-menu" role="listbox" aria-label="事件类别">
-                <button class="anim-dd-item active" data-cat="all" type="button" role="option" aria-selected="true">
-                  <span class="dd-dot" data-cat="all"></span>
-                  <span class="dd-item-text"><b>全部事件</b><small>纵览五千年全部重大史事</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-                <button class="anim-dd-item" data-cat="政治变革" type="button" role="option" aria-selected="false">
-                  <span class="dd-dot" data-cat="政治变革"></span>
-                  <span class="dd-item-text"><b>政治兴替</b><small>王朝更迭、变法改制与政局转折</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-                <button class="anim-dd-item" data-cat="军事风云" type="button" role="option" aria-selected="false">
-                  <span class="dd-dot" data-cat="军事风云"></span>
-                  <span class="dd-item-text"><b>军事风云</b><small>定鼎决战、经典战役与边疆征伐</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-                <button class="anim-dd-item" data-cat="文明盛世" type="button" role="option" aria-selected="false">
-                  <span class="dd-dot" data-cat="文明盛世"></span>
-                  <span class="dd-item-text"><b>文明盛世</b><small>治世盛景、科技发明与文化典籍</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-                <button class="anim-dd-item" data-cat="对外开拓" type="button" role="option" aria-selected="false">
-                  <span class="dd-dot" data-cat="对外开拓"></span>
-                  <span class="dd-item-text"><b>对外开拓</b><small>丝路凿空、下西洋与疆域奠定</small></span>
-                  <span class="dd-check">✓</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- 保留原 #event-chips 以支持朝代过滤标签及兼容逻辑 -->
-            <div id="event-chips" class="event-chips no-scrollbar" hidden aria-hidden="true">
-              <button data-cat="all" class="fchip active" type="button">全部</button>
-              <button data-cat="政治变革" class="fchip" type="button">政治兴替</button>
-              <button data-cat="军事风云" class="fchip" type="button">军事风云</button>
-              <button data-cat="文明盛世" class="fchip" type="button">文明盛世</button>
-              <button data-cat="对外开拓" class="fchip" type="button">对外开拓</button>
-            </div>
-
-            <span id="events-count" class="events-count"></span>
-          </div>
-
-          <!-- 右：缩小版紧凑搜索框 -->
-          <label class="search-box compact-search" id="search-box">
-            <svg class="s-svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-            <input id="event-search" type="search" inputmode="search" autocomplete="off"
-                   placeholder="搜事件/年号…" aria-label="搜索历史事件" />
-            <button id="search-clear" class="search-clear" type="button" aria-label="清空">×</button>
-          </label>
-        </div>
-
-        <div id="events-list" class="events-list"></div>
-      </div>
-    </section>
-
-    <!-- ============ 视图四：疆域图谱（内嵌 · 全屏沉浸 + 双向联动）============ -->
+    <!-- ============ 视图二：疆域图谱（内嵌 · 全屏沉浸 + 双向联动）============ -->
     <section id="view-map" class="view">
       <div class="map-stage" id="map-stage">
         <iframe id="map-embed" class="map-frame" title="疆域图谱"></iframe>
@@ -5019,14 +4937,6 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     <button class="view-tab active" data-view="scroll" type="button" role="tab" aria-selected="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z"/><path d="M12 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1"/><path d="M5 8.5h4M5 12h4"/></svg>
       <span>长卷</span>
-    </button>
-    <button class="view-tab" data-view="archive" type="button" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 20c.6-3.4 3.1-5.2 6.2-5.2s5.6 1.8 6.2 5.2"/><circle cx="17.2" cy="9.4" r="2.6"/><path d="M16.4 14.9c2.6.1 4.4 1.6 4.9 4.3"/></svg>
-      <span>人物</span>
-    </button>
-    <button class="view-tab" data-view="events" type="button" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
-      <span>事件</span>
     </button>
     <button class="view-tab" data-view="map" type="button" role="tab" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v14L9 18l6 2 6-2.5v-14L15 6 9 4z"/><path d="M9 4v14M15 6v14"/></svg>
@@ -8241,8 +8151,8 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       GEOM.fullSubZoneH = px(114);
 
       const contentH = GEOM.axisY + px(139);
-      // 顶部净空 52px：避开悬浮品牌与搜索胶囊；其余空间适度下移、视觉居中偏上
-      const topFree = 52;
+      // 顶部净空 108px：避开顶部「长卷/史图」大胶囊（约52px）与下移后的纪年罗盘（约60px 处），让时间轴整体下移
+      const topFree = 108;
       GEOM.offsetY = Math.max(topFree, Math.round((bandH - contentH) * 0.45));
 
       // 折叠态（仅朝代，无事件）内容高度：根据当前支系高度动态居中
@@ -8615,6 +8525,21 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     ];
     FIGURE_AXIS.sort((a, b) => a.year - b.year);
 
+    /* 帝王（上排）识别：以地图 PERSON_PROFILES 的称号（role/courtesyZh）为准，
+       匹配「帝 / 皇 / 祖 / 宗 / 汗 / 天王 / 霸王 / 后主」等君主称号，排除封王功臣 */
+    const EMPEROR_KEYS = new Set([
+      'at-qinshihuang', 'at-liubang', 'at-chensheng', 'at-xiangyu',
+      'at-hanwendi', 'at-hanwudi', 'at-wangmang', 'at-liuxiu',
+      'at-caocao', 'at-liubei', 'at-simayi', 'at-sunquan',
+      'at-fujian', 'at-liuyu', 'at-xiaowendi', 'at-yangjian',
+      'at-yangguang', 'at-lishimin', 'at-wuzetian', 'at-tangxuanzong',
+      'at-anlushan', 'at-huangchao', 'at-licunxu', 'at-chairong',
+      'at-zhaokuangyin', 'at-liyu_nt', 'at-genghiskhan', 'at-kublaikhan',
+      'at-zhuyuanzhang', 'at-zhudi', 'at-nurhaci', 'at-huangtaiji',
+      'at-lizicheng', 'at-kangxi', 'at-yongzheng', 'at-qianlong', 'at-hongxiuquan'
+    ]);
+    FIGURE_AXIS.forEach((f) => { f.isEmperor = EMPEROR_KEYS.has(f.id); });
+
     const LITERATI_AXIS = LITERATI.map((l) => ({
       id: `lt-${l.id}`, kind: 'literati', n: l.n, year: l.y, life: l.life,
       role: l.role, work: l.work, d: l.d, dyn: l.dyn, arc: l.arc
@@ -8628,20 +8553,18 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
     const LAYER_META = {
       events: { noun: '事件', color: '#B8332A' },
-      figures: { noun: '人物', color: '#3C6E8F' },
-      literati: { noun: '文豪', color: '#7A5AA8' },
+      figures: { noun: '关键人物', color: '#3C6E8F' },
       eras: { noun: '盛世', color: '#C09020' }
     };
 
     /* 竖卡制式（与 .axis-person-card 实际尺寸保持一致，单位为设计单位） */
     const CARD_W = 36;
     const CARD_H = 64;
-    const CARD_LAYERS = { figures: 1, literati: 1, eras: 1 };
+    const CARD_LAYERS = { figures: 1, eras: 1 };
     const nameShort = (s) => String(s || '').replace(/（[^）]*）/g, '').replace(/\([^)]*\)/g, '').trim();
 
     function getAxisItems() {
       if (state.axisLayer === 'figures') return FIGURE_AXIS;
-      if (state.axisLayer === 'literati') return LITERATI_AXIS;
       if (state.axisLayer === 'eras') return ERA_AXIS;
       return HISTORICAL_EVENTS
         .filter((ev) => state.activeCategory === 'all' || ev.category === state.activeCategory)
@@ -8669,6 +8592,9 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
         if (isPerson) {
           node.dataset.personId = item.id;
+          // 帝王（上排）与关键人物（下排）分别打标，布局时区分上下
+          const isEmperor = item.isEmperor === true;
+          if (isEmperor) node.classList.add('emperor');
           node.innerHTML = `
             <div class="event-stack">
               <div class="pulse-circle" style="background-color:${LAYER_META[state.axisLayer].color};"></div>
@@ -9041,9 +8967,12 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         let lastX = -Infinity;
         const isCard = !!CARD_LAYERS[state.axisLayer];
         const stemRows = [Math.round(8 * v), Math.round(32 * v)];
+        const cardH = CARD_H * v;
+        const pulseH = Math.round(14 * v);
         items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
           const forced = item.el.classList.contains('selected');
+          const isEmp = isCard && item.el.classList.contains('emperor');
           const stemH = isCard ? stemRows[idx % 2] : GEOM.stems[idx % GEOM.stems.length];
           item.defaultStemH = stemH;
           if (x - lastX < gap && !forced) {
@@ -9051,7 +8980,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
             item.x = x;
             item.row = -1;
             item.el.style.left = `${x}px`;
-            item.el.style.top = `${nodeTop}px`;
+            item.el.style.top = `${isEmp ? (GEOM.axisY - cardH - stemH - pulseH) : nodeTop}px`;
             item.stemEl.style.height = `${stemH}px`;
             item.el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
             return;
@@ -9075,14 +9004,23 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         });
       } else {
         const cardW = CARD_W * v;
+        const cardH = CARD_H * v;
         const stemRows = [Math.round(10 * v), Math.round(34 * v)];
+        const pulseH = Math.round(14 * v);
+        // 帝王上排：卡片整体倒挂于轴线上方；关键人物下排：卡片垂于轴线下方
         placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
           const { el, stemEl } = item;
+          const isEmp = el.classList.contains('emperor');
+          const stemH = stemRows[idx % 2];
           item.x = x;
-          item.row = 0;
+          item.row = isEmp ? 1 : 0;
           el.style.left = `${x}px`;
-          el.style.top = `${nodeTop}px`;
-          stemEl.style.height = `${stemRows[idx % 2]}px`;
+          if (isEmp) {
+            el.style.top = `${GEOM.axisY - cardH - stemH - pulseH}px`;
+          } else {
+            el.style.top = `${nodeTop}px`;
+          }
+          stemEl.style.height = `${stemH}px`;
           el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
         });
       }
@@ -9268,12 +9206,11 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       updateActiveHighlights();
     }
 
-    /* ---------------- 长卷全库搜索（事件 / 人物 / 文豪 / 盛世，混合结果再点选） ---------------- */
+    /* ---------------- 长卷全库搜索（事件 / 关键人物 / 盛世，混合结果再点选） ---------------- */
     (function initAxisSearch() {
       const SOURCES = [
         { layer: 'events',   items: HISTORICAL_EVENTS, name: '事件', cls: 'as-t-ev'  },
-        { layer: 'figures',  items: FIGURE_AXIS,       name: '人物', cls: 'as-t-fg'  },
-        { layer: 'literati', items: LITERATI_AXIS,     name: '文豪', cls: 'as-t-lit' },
+        { layer: 'figures',  items: FIGURE_AXIS,       name: '关键人物', cls: 'as-t-fg'  },
         { layer: 'eras',     items: ERA_AXIS,          name: '盛世', cls: 'as-t-era' },
       ];
       const btn = document.getElementById('axis-search-btn');
@@ -9355,7 +9292,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       function open() {
         panel.hidden = false;
         requestAnimationFrame(() => panel.classList.add('on'));
-        hintEl.textContent = '全库搜索：重大事件 · 重要人物 · 文学大家 · 各朝盛世';
+        hintEl.textContent = '全库搜索：重大事件 · 关键人物 · 各朝盛世';
         input.value = '';
         resultsEl.innerHTML = '';
         document.body.classList.add('search-open');
@@ -9395,7 +9332,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       if (!item) return;
 
       // 保证所在图层已展开
-      const targetLayer = item.kind === 'literati' ? 'literati' : (item.kind === 'era' ? 'eras' : 'figures');
+      const targetLayer = item.kind === 'era' ? 'eras' : 'figures';
       if (state.axisLayer !== targetLayer) setAxisLayer(targetLayer, { silentSelect: true });
 
       state.selectedPersonId = item.id;
@@ -9445,9 +9382,10 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
         detailExtendedLabel.textContent = isEra ? '📖 盛世始末' : (isLit ? '📖 生平与创作' : '📖 生平与功业');
         detailImpactLabel.textContent = '【代表作品】';
-        openArchiveBtn.textContent = isEra ? '本朝档案 ›' : (isLit ? '文学大家 ›' : '人物档案 ›');
+        // 人物档案入口：人物页已移除，改为「定位轴上」直接聚焦长卷时间轴上的对应人物/盛世
+        openArchiveBtn.textContent = isEra ? '本朝盛世 ›' : (isLit ? '定位人物 ›' : '关键人物 ›');
         openArchiveBtn.dataset.personArc = item.arcId || item.arc || '';
-        openArchiveBtn.dataset.personTab = isEra ? 'figures' : (isLit ? 'literati' : 'figures');
+        openArchiveBtn.dataset.personTab = isEra ? 'eras' : 'figures';
 
         // 人物地图联动按钮：仅「人物」图层显示，携带地图人物 key 与代表年份
         if (isLit || isEra) {
@@ -9507,7 +9445,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         detailExtendedLabel.textContent = '📜 朝代详述';
         detailImpactLabel.textContent = '【史家评述与制度遗产】';
         detailImpactBox.hidden = false;
-        openArchiveBtn.textContent = '人物档案 ›';
+        openArchiveBtn.textContent = '关键人物 ›';
         delete openArchiveBtn.dataset.personArc;
         delete openArchiveBtn.dataset.personTab;
 
@@ -10789,8 +10727,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       if (!bandHintEl) return;
       const map = {
         events: '轻点竹简 · 查看<b>史事详述</b>',
-        figures: '轻点竖卡 · 查看<b>人物生平</b>',
-        literati: '轻点竖卡 · 查看<b>文豪生平</b>',
+        figures: '轻点竖卡 · 查看<b>关键人物生平</b>',
         eras: '轻点竖卡 · 查看<b>盛世始末</b>'
       };
       bandHintEl.innerHTML = map[state.axisLayer] || '';
@@ -10884,7 +10821,6 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     /* 当前图层的有序列表（供上一/下一节点使用） */
     function currentAxisList() {
       if (state.axisLayer === 'figures') return FIGURE_AXIS;
-      if (state.axisLayer === 'literati') return LITERATI_AXIS;
       if (state.axisLayer === 'eras') return ERA_AXIS;
       return getEventsByYear()
         .filter((ev) => state.activeCategory === 'all' || ev.category === state.activeCategory);
@@ -11249,11 +11185,9 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       const name = (d && d.personName) || '';
       if (name) {
         const inFig = (typeof FIGURE_AXIS !== 'undefined' && FIGURE_AXIS || []).some((x) => x.n === name);
-        const inLit = !inFig && (typeof LITERATI_AXIS !== 'undefined' && LITERATI_AXIS || []).some((x) => x.n === name);
-        if (inFig || inLit) {
-          const list = inFig ? FIGURE_AXIS : LITERATI_AXIS;
-          const item = list.find((x) => x.n === name);
-          locateOnAxis(inFig ? 'figures' : 'literati', item.id, Number.isFinite(y) ? y : undefined);
+        if (inFig) {
+          const item = FIGURE_AXIS.find((x) => x.n === name);
+          locateOnAxis('figures', item.id, Number.isFinite(y) ? y : undefined);
           return;
         }
       }
@@ -11381,22 +11315,24 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
     const VIEW_ELS = {
       scroll: document.getElementById('view-scroll'),
-      archive: document.getElementById('view-archive'),
-      events: document.getElementById('view-events'),
       map: document.getElementById('view-map')
     };
 
     let currentView = 'scroll';
-    let archiveDynId = null;
-    let eventQuery = '';
-    let eventFilter = 'all';
-    let activeDynRange = null;
 
     function dynastyForYear(y) {
       for (let i = MACRO_DYNASTIES.length - 1; i >= 0; i--) {
         if (y >= MACRO_DYNASTIES[i].start) return MACRO_DYNASTIES[i];
       }
       return MACRO_DYNASTIES[0];
+    }
+
+    function syncViewSwitchCapsule(name) {
+      document.querySelectorAll('.view-switch-capsule .vsc-item').forEach((btn) => {
+        const on = btn.dataset.switchView === name;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', String(on));
+      });
     }
 
     function switchView(name) {
@@ -11412,6 +11348,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       });
       document.body.dataset.view = name;
       syncTabGlider(true);
+      syncViewSwitchCapsule(name);
 
       if (name !== 'scroll') closeSheet();
 
@@ -11422,119 +11359,21 @@ body.map-interacting #layers-popover:not(.popup-focused) {
           updateCanvasLayout();
           applyScrollTransform();
         });
-      } else if (name === 'archive') {
-        renderArchive(archiveDynId || state.activeDynastyId || 'sanguo');
-      } else if (name === 'events') {
-        renderEventList();
       } else if (name === 'map') {
         renderMapView();
         scheduleMapPreload();
       }
     }
 
-    /* ---------------- 人物页（帝王 / 重要人物 / 文学大家） ---------------- */
-    let peopleTab = 'rulers';
-    let peopleQuery = '';
-
-    /* 某一朝的「重要人物」= 原档案 + 补录（史记专传等），重名去重 */
-    function archiveFigures(arc) {
-      const list = (arc.figures || []).map((f) => ({
-        n: f.n, r: f.r, d: f.d, s: '',
-        life: FIGURE_LIFE[f.n] ? FIGURE_LIFE[f.n][1] : ''
-      }));
-      const seen = new Set(list.map((f) => f.n));
-      (EXTRA_BY_ARC[arc.id] || []).forEach((f) => {
-        if (seen.has(f.n)) return;
-        seen.add(f.n);
-        list.push({ n: f.n, r: f.r, d: f.d, s: f.s || '', life: f.life || '' });
-      });
-      return list;
-    }
-
-    /* 全量人物检索索引（帝王 + 重要人物 + 文学大家） */
-    let PEOPLE_INDEX = null;
-    function buildPeopleIndex() {
-      if (PEOPLE_INDEX) return PEOPLE_INDEX;
-      const idx = [];
-      DYNASTY_ARCHIVES.forEach((arc) => {
-        (arc.groups || []).forEach((g) => {
-          (g.rulers || []).forEach((r) => {
-            idx.push({
-              kind: 'rulers', id: `rl-${arc.id}-${r.n}`, n: r.n, dyn: arc.name, arcId: arc.id,
-              role: g.g || arc.name + '帝王', life: r.r || '', y: r.y, d: r.d || ''
-            });
-          });
-        });
-        archiveFigures(arc).forEach((f) => {
-          idx.push({
-            kind: 'figures', id: `fg-${arc.id}-${stripId(f.n)}`, n: f.n, dyn: arc.name, arcId: arc.id,
-            role: f.r || '', life: f.life || '', y: null, d: f.d || '', src: f.s || ''
-          });
-        });
-      });
-      LITERATI.forEach((l) => {
-        idx.push({
-          kind: 'literati', id: `lt-${l.id}`, n: l.n, dyn: l.dyn, arcId: l.arc,
-          role: l.role || '', life: l.life || '', y: l.y, d: l.d || '', src: ''
-        });
-      });
-      PEOPLE_INDEX = idx;
-      return idx;
-    }
-
-    const PEOPLE_KIND_LABEL = { rulers: '帝王', figures: '重要人物', literati: '文学大家' };
-
-    function renderPeopleSearch(rawQuery) {
-      const kw = rawQuery.trim().toLowerCase();
-      const all = buildPeopleIndex();
-      const hits = [];
-      for (const it of all) {
-        const hay = `${it.n} ${it.role} ${it.dyn} ${it.life} ${it.d} ${it.src || ''}`.toLowerCase();
-        if (!hay.includes(kw)) continue;
-        hits.push(it);
-        if (hits.length >= 80) break;
-      }
-      if (!hits.length) {
-        return `<div class="pa-hint">没有找到「${escapeHtml(rawQuery.trim())}」相关的人物。</div>
-          <div class="empty-tip">试试输入姓名、身份（如“名将”“词人”）或朝代名。</div>`;
-      }
-
-      const order = ['figures', 'literati', 'rulers'];
-      const groups = {};
-      hits.forEach((h) => { (groups[h.kind] = groups[h.kind] || []).push(h); });
-
-      let html = `<div class="pa-hint">全朝代共找到 <b>${hits.length}</b> 位，点「长卷定位」直接跳到时间轴上的对应位置。</div>`;
-      order.forEach((kind) => {
-        const arr = groups[kind];
-        if (!arr || !arr.length) return;
-        html += `<div class="pa-sec">${PEOPLE_KIND_LABEL[kind]} · ${arr.length}</div>`;
-        html += arr.map((it) => `
-          <div class="pa-row">
-            <div class="pa-main">
-              <div class="pa-name-line">
-                <span class="pa-name">${escapeHtml(it.n)}</span>
-                <span class="pa-tag" data-kind="${kind}">${PEOPLE_KIND_LABEL[kind]}</span>
-              </div>
-              <div class="pa-meta">${escapeHtml([it.dyn, it.life, it.role].filter(Boolean).join(' · '))}</div>
-            </div>
-            <div class="pa-act">
-              <a class="baike-link" href="${baikeUrl(stripParen(it.n))}" target="_blank" rel="noopener">百科 ›</a>
-              <button class="pa-go" type="button"
-                data-kind="${kind}" data-id="${it.id}" data-year="${typeof it.y === 'number' ? it.y : ''}"
-                data-layer-id="${it.arcId || ''}">长卷定位</button>
-            </div>
-          </div>`).join('');
-      });
-      return html;
-    }
-
+    /* ---------------- 轴上人物定位（供地图返回 / 长卷内部使用） ---------------- */
     function locateOnAxis(kind, id, year) {
       if (kind === 'rulers') {
         if (typeof year === 'number') jumpToYear(year);
         return;
       }
-      const layer = kind === 'literati' ? 'literati' : 'figures';
-      const list = layer === 'literati' ? LITERATI_AXIS : FIGURE_AXIS;
+      // 文豪图层已移除，统一归并到「关键人物」图层
+      const layer = 'figures';
+      const list = FIGURE_AXIS;
       const item = list.find((x) => x.id === id) || list.find((x) => x.n === id);
       switchView('scroll');
       setTimeout(() => {
@@ -11571,334 +11410,6 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       if (!inside) closeAllAnimDropdowns();
     });
 
-    function syncPeopleDropdownUI(arcId, tabKey) {
-      const catNames = { rulers: '帝王', figures: '重要人物', literati: '文学大家' };
-      const catLabel = document.getElementById('people-cat-label');
-      const catDot = document.getElementById('people-cat-dot');
-      if (catLabel && catNames[tabKey]) catLabel.textContent = catNames[tabKey];
-      if (catDot) catDot.dataset.kind = tabKey;
-
-      document.querySelectorAll('#people-cat-menu .anim-dd-item').forEach((btn) => {
-        const on = btn.dataset.ptab === tabKey;
-        btn.classList.toggle('active', on);
-        btn.setAttribute('aria-selected', String(on));
-      });
-
-      const arc = ARCHIVE_MAP[arcId] || DYNASTY_ARCHIVES[0];
-      const dynLabel = document.getElementById('people-dyn-label');
-      if (dynLabel && arc) dynLabel.textContent = arc.name;
-
-      document.querySelectorAll('#people-dyn-menu .anim-dd-item').forEach((btn) => {
-        const on = btn.dataset.dynId === (arc && arc.id);
-        btn.classList.toggle('active', on);
-        btn.setAttribute('aria-selected', String(on));
-      });
-    }
-
-    function syncEventDropdownUI(catKey) {
-      const catNames = {
-        all: '全部事件',
-        '政治变革': '政治兴替',
-        '军事风云': '军事风云',
-        '文明盛世': '文明盛世',
-        '对外开拓': '对外开拓'
-      };
-      const labelEl = document.getElementById('event-cat-label');
-      const dotEl = document.getElementById('event-cat-dot');
-      if (labelEl) labelEl.textContent = catNames[catKey] || catKey;
-      if (dotEl) dotEl.dataset.cat = catKey;
-
-      document.querySelectorAll('#event-cat-menu .anim-dd-item').forEach((btn) => {
-        const on = btn.dataset.cat === catKey;
-        btn.classList.toggle('active', on);
-        btn.setAttribute('aria-selected', String(on));
-      });
-    }
-
-    function buildDynSelect() {
-      const sel = document.getElementById('dyn-select');
-      sel.innerHTML = DYNASTY_ARCHIVES.map((arc) =>
-        `<option value="${arc.id}">${arc.name}（${arc.range}）</option>`
-      ).join('');
-      sel.addEventListener('change', () => {
-        clearPeopleSearch();
-        renderArchive(sel.value);
-      });
-
-      // 构建动画朝代下拉菜单项
-      const dynMenu = document.getElementById('people-dyn-menu');
-      if (dynMenu) {
-        dynMenu.innerHTML = DYNASTY_ARCHIVES.map((arc) => `
-          <button class="anim-dd-item" data-dyn-id="${arc.id}" type="button" role="option">
-            <span class="dd-item-text"><b>${arc.name}</b><small>${arc.range}</small></span>
-            <span class="dd-check">✓</span>
-          </button>
-        `).join('');
-        dynMenu.querySelectorAll('.anim-dd-item').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const id = btn.dataset.dynId;
-            sel.value = id;
-            clearPeopleSearch();
-            renderArchive(id);
-            closeAllAnimDropdowns();
-          });
-        });
-      }
-
-      // 绑定三个动画下拉菜单触发器
-      const pCatDd = document.getElementById('people-cat-dd');
-      const pCatTrig = document.getElementById('people-cat-trigger');
-      if (pCatTrig && pCatDd) {
-        pCatTrig.addEventListener('click', () => toggleAnimDropdown(pCatDd));
-      }
-      document.querySelectorAll('#people-cat-menu .anim-dd-item').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          peopleTab = btn.dataset.ptab;
-          clearPeopleSearch();
-          renderArchive(archiveDynId || state.activeDynastyId || 'sanguo');
-          closeAllAnimDropdowns();
-        });
-      });
-
-      const pDynDd = document.getElementById('people-dyn-dd');
-      const pDynTrig = document.getElementById('people-dyn-trigger');
-      if (pDynTrig && pDynDd) {
-        pDynTrig.addEventListener('click', () => toggleAnimDropdown(pDynDd));
-      }
-
-      const eCatDd = document.getElementById('event-cat-dd');
-      const eCatTrig = document.getElementById('event-cat-trigger');
-      if (eCatTrig && eCatDd) {
-        eCatTrig.addEventListener('click', () => toggleAnimDropdown(eCatDd));
-      }
-      document.querySelectorAll('#event-cat-menu .anim-dd-item').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          eventFilter = btn.dataset.cat;
-          document.querySelectorAll('.fchip').forEach((b) => {
-            if (b.dataset.dynChip) return;
-            b.classList.toggle('active', b.dataset.cat === eventFilter);
-          });
-          syncEventDropdownUI(eventFilter);
-          renderEventList();
-          closeAllAnimDropdowns();
-        });
-      });
-    }
-
-    /* 清空人物页查找框（切朝代 / 切选项卡时） */
-    function clearPeopleSearch() {
-      const input = document.getElementById('people-search');
-      const box = document.getElementById('people-search-box');
-      if (!input) return;
-      if (peopleQuery || input.value) {
-        input.value = '';
-        peopleQuery = '';
-      }
-      if (box) box.classList.remove('has-value');
-    }
-
-    function renderArchive(id) {
-      const arc = ARCHIVE_MAP[id] || DYNASTY_ARCHIVES[0];
-      archiveDynId = arc.id;
-
-      const sel = document.getElementById('dyn-select');
-      if (sel.value !== arc.id) sel.value = arc.id;
-      document.querySelectorAll('#people-seg .seg-btn').forEach((b) => {
-        b.classList.toggle('active', b.dataset.ptab === peopleTab);
-      });
-      syncPeopleDropdownUI(arc.id, peopleTab);
-
-      const body = document.getElementById('people-body');
-
-      // 有查询词时整页切换为「全朝代检索结果」，每条可一键定位到长卷
-      if (peopleQuery.trim()) {
-        body.innerHTML = renderPeopleSearch(peopleQuery);
-        body.scrollTop = 0;
-        body.querySelectorAll('.pa-go').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const y = btn.dataset.year === '' ? null : Number(btn.dataset.year);
-            locateOnAxis(btn.dataset.kind, btn.dataset.id, y);
-          });
-        });
-        return;
-      }
-
-      const mac = MACRO_DYNASTIES.find((d) => d.id === arc.id);
-      const midYear = mac ? Math.round((mac.start + mac.end) / 2) : null;
-
-      const hero = `
-        <div class="arch-hero">
-          <div class="arch-hero-top">
-            <h2 class="arch-name">${arc.name}</h2>
-            <span class="arch-years">${arc.range}</span>
-          </div>
-          <div class="arch-meta">
-            <span>都城 <b>${arc.capital}</b></span>
-            <span>开国 <b>${arc.founder}</b></span>
-          </div>
-          <p class="arch-intro">${arc.intro}</p>
-          ${midYear !== null ? `<button class="ghost-btn" type="button" data-jump="${midYear}">在长卷中查看该朝 ›</button>` : ''}
-        </div>`;
-
-      let listHtml = '';
-      if (peopleTab === 'rulers') {
-        listHtml = arc.groups.map((g) => {
-          const rows = g.rulers.map((r) => `
-            <div class="emp-row">
-              <div class="emp-id">
-                <span class="emp-name">${r.n}</span>
-                <span class="emp-reign">${r.r}</span>
-              </div>
-              <p class="emp-deed">${r.d}</p>
-              <div class="emp-actions">
-                <a class="baike-link" href="${baikeUrl(stripParen(r.n))}" target="_blank" rel="noopener">百科生平 ›</a>
-                ${typeof r.y === 'number' ? `<button class="emp-jump" type="button" data-year="${r.y}">长卷定位</button>` : ''}
-              </div>
-            </div>`).join('');
-          return `${g.g ? `<div class="group-head">${g.g}</div>` : ''}${rows}`;
-        }).join('');
-      } else if (peopleTab === 'literati') {
-        // 文学大家：与卷轴「文学大家」图层同源，按朝代归集
-        const list = LITERATI.filter((l) => l.arc === arc.id);
-        if (!list.length) {
-          listHtml = `<div class="empty-tip">本朝暂无收录的文学大家，可在「长卷 › 文学大家」中浏览全部 ${LITERATI.length} 位。</div>`;
-        } else {
-          listHtml = `<div class="group-head">文学大家 · ${list.length} 位</div><div class="fig-grid">` + list.map((l) => `
-            <div class="fig-card lit-card">
-              <div class="lit-row">
-                <span class="fig-name">${l.n}</span>
-                <span class="lit-life">${l.life}</span>
-              </div>
-              <span class="fig-role">${l.role}</span>
-              <p class="fig-note">${l.d}</p>
-              <p class="fig-work">代表作：${l.work}</p>
-              <a class="baike-link fig-baike" href="${baikeUrl(stripParen(l.n))}" target="_blank" rel="noopener">百科生平 ›</a>
-            </div>`).join('') + `</div>`;
-        }
-      } else {
-        const figs = archiveFigures(arc);
-        listHtml = `<div class="group-head">重要人物 · ${figs.length} 位${(EXTRA_BY_ARC[arc.id] || []).length ? '（含《史记》专传人物）' : ''}</div>` +
-          `<div class="fig-grid">` + figs.map((f) => {
-          const p = PERSON_INDEX.get(stripParen(f.n));
-          const lore = (p && p.lore) || '';
-          return `
-          <div class="fig-card${lore ? ' has-lore' : ''}">
-            <div class="lit-row">
-              <span class="fig-name">${f.n}</span>
-              ${f.life ? `<span class="lit-life">${f.life}</span>` : ''}
-            </div>
-            <span class="fig-role">${f.r}</span>
-            ${f.s ? `<span class="fig-src">${f.s}</span>` : ''}
-            <p class="fig-note">${f.d}</p>
-            ${lore ? `<p class="fig-lore">${lore}</p><span class="fig-more">展开小传 ›</span>` : ''}
-            <a class="baike-link fig-baike" href="${baikeUrl(stripParen(f.n))}" target="_blank" rel="noopener">百科生平 ›</a>
-          </div>`;
-        }).join('') + `</div>`;
-      }
-
-      body.innerHTML = hero + listHtml;
-      body.scrollTop = 0;
-
-      body.querySelectorAll('.fig-card.has-lore').forEach((card) => {
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('a')) return;
-          const open = card.classList.toggle('open');
-          const hint = card.querySelector('.fig-more');
-          if (hint) hint.textContent = open ? '收起 ›' : '展开小传 ›';
-        });
-      });
-      body.querySelectorAll('.emp-jump').forEach((btn) => {
-        btn.addEventListener('click', () => jumpToYear(Number(btn.dataset.year)));
-      });
-      const jumpBtn = body.querySelector('[data-jump]');
-      if (jumpBtn) jumpBtn.addEventListener('click', () => jumpToYear(Number(jumpBtn.dataset.jump)));
-    }
-
-        /* ---------------- 事件页 ---------------- */
-    function syncDynChip() {
-      const chips = document.getElementById('event-chips');
-      const existing = chips.querySelector('[data-dyn-chip]');
-      if (!activeDynRange) {
-        if (existing) existing.remove();
-        return;
-      }
-      const label = `朝代：${activeDynRange.name} ×`;
-      if (existing) { existing.textContent = label; return; }
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'fchip active';
-      btn.dataset.dynChip = '1';
-      btn.textContent = label;
-      btn.addEventListener('click', () => {
-        activeDynRange = null;
-        syncDynChip();
-        renderEventList();
-      });
-      chips.insertBefore(btn, chips.firstChild);
-    }
-
-    function renderEventList() {
-      syncDynChip();
-      syncEventDropdownUI(eventFilter);
-      const list = document.getElementById('events-list');
-      const q = eventQuery.trim().toLowerCase();
-
-      const items = HISTORICAL_EVENTS.filter((ev) => {
-        if (eventFilter !== 'all' && ev.category !== eventFilter) return false;
-        if (activeDynRange && (ev.year < activeDynRange.start || ev.year > activeDynRange.end)) return false;
-        if (!q) return true;
-        const hay = `${ev.year} ${ev.shortTitle} ${ev.title} ${ev.period} ${ev.figure} ${ev.desc} ${ev.detail || ''}`.toLowerCase();
-        return hay.includes(q);
-      });
-
-      document.getElementById('events-count').textContent = `共 ${items.length} 条`;
-
-      if (!items.length) {
-        list.innerHTML = '<div class="empty-tip">没有匹配的历史事件，换个关键词试试</div>';
-        return;
-      }
-
-      let html = '';
-      let lastDynId = null;
-      items.forEach((ev) => {
-        const mac = dynastyForYear(ev.year);
-        if (mac && mac.id !== lastDynId) {
-          html += `<div class="ev-group">${mac.name.replace('(春秋战国)', '')}<span class="g-range">${mac.period}</span></div>`;
-          lastDynId = mac.id;
-        }
-        const y = ev.year < 0 ? `前${Math.abs(ev.year)}` : `${ev.year}`;
-        const wikiKey = ev.bk || ev.lemma || ev.title;
-        html += `
-          <div class="ev-row" data-year="${ev.year}" data-event="${ev.id}">
-            <span class="ev-year">${y}</span>
-            <div class="ev-main">
-              <div class="ev-title">${ev.title}</div>
-              <div class="ev-sub">${ev.period} · ${ev.figure}</div>
-              <p class="ev-desc">${ev.desc}</p>
-              ${ev.detail ? `<p class="ev-detail">${ev.detail}</p><button class="ev-more" type="button">展开详述 ›</button>` : ''}
-              <div class="ev-links">
-                <a class="baike-link" href="${baikeUrl(wikiKey)}" target="_blank" rel="noopener">百度百科 ›</a>
-                <span class="ev-cat" data-cat="${ev.category}">${ev.category}</span>
-              </div>
-            </div>
-          </div>`;
-      });
-
-      list.innerHTML = html;
-      list.scrollTop = 0;
-      list.querySelectorAll('.ev-row').forEach((row) => {
-        row.addEventListener('click', (e) => {
-          if (e.target.closest('a')) return;
-          const more = e.target.closest('.ev-more');
-          if (more) {
-            const open = row.classList.toggle('open');
-            more.textContent = open ? '收起详述 ›' : '展开详述 ›';
-            return;
-          }
-          jumpToYear(Number(row.dataset.year), row.dataset.event);
-        });
-      });
-    }
 
     /* ---------------- 跨页联动 ---------------- */
     function jumpToYear(year, eventId) {
@@ -11916,32 +11427,6 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     }
 
     function initViews() {
-      buildDynSelect();
-
-      document.querySelectorAll('#people-seg .seg-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          peopleTab = btn.dataset.ptab;
-          clearPeopleSearch();
-          renderArchive(archiveDynId || state.activeDynastyId || 'sanguo');
-        });
-      });
-
-      const pSearch = document.getElementById('people-search');
-      const pBox = document.getElementById('people-search-box');
-      const pClear = document.getElementById('people-search-clear');
-      if (pSearch) {
-        pSearch.addEventListener('input', () => {
-          peopleQuery = pSearch.value;
-          pBox.classList.toggle('has-value', !!pSearch.value);
-          renderArchive(archiveDynId || state.activeDynastyId || 'sanguo');
-        });
-        pClear.addEventListener('click', () => {
-          clearPeopleSearch();
-          renderArchive(archiveDynId || state.activeDynastyId || 'sanguo');
-          pSearch.focus();
-        });
-      }
-
       // 防误触优化：阻止在 Tab 栏上的触摸事件穿透到底层画卷，且仅在干净点按（移动距离 < 10px）时立即触发切换
       if (bottomTabsEl) {
         ['pointerdown', 'touchstart', 'mousedown'].forEach((evt) => {
@@ -11963,47 +11448,38 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         });
       });
 
-      document.getElementById('open-archive-btn').addEventListener('click', () => {
-        const arcId = openArchiveBtn.dataset.personArc;
-        const tab = openArchiveBtn.dataset.personTab;
-        if (arcId && ARCHIVE_MAP[arcId]) archiveDynId = arcId;
-        else if (ARCHIVE_MAP[state.activeDynastyId]) archiveDynId = state.activeDynastyId;
-        if (tab) peopleTab = tab;
-        switchView('archive');
-        renderArchive(archiveDynId);
-      });
-
-      const search = document.getElementById('event-search');
-      const box = document.getElementById('search-box');
-      const clearBtn = document.getElementById('search-clear');
-
-      search.addEventListener('input', () => {
-        eventQuery = search.value;
-        box.classList.toggle('has-value', !!search.value);
-        renderEventList();
-      });
-      clearBtn.addEventListener('click', () => {
-        search.value = '';
-        eventQuery = '';
-        box.classList.remove('has-value');
-        renderEventList();
-        search.focus();
-      });
-
-      document.querySelectorAll('.fchip').forEach((btn) => {
-        if (btn.dataset.dynChip) return;
-        btn.addEventListener('click', () => {
-          eventFilter = btn.dataset.cat;
-          document.querySelectorAll('.fchip').forEach((b) => {
-            if (b.dataset.dynChip) return;
-            b.classList.toggle('active', b.dataset.cat === eventFilter);
-          });
-          renderEventList();
+      // 顶部「长卷 / 史图」大胶囊切换按钮
+      document.querySelectorAll('.view-switch-capsule .vsc-item').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const target = btn.dataset.switchView;
+          if (!target) return;
+          if (currentView !== target) switchView(target);
+          syncViewSwitchCapsule(target);
         });
       });
 
-      // 预渲染，避免首次切换出现空白
-      renderArchive(archiveDynId || state.activeDynastyId || 'sanguo');
+      // 「关键人物 / 本朝盛世」入口：详情弹窗内点击，直接聚焦长卷时间轴对应图层
+      const arcBtn = document.getElementById('open-archive-btn');
+      if (arcBtn) {
+        arcBtn.addEventListener('click', () => {
+          const tab = arcBtn.dataset.personTab || 'figures';
+          const arcId = arcBtn.dataset.personArc || '';
+          const targetLayer = tab === 'eras' ? 'eras' : 'figures';
+          if (currentView !== 'scroll') switchView('scroll');
+          requestAnimationFrame(() => {
+            setAxisLayer(targetLayer, { force: true });
+            // 若为盛世，直接聚焦到该朝盛世节点；否则聚焦到当前选中人物
+            if (currentDetail && currentDetail.type === 'person' && currentDetail.data) {
+              const item = currentDetail.data;
+              const list = targetLayer === 'eras' ? ERA_AXIS : FIGURE_AXIS;
+              const hit = list.find((x) => x.id === item.id);
+              if (hit) setTimeout(() => selectPersonItem(hit, true), 90);
+            }
+          });
+        });
+      }
+
       document.body.dataset.view = 'scroll';
     }
 
@@ -12141,11 +11617,9 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       }
       if (name) {
         const inFig = (typeof FIGURE_AXIS !== 'undefined' && FIGURE_AXIS || []).some((x) => x.n === name);
-        const inLit = !inFig && (typeof LITERATI_AXIS !== 'undefined' && LITERATI_AXIS || []).some((x) => x.n === name);
-        if (inFig || inLit) {
-          const list = inFig ? FIGURE_AXIS : LITERATI_AXIS;
-          const item = list.find((x) => x.n === name);
-          locateOnAxis(inFig ? 'figures' : 'literati', item.id, Number.isFinite(y) ? y : undefined);
+        if (inFig) {
+          const item = FIGURE_AXIS.find((x) => x.n === name);
+          locateOnAxis('figures', item.id, Number.isFinite(y) ? y : undefined);
           return;
         }
       }

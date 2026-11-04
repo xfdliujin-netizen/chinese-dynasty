@@ -12189,19 +12189,7 @@
           e.stopPropagation();
           const willOpen = layersPopover.classList.contains('is-hidden');
           if (willOpen) {
-            if (window.innerWidth > 640) {
-              const btnRect = layersBtn.getBoundingClientRect();
-              const navRect = this._id('nav-bar').getBoundingClientRect();
-              const leftPx = Math.max(
-                12,
-                Math.min(window.innerWidth - 300, btnRect.left - navRect.left)
-              );
-              layersPopover.style.left = `${leftPx}px`;
-              layersPopover.style.right = 'auto';
-            } else {
-              layersPopover.style.left = '';
-              layersPopover.style.right = '';
-            }
+            // 图层按钮已移至右上角「复位视图/比例尺」处，弹窗采用 fixed 定位贴右上角，无需动态计算
             layersPopover.classList.remove('is-hidden');
             layersBtn.classList.add('is-active');
             layersBtn.setAttribute('aria-expanded', 'true');
