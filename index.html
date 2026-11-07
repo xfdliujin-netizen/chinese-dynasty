@@ -512,6 +512,8 @@
     }
 
     .event-node {
+      --card-direction: 1;
+      --card-origin: 50% 0%;
       position: absolute;
       transform: translateX(-50%);
       z-index: 35;
@@ -520,7 +522,8 @@
     }
     .event-stack { display: flex; flex-direction: column; align-items: center; }
 
-    /* 帝王（上排）：卡片倒挂于轴线上方，圆点贴轴 */
+    /* 帝王以底边为锚点向上展开；下排以顶边为锚点向下展开。 */
+    .event-node.emperor { --card-direction:-1; --card-origin:50% 100%; }
     .event-node.emperor .event-stack { flex-direction: column; }
     .event-node.emperor .slip-fold-wrapper { position:absolute; bottom:100%; flex-direction:column-reverse; transform-origin:bottom center; }
 
@@ -608,7 +611,7 @@
       background: linear-gradient(165deg, #C8382E 0%, #9E261E 100%);
       border-color: #7F1D1D;
       box-shadow: 0 4px 12px rgba(184, 51, 42, 0.4);
-      transform: translateY(2px) scale(1.04);
+      transform: translateY(calc(2px * var(--card-direction, 1))) scale(1.04);
     }
     .event-node.selected .axis-person-card .ap-name { color: #FFFFFF; }
     .event-node.selected .axis-person-card .ap-life { color: rgba(255, 255, 255, 0.84); }
@@ -762,7 +765,7 @@
     #timeline-canvas .pulse-circle { opacity: calc(1 - var(--fold, 0)); }
     #timeline-canvas .slip-fold-wrapper {
       opacity: calc(1 - var(--fold, 0));
-      transform: translateY(calc(var(--fold, 0) * 12px)) scale(calc(1 - var(--fold, 0) * 0.94));
+      transform: translateY(calc(var(--fold, 0) * -12px * var(--card-direction, 1))) scale(calc(1 - var(--fold, 0) * 0.94));
     }
     #timeline-canvas { will-change: transform; }
 
@@ -4210,7 +4213,7 @@
         0 2px 8px rgba(184, 51, 42, 0.45) !important;
     }
 
-    /* --- 3. 牌子放大严格以顶部中心（50% 0%）向下延展，绝不向上侵入轴线与圆点 --- */
+    /* --- 3. 上下排牌子各自朝远离轴线的方向放大 --- */
     .slip-fold-wrapper {
       position: relative;
       z-index: 1;
@@ -4221,12 +4224,12 @@
     }
     .vertical-bamboo-slip,
     .axis-person-card {
-      transform-origin: 50% 0% !important;
+      transform-origin: var(--card-origin, 50% 0%) !important;
     }
     .event-node.selected .vertical-bamboo-slip,
     .event-node.selected .axis-person-card {
-      transform-origin: 50% 0% !important;
-      transform: translate3d(0, 3px, 0) scale(1.06) !important;
+      transform-origin: var(--card-origin, 50% 0%) !important;
+      transform: translate3d(0, calc(3px * var(--card-direction, 1)), 0) scale(1.06) !important;
     }
 /* ================= 修复事件竹简与人物竖卡点击选中后白字泛白看不见的 Bug ================= */
 .event-node.selected .vertical-bamboo-slip,
@@ -10021,7 +10024,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       //    - 光标接近轴上圆点时，圆点与下方牌子同步产生放大动效；
       //    - 若光标接近到被密度抽样隐藏（.label-hidden）或被邻近牌子遮蔽的节点时，
       //      自动将该被遮蔽的牌子置顶显示（.cursor-unmask-node + 动态高 z-index），并同步施加圆点与牌子动效；
-      //    - 牌子以顶部中心（50% 0%）为原点向下放大（dropY >= 0），绝不向上侵入轴线与圆点！
+      //    - 帝王牌以底部中心向上放大，下排牌子以顶部中心向下放大。
       if (state.axisLayer) {
         const CIRCLE_SENSE_RADIUS = 76; // 以轴上圆点为基准的感应半径（px）
         // 先找出当前距离中央光标最近的主焦点圆点（用于精准唤醒被遮蔽的牌子）
@@ -10076,9 +10079,10 @@ body.map-interacting #layers-popover:not(.popup-focused) {
             // 按接近程度动态分配层级（36 ~ 85），确保越靠近光标的牌子越在最上层，绝不被旁边牌子遮挡
             item.el.style.zIndex = String(36 + Math.round(weight * 48) + (i === closestIdx ? 10 : 0));
 
-            // 牌子以顶部中心（50% 0%）为基准向下自然放大并微下垂（dropY >= 0），严禁向上侵入轴线与圆点
+            // 按上下排方向放大：帝王牌向上抬升，下排牌子向下展开。
             const cardScale = 1 + weight * 0.34;
-            const cardDropY = weight * 3.0;
+            const cardDirection = item.data && item.data.isEmperor ? -1 : 1;
+            const cardDropY = weight * 3.0 * cardDirection;
             card.style.transform = `translate3d(${pushX.toFixed(2)}px, ${cardDropY.toFixed(2)}px, 0) scale(${cardScale.toFixed(3)})`;
             card.classList.toggle('dock-focus', weight > 0.48);
 
