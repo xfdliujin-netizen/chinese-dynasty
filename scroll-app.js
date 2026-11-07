@@ -2976,7 +2976,7 @@
       GEOM.subTops = [0, 1, 2].map((i) => px(102 + i * 38));
       // Reserve the full upward animation envelope below all three dynasty tracks.
       const dynastyBottom = GEOM.subTops[2] + GEOM.subH;
-      const emperorFocusHeight = px(64) * (1 + PERSON_CARD_FOCUS_GROWTH);
+      const emperorFocusHeight = px(CARD_H) * (1 + PERSON_CARD_FOCUS_GROWTH);
       GEOM.axisY = state.axisLayer === 'figures'
         ? Math.ceil(dynastyBottom + emperorFocusHeight + px(12) + px(7) + 3 + 24)
         : px(244);
@@ -3233,8 +3233,8 @@
     /********************************************************************
      * 8.1 时间轴图层数据
      *     events   → HISTORICAL_EVENTS（竖排竹简）
-     *     figures  → 各朝代档案「重要人物」+ FIGURE_LIFE 生卒年（横卡）
-     *     literati → LITERATI 文学大家（横卡）
+     *     figures  → 人物节点与明确列举的在位皇帝
+     *     文学人物已归入关键人物
      ********************************************************************/
     const stripId = (s) => String(s || '').replace(/[（）()·\s]/g, '');
 
@@ -3812,11 +3812,9 @@
         let lastX = -Infinity;
         const isCard = !!CARD_LAYERS[state.axisLayer];
         const stemRows = [Math.round(12 * v), Math.round(12 * v)];
-        const cardH = CARD_H * v;
         items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
           const forced = item.el.classList.contains('selected');
-          const isEmp = isCard && item.el.classList.contains('emperor');
           const stemH = isCard ? stemRows[idx % 2] : GEOM.stems[idx % GEOM.stems.length];
           item.defaultStemH = stemH;
           if (x - lastX < gap && !forced) {
@@ -3824,7 +3822,7 @@
             item.x = x;
             item.row = -1;
             item.el.style.left = `${x}px`;
-            item.el.style.top = `${isEmp ? (nodeTop) : nodeTop}px`;
+            item.el.style.top = `${nodeTop}px`;
             item.stemEl.style.height = `${stemH}px`;
             item.el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
             return;
@@ -3848,7 +3846,6 @@
         });
       } else {
         const cardW = CARD_W * v;
-        const cardH = CARD_H * v;
         const stemRows = [Math.round(12 * v), Math.round(12 * v)];
         // 帝王上排：卡片整体倒挂于轴线上方；关键人物下排：卡片垂于轴线下方
         placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
@@ -3858,11 +3855,7 @@
           item.x = x;
           item.row = isEmp ? 1 : 0;
           el.style.left = `${x}px`;
-          if (isEmp) {
-            el.style.top = `${nodeTop}px`;
-          } else {
-            el.style.top = `${nodeTop}px`;
-          }
+          el.style.top = `${nodeTop}px`;
           stemEl.style.height = `${stemH}px`;
           el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
         });
@@ -5801,11 +5794,11 @@
 
 
       /********************************************************************
-     * 16. 多页面视图：长卷 / 帝王档案 / 事件年表
+     * 16. 长卷与内嵌地图联动
      ********************************************************************/
     /* ==================================================================
        疆域图谱（Demo A）：把长卷的事件 / 人物映射为「山河时序」深链
-       纯外链跳转，不内嵌地图、不增加本地体积
+       通过同目录 iframe 与 postMessage 复用常驻地图
        ================================================================== */
     const MAP_MIN_YEAR = -403;   // 地图数据下限（周威烈王）
     const MAP_MAX_YEAR = 1949;   // 上限（1949年）
