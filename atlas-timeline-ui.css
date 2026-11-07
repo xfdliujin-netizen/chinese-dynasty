@@ -1,17 +1,4 @@
-body.atlas-embed #scrubber-dock {
- display:grid !important; grid-template-columns:auto minmax(0,1fr) auto; grid-template-areas:'play title year' 'rail rail rail'; gap:8px 14px; width:calc(100vw - 24px) !important; max-width:none !important; padding:12px 18px 10px !important; box-sizing:border-box; border-radius:20px; background:#fcf9f2 !important; bottom:calc(env(safe-area-inset-bottom,0px) + 8px) !important;
-}
-body.atlas-embed .playback-controls-group { grid-area:play; margin:0; }
-body.atlas-embed .year-stepper { grid-area:year; margin:0; }
-body.atlas-embed #scrubber-Bubble { grid-area:title; position:static !important; transform:none !important; align-self:center; justify-self:center; max-width:100%; overflow:hidden; text-overflow:ellipsis; color:#6b4938; background:transparent; padding:0 8px; box-shadow:none; font-size:14px; }
-body.atlas-embed #scrubber-Bubble::after { display:none; }
-body.atlas-embed #scrubber-rail-wrap { grid-area:rail; width:100%; padding:0 !important; }
-body.atlas-embed #scrubber-track { height:52px !important; border-radius:12px; }
-body.atlas-embed #dynasty-bands { border-radius:12px; }
-body.atlas-embed .band-cell { font-size:14px; border-right:1px solid #ffffff40; }
-body.atlas-embed .band-phase-tick { display:none; }
-body.atlas-embed #scrubber-handle { top:0; bottom:0; width:3px; margin-left:-1.5px; background:#fff7e8; box-shadow:0 0 0 1px #7e342b; }
-body.atlas-embed #scrubber-ticks { height:18px; margin-top:4px; }
+.band-phase-tick { display:none; }
 body.atlas-embed #map-key { position:fixed !important; left:12px; bottom:calc(var(--dock-clearance,150px) + 4px) !important; max-height:min(45vh,380px) !important; max-width:min(320px,calc(100vw - 24px)); transform:none !important; overflow-y:auto; z-index:67; }
 body.atlas-embed #map-key::after { display:none !important; }
 .legend-drag-handle { display:block; position:sticky; top:0; z-index:2; width:100%; margin:0 0 6px; padding:5px 8px; text-align:left; font:600 12px inherit; letter-spacing:.1em; color:#78644e; background:#f7f1e5; border:0; border-radius:7px; cursor:grab; touch-action:none; }
@@ -19,16 +6,8 @@ body.atlas-embed #map-key::after { display:none !important; }
 #scrubber-loupe { width:min(360px,calc(100vw - 24px)) !important; height:132px !important; transform:none !important; border-radius:16px; background:#fcf9f2; box-shadow:0 12px 36px #30251b35; }
 #scrubber-loupe .loupe-pin { display:none; }
 #scrubber-loupe .loupe-year { bottom:7px; font-size:13px; }
-@media(max-width:600px) {
- body.atlas-embed #scrubber-dock { width:calc(100vw - 12px) !important; padding:10px 10px 8px !important; gap:8px; border-radius:16px; }
- body.atlas-embed #scrubber-Bubble { font-size:11px; padding:0; white-space:normal; text-align:center; line-height:1.4; }
- body.atlas-embed #scrubber-track { height:56px !important; }
- body.atlas-embed .year-stepper { gap:0; }
- body.atlas-embed #inp-year { width:46px; }
- body.atlas-embed .unit-label { display:none; }
- body.atlas-embed #map-key { left:8px; max-width:250px; }
-}
+@media(max-width:600px) { body.atlas-embed #map-key { left:8px; max-width:250px; } }
 
-body.atlas-embed .year-stepper input { display:inline-block !important; }
+
 
 @media(max-width:767px) { body.atlas-embed #map-key { bottom:var(--phone-pane-clearance,calc(var(--dock-clearance,150px) + 74px)) !important; } }
