@@ -5810,9 +5810,22 @@ body.atlas-embed #atlas-svg text[filter] {
 </style>
   <link rel="preload" href="atlas-app.js" as="script" />
   <link rel="preload" href="atlas-dynasty.js" as="script" />
-</head>
+<style id="archive-ui-refinement">
+@media(min-width:768px) {
+body.atlas-embed .archive-folder-tabs { height:40px; align-items:center; padding:4px; gap:2px; background:rgba(252,249,242,.94); border:1px solid #d8cbb6; border-radius:16px; box-shadow:0 4px 16px #30251b12; box-sizing:border-box; }
+body.atlas-embed .archive-folder-tab { height:32px; min-width:54px; padding:0 10px; border:0; border-radius:12px; background:transparent; box-shadow:none; color:#6d5d47; }
+body.atlas-embed .archive-folder-tab.is-active { height:32px; background:#a9362b; color:#fff8f0; }
+body.atlas-embed .archive-folder-tab small { display:none; }
+body.atlas-embed #chronicle-pane,body.atlas-embed #milestone-balloon,body.atlas-embed #genealogy-card,body.atlas-embed #journey-card { top:calc(env(safe-area-inset-top,0px) + 166px) !important; border:1px solid #d8cbb6 !important; border-radius:18px; background:rgba(252,249,242,.96); background-image:none; box-shadow:0 8px 28px #30251b18; }
+body.atlas-embed #chronicle-pane::after,body.atlas-embed #milestone-balloon::after,body.atlas-embed #genealogy-card::after,body.atlas-embed #journey-card::after { display:none; }
+}
+.atlas-view-switch { position:fixed; z-index:80; top:calc(env(safe-area-inset-top,0px) + 8px); left:50%; transform:translateX(-50%); display:flex; gap:3px; height:44px; padding:4px; box-sizing:content-box; border-radius:999px; background:rgba(252,249,242,.72); backdrop-filter:blur(18px) saturate(1.5); border:1px solid rgba(184,51,42,.24); box-shadow:0 6px 22px #1e18101f,inset 0 1px 0 #ffffffcc; align-items:center; }
+.atlas-view-switch button { height:36px; padding:0 20px; border:0; border-radius:999px; background:transparent; color:#6d5d47; font:700 15.5px 'Noto Serif SC','Songti SC',serif; letter-spacing:.06em; cursor:pointer; }
+.atlas-view-switch .active { background:linear-gradient(145deg,#C8382E,#9A241B); color:#fff8f0; box-shadow:0 3px 10px #b8332a57; }
+body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
+</style></head>
 <body class="atlas-embed">
-  <div id="atlas-shell">
+  <nav class="atlas-view-switch" aria-label="长卷与史图切换"><button type="button" onclick="document.getElementById('act-home').click()">长卷</button><button type="button" class="active" aria-current="page">史图</button></nav><div id="atlas-shell">
     <header id="nav-bar">
       <div class="brand-group">
         <h1 id="site-heading">
@@ -6242,7 +6255,8 @@ body.atlas-embed #atlas-svg text[filter] {
     try {
       if (a.stopAutoplay) a.stopAutoplay();
       if (d.person) {
-        a.openPersonChronicle(d.person, -1);
+        if (!a.openPersonChronicle(d.person, -1)) return false;
+        document.body.setAttribute('data-archive-tab', 'genealogy');
       } else {
         if (a.activePerson && a.closeGenealogyCard) a.closeGenealogyCard();
         if (typeof d.year === 'number' && isFinite(d.year) && a.jumpToYear) a.jumpToYear(d.year);
@@ -6420,7 +6434,7 @@ body.atlas-embed #atlas-svg text[filter] {
       tabs.innerHTML =
         '<button type="button" class="archive-folder-tab is-active" data-tab="chronicle" role="tab" aria-selected="true">史志<small>CHRONICLE</small></button>' +
         '<button type="button" class="archive-folder-tab" data-tab="event" role="tab" aria-selected="false">事件<small>EVENT</small></button>' +
-        '<button type="button" class="archive-folder-tab" data-tab="genealogy" role="tab" aria-selected="false">沿革<small>PLACE</small></button>' +
+        '<button type="button" class="archive-folder-tab" data-tab="genealogy" role="tab" aria-selected="false">沿革 / 人物<small>PLACE</small></button>' +
         '<button type="button" class="archive-folder-tab" data-tab="journey" role="tab" aria-selected="false">路线<small>ROUTE</small></button>';
       body.appendChild(tabs);
       body.setAttribute('data-archive-tab', 'chronicle');
@@ -6455,7 +6469,8 @@ body.atlas-embed #atlas-svg text[filter] {
           // 切到「沿革」签：若当前没有激活的地名沿革，显示引导占位
           var genCard = document.getElementById('genealogy-card');
           if (genCard && genCard.classList.contains('is-hidden')) {
-            genCard.innerHTML = '<div class="genealogy-header"><div class="genealogy-heading-group"><div class="genealogy-tag">点地溯源 · 古今政区沿革</div><div class="genealogy-title">沿革档案</div></div></div><div class="genealogy-sub">点击地图上的城名或双击任意处，即可查看该地古今政区沿革。</div><div class="genealogy-body"><div class="archive-empty">尚未选择地点，点击地图上的地名即可查看沿革。</div></div>';
+            var hint = genCard.querySelector('.genealogy-body');
+            if (hint) hint.textContent = '点击地图城名或双击任意位置，查看该地历代政区沿革。';
             genCard.classList.remove('is-hidden');
           }
         } else if (name === 'journey') {
@@ -6482,6 +6497,14 @@ body.atlas-embed #atlas-svg text[filter] {
         });
       });
 
+      var gen = document.getElementById('genealogy-card');
+      if (gen) new MutationObserver(function () {
+        if (!gen.classList.contains('is-hidden')) {
+          body.setAttribute('data-archive-tab', 'genealogy');
+          paintTabs('genealogy');
+          scheduleLayout();
+        }
+      }).observe(gen, {childList:true, subtree:true, attributes:true, attributeFilter:['class']});
       /* 点击地图事件后自动翻到「事件」签；关闭事件后回到「史志」签 */
       var balloonObserver = new MutationObserver(function () {
         if (!archiveMode()) return;
