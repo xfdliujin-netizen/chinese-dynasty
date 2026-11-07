@@ -4378,6 +4378,8 @@ body.map-interacting #layers-popover:not(.popup-focused) {
   </style>
 
 <style id="scroll-ui-refinement">
+/* Keep fixed navigation anchored to the viewport throughout view changes. */
+.view.active { animation:none !important; }
 #unified-console { bottom: calc(18px + env(safe-area-inset-bottom,0px)); left: 18px; padding:0; }
 #unified-console .zen-dock-card { border-radius:18px; padding:10px; gap:8px; box-shadow:0 6px 24px #30251b12; }
 #unified-console .zen-dock-row { gap:8px; }
@@ -8700,7 +8702,6 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         const isCard = !!CARD_LAYERS[state.axisLayer];
         const stemRows = [Math.round(8 * v), Math.round(32 * v)];
         const cardH = CARD_H * v;
-        const pulseH = Math.round(14 * v);
         items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
           const forced = item.el.classList.contains('selected');
@@ -8738,7 +8739,6 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         const cardW = CARD_W * v;
         const cardH = CARD_H * v;
         const stemRows = [Math.round(10 * v), Math.round(34 * v)];
-        const pulseH = Math.round(14 * v);
         // 帝王上排：卡片整体倒挂于轴线上方；关键人物下排：卡片垂于轴线下方
         placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
           const { el, stemEl } = item;
