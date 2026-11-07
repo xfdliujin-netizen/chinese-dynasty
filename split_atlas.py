@@ -57,7 +57,7 @@ def is_full_source(path):
         return False
     text = read(path)
     return ('data:image/webp;base64,' in text and
-            all(marker in text for marker in MARKERS.values()))
+            all(MARKERS[key] in text for key in ('lore', 'dynasty', 'snapshots')))
 
 
 def main():
@@ -74,13 +74,16 @@ def main():
     else:
         raise SystemExit('请先运行 python _probe/build_atlas.py 生成完整地图文件')
 
-    spans = {k: locate(src, m) for k, m in MARKERS.items()}
+    spans = {k: locate(src, m) for k, m in MARKERS.items() if m in src}
 
     # ---------- 1. 抽出各段脚本 ----------
     bodies = {k: src[v[1]:v[2]] for k, v in spans.items()}
     write(os.path.join(ROOT, 'atlas-dynasty.js'), bodies['dynasty'].strip() + '\n')
     write(os.path.join(ROOT, 'atlas-lore.js'), bodies['lore'].strip() + '\n')
-    write(os.path.join(ROOT, 'atlas-app.js'), bodies['controller'].strip() + '\n')
+    if 'controller' in bodies:
+        write(os.path.join(ROOT, 'atlas-app.js'), bodies['controller'].strip() + '\n')
+    elif not os.path.isfile(os.path.join(ROOT, 'atlas-app.js')):
+        raise SystemExit('缺少共享控制器 atlas-app.js')
     write(os.path.join(ROOT, 'js', 'atlas_snapshots.js'), bodies['snapshots'].strip() + '\n')
 
     # ---------- 2. 地形图：base64 → webp ----------
@@ -94,12 +97,13 @@ def main():
 
     # ---------- 3. 组装新 HTML ----------
     subs = [
-        (spans['controller'][0], spans['controller'][3],
-         '<script id="atlas-app-script" src="atlas-app.js" defer data-v-snapshots="20261031"></script>'),
         (spans['snapshots'][0], spans['snapshots'][3], ''),          # 交给控制器异步加载
         (spans['lore'][0], spans['lore'][3], '<script src="atlas-lore.js" defer></script>'),
         (spans['dynasty'][0], spans['dynasty'][3], '<script src="atlas-dynasty.js" defer></script>'),
     ]
+    if 'controller' in spans:
+        subs.append((spans['controller'][0], spans['controller'][3],
+                     '<script id="atlas-app-script" src="atlas-app.js" defer data-v-snapshots="20261031"></script>'))
     for a, b, rep in sorted(subs, key=lambda x: -x[0]):
         src = src[:a] + rep + src[b:]
 
