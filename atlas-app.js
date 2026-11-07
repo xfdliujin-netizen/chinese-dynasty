@@ -15044,11 +15044,14 @@
   const box=document.createElement('div');box.id='scrubber-loupe';
   box.innerHTML='<canvas></canvas><div class="loupe-year"></div>';document.body.appendChild(box);
   const canvas=box.querySelector('canvas'),ctx=canvas.getContext('2d'),label=box.querySelector('.loupe-year');
-  let timer=0,down=null,active=false;
+  let timer=0,drawFrame=0,down=null,active=false;
+  function requestDraw(){if(drawFrame)return;drawFrame=requestAnimationFrame(()=>{drawFrame=0;if(active)draw();});}
   const yearLabel=y=>y<0?'前'+Math.abs(y):String(y);
   function draw(){
    const w=Math.min(360,window.innerWidth-24),h=132,dpr=window.devicePixelRatio||1,c=app.year,span=18;
-   canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+   const pixelW=Math.round(w*dpr),pixelH=Math.round(h*dpr);
+   if(canvas.width!==pixelW || canvas.height!==pixelH){canvas.width=pixelW;canvas.height=pixelH;}
+   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalAlpha=1;
    ctx.fillStyle='#fcf9f2';ctx.fillRect(0,0,w,h);
    const px=y=>(y-c+span)/(span*2)*w;
    app.dynasties.forEach(d=>{let a=Math.max(c-span,d.fromYear),b=Math.min(c+span,d.toYear);if(b<=a)return;ctx.fillStyle=d.tint||'#aa7954';ctx.globalAlpha=.22;ctx.fillRect(px(a),0,px(b)-px(a),30);ctx.globalAlpha=1;if(px(b)-px(a)>42){ctx.fillStyle='#604b38';ctx.font='600 12px sans-serif';ctx.textAlign='center';ctx.fillText(app.dynastyBadge(d),(px(a)+px(b))/2,20);}});
@@ -15057,9 +15060,9 @@
    label.textContent=app.formatYear(c)+' · 左右移动逐年微调';
    const r=track.getBoundingClientRect();box.style.left=Math.max(12,Math.min(window.innerWidth-w-12,(down?down.x:r.x+r.width/2)-w/2))+'px';box.style.top=Math.max(64,r.top-h-16)+'px';
   }
-  function end(){clearTimeout(timer);down=null;active=false;app._fineScrub=null;app._drawScrubberLoupe=null;box.classList.remove('on');}
-  track.addEventListener('pointerdown',e=>{if(e.button||app.challenge)return;down={x:e.clientX,y:e.clientY,id:e.pointerId};timer=setTimeout(()=>{if(!down)return;active=true;app._fineScrub={x:down.x,year:app.year,pixelsPerYear:8};app._drawScrubberLoupe=draw;draw();box.classList.add('on');},360);});
-  track.addEventListener('pointermove',e=>{if(!down)return;if(!active&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>12)clearTimeout(timer);if(active)requestAnimationFrame(draw);});
+  function end(){clearTimeout(timer);if(drawFrame){cancelAnimationFrame(drawFrame);drawFrame=0;}down=null;active=false;app._fineScrub=null;app._drawScrubberLoupe=null;box.classList.remove('on');}
+  track.addEventListener('pointerdown',e=>{if(e.button||app.challenge)return;down={x:e.clientX,y:e.clientY,id:e.pointerId};timer=setTimeout(()=>{if(!down)return;active=true;app._fineScrub={x:down.x,year:app.year,pixelsPerYear:8};app._drawScrubberLoupe=requestDraw;draw();box.classList.add('on');},360);});
+  track.addEventListener('pointermove',e=>{if(!down)return;if(!active&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>12)clearTimeout(timer);if(active)requestDraw();});
   track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);track.addEventListener('lostpointercapture',end);window.addEventListener('blur',end);
  }
  if(document.readyState==='complete')boot();else window.addEventListener('load',boot);
