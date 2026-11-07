@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""把 5MB 单文件地图拆成「骨架 + 外链数据 + 外链控制器 + 独立地形图」。
+"""从打包源重建「骨架 + 外链数据 + 共享控制器 + 独立地形图」。
    幂等：每次都从 jiangshan-atlas.src.html（首次自动备份）重新生成。
    产物：
      jiangshan-atlas.html   骨架（CSS + DOM + seed + 桥接）
@@ -124,8 +124,10 @@ def main():
     total = html_kb + sum(os.path.getsize(os.path.join(ROOT, p)) for p in
                           ['atlas-dynasty.js', 'atlas-lore.js', 'atlas-app.js',
                            'js/atlas_snapshots.js', 'atlas-terrain.webp']) / 1024
-    print('\n骨架 %.0f KB（原 4890 KB），首屏关键脚本约 %.0f KB，总量 %.0f KB'
-          % (html_kb, html_kb + 247 + 584, total))
+    core_kb = html_kb + sum(os.path.getsize(os.path.join(ROOT, p)) for p in
+                            ['atlas-dynasty.js', 'atlas-lore.js', 'atlas-app.js']) / 1024
+    print('\n骨架 %.0f KB，HTML 与核心脚本约 %.0f KB，地图资源合计 %.0f KB'
+          % (html_kb, core_kb, total))
 
 
 if __name__ == '__main__':
