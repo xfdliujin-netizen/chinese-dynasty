@@ -5812,6 +5812,12 @@ body.atlas-embed #atlas-svg text[filter] {
   <link rel="preload" href="atlas-dynasty.js" as="script" />
 <style id="archive-ui-refinement">
 @media(min-width:768px) {
+body.atlas-embed #act-toggle-pane { display:none !important; }
+body.atlas-embed.archive-collapsed #chronicle-pane,body.atlas-embed.archive-collapsed #milestone-balloon,body.atlas-embed.archive-collapsed #genealogy-card,body.atlas-embed.archive-collapsed #journey-card { display:none !important; }
+.archive-collapse { border:0; border-left:1px solid #d8cbb6; background:transparent; color:#776752; font:inherit; font-size:12px; padding:6px 10px; cursor:pointer; }
+}
+
+@media(min-width:768px) {
 body.atlas-embed .archive-folder-tabs { height:40px; align-items:center; padding:4px; gap:2px; background:rgba(252,249,242,.94); border:1px solid #d8cbb6; border-radius:16px; box-shadow:0 4px 16px #30251b12; box-sizing:border-box; }
 body.atlas-embed .archive-folder-tab { height:32px; min-width:54px; padding:0 10px; border:0; border-radius:12px; background:transparent; box-shadow:none; color:#6d5d47; }
 body.atlas-embed .archive-folder-tab.is-active { height:32px; background:#a9362b; color:#fff8f0; }
@@ -6446,6 +6452,23 @@ body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
         '<button type="button" class="archive-folder-tab" data-tab="event" role="tab" aria-selected="false">事件<small>EVENT</small></button>' +
         '<button type="button" class="archive-folder-tab" data-tab="genealogy" role="tab" aria-selected="false">沿革 / 人物<small>PLACE</small></button>' +
         '<button type="button" class="archive-folder-tab" data-tab="journey" role="tab" aria-selected="false">路线<small>ROUTE</small></button>';
+      var collapseButton = document.createElement('button');
+      collapseButton.type = 'button';
+      collapseButton.className = 'archive-collapse';
+      collapseButton.textContent = '收起';
+      collapseButton.setAttribute('aria-expanded', 'true');
+      function expandArchive() {
+        body.classList.remove('archive-collapsed');
+        collapseButton.textContent = '收起';
+        collapseButton.setAttribute('aria-expanded', 'true');
+      }
+      collapseButton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var collapsed = body.classList.toggle('archive-collapsed');
+        collapseButton.textContent = collapsed ? '展开' : '收起';
+        collapseButton.setAttribute('aria-expanded', String(!collapsed));
+      });
+      tabs.appendChild(collapseButton);
       body.appendChild(tabs);
       body.setAttribute('data-archive-tab', 'chronicle');
 
@@ -6463,6 +6486,7 @@ body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
       }
       function selectArchive(name) {
         if (!archiveMode()) return;
+        expandArchive();
         if (name === 'chronicle') {
           var workspace = document.getElementById('workspace-body');
           if (workspace && workspace.classList.contains('is-pane-collapsed')) {
@@ -6510,6 +6534,7 @@ body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
       var gen = document.getElementById('genealogy-card');
       if (gen) new MutationObserver(function () {
         if (!gen.classList.contains('is-hidden')) {
+          expandArchive();
           body.setAttribute('data-archive-tab', 'genealogy');
           paintTabs('genealogy');
           scheduleLayout();
