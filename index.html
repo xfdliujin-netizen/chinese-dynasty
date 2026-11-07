@@ -4672,6 +4672,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
 
 
+  <script src="emperor-data.js"></script>
   <script>
     /********************************************************************
      * 1. 顶层大朝代数据 (全部16个核心历史时期，附带 20% 极小缩放下的简称 shortName)
@@ -7109,6 +7110,25 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
     // 档案索引：id -> 档案
     DYNASTY_ARCHIVES.push({"id":"roc","name":"民国时期","range":"1912—1949年","capital":"南京 / 北京 / 重庆","founder":"孙中山","desc":"1912年帝制终结、共和肇始。此后经历北洋时期、北伐战争、抗日战争和解放战争，长卷以1949年中华人民共和国成立为终点。","rulers":[],"figures":[{"n":"孙中山","r":"孙文 · 字逸仙 · 近代民主革命先行者","d":"孙文 · 字逸仙 · 近代民主革命先行者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"},{"n":"蒋介石","r":"蒋中正 · 北伐与抗战统帅","d":"蒋中正 · 北伐与抗战统帅。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"},{"n":"毛泽东","r":"字润之 · 中华人民共和国主要缔造者","d":"字润之 · 中华人民共和国主要缔造者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"},{"n":"邓小平","r":"改革开放总设计师","d":"改革开放总设计师。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"}]});
+    const EMPEROR_RECORDS = window.EMPEROR_CATALOG.emperors;
+    const rulerYearLabel = y => y < 0 ? '前'+Math.abs(y) : String(y);
+    const rulerReignLabel = e => e.reigns.map(([a,b]) => rulerYearLabel(a)+'—'+rulerYearLabel(b)).join('、');
+    const ORIGINAL_RULERS = DYNASTY_ARCHIVES.flatMap(a => (a.groups||[]).flatMap(g => g.rulers||[]));
+    function emperorDescription(e) {
+      const old = ORIGINAL_RULERS.find(r => r.n.includes(e.personalName) || r.n === e.n);
+      return (old ? old.d+' ' : '') + '本名'+e.personalName+'，'+e.dyn+'在位皇帝。在位：'+rulerReignLabel(e)+'年。';
+    }
+    // Use the same explicit succession records in archive data and timeline cards.
+    DYNASTY_ARCHIVES.forEach(a => {
+      const emperors = EMPEROR_RECORDS.filter(e => e.arcId===a.id);
+      if (!emperors.length) return;
+      const groups = new Map();
+      emperors.forEach(e => {
+        if (!groups.has(e.dyn)) groups.set(e.dyn, {g:e.dyn,rulers:[]});
+        groups.get(e.dyn).rulers.push({n:e.n+' '+e.personalName,r:rulerReignLabel(e),y:e.from,d:emperorDescription(e)});
+      });
+      a.groups=Array.from(groups.values()); a.rulerLabel='在位皇帝';
+    });
     const ARCHIVE_MAP = {};
     DYNASTY_ARCHIVES.forEach((a) => { ARCHIVE_MAP[a.id] = a; });
 
@@ -8268,20 +8288,24 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     FIGURE_AXIS.push(...[{"id":"at-sunzhongshan","kind":"figure","n":"孙中山","year":1912,"life":"1866—1925","role":"孙文 · 字逸仙 · 近代民主革命先行者","d":"孙文 · 字逸仙 · 近代民主革命先行者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"},{"id":"at-jiangjieshi","kind":"figure","n":"蒋介石","year":1926,"life":"1887—1975","role":"蒋中正 · 北伐与抗战统帅","d":"蒋中正 · 北伐与抗战统帅。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"},{"id":"at-maozedong","kind":"figure","n":"毛泽东","year":1935,"life":"1893—1976","role":"字润之 · 中华人民共和国主要缔造者","d":"字润之 · 中华人民共和国主要缔造者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"},{"id":"at-dengxiaoping","kind":"figure","n":"邓小平","year":1948,"life":"1904—1997","role":"改革开放总设计师","d":"改革开放总设计师。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"}]);
     FIGURE_AXIS.sort((a, b) => a.year - b.year);
 
-    /* 帝王（上排）识别：以地图 PERSON_PROFILES 的称号（role/courtesyZh）为准，
-       匹配「帝 / 皇 / 祖 / 宗 / 汗 / 天王 / 霸王 / 后主」等君主称号，排除封王功臣 */
-    const EMPEROR_KEYS = new Set([
-      'at-qinshihuang', 'at-liubang', 'at-chensheng', 'at-xiangyu',
-      'at-hanwendi', 'at-hanwudi', 'at-wangmang', 'at-liuxiu',
-      'at-caocao', 'at-liubei', 'at-simayi', 'at-sunquan',
-      'at-fujian', 'at-liuyu', 'at-xiaowendi', 'at-yangjian',
-      'at-yangguang', 'at-lishimin', 'at-wuzetian', 'at-tangxuanzong',
-      'at-anlushan', 'at-huangchao', 'at-licunxu', 'at-chairong',
-      'at-zhaokuangyin', 'at-liyu_nt', 'at-genghiskhan', 'at-kublaikhan',
-      'at-zhuyuanzhang', 'at-zhudi', 'at-nurhaci', 'at-huangtaiji',
-      'at-lizicheng', 'at-kangxi', 'at-yongzheng', 'at-qianlong', 'at-hongxiuquan'
-    ]);
-    FIGURE_AXIS.forEach((f) => { f.isEmperor = EMPEROR_KEYS.has(f.id); });
+    // The emperor row is accession-based and uses an explicit catalog, never title matching.
+    const matchedFigures = new Set();
+    const emperorItems = EMPEROR_RECORDS.map((e, index) => {
+      const old = FIGURE_AXIS.find(f => f.n===e.n || f.n===e.personalName);
+      if (old) matchedFigures.add(old.id);
+      const reign = rulerReignLabel(e);
+      return { id:old ? old.id : 'emperor-'+index, kind:'figure', n:e.n,
+        personalName:e.personalName, mapName:old ? old.n : e.personalName,
+        year:e.from, life:reign, cardLife:e.reigns.length>1 ? rulerYearLabel(e.from)+' · 复位' : reign,
+        reigns:e.reigns, role:e.dyn+'皇帝', d:emperorDescription(e), dyn:e.dyn,
+        arcId:e.arcId, isEmperor:true, bk:e.personalName,
+        src:'历代帝王年表；明清宫廷世系（即位年口径）' };
+    });
+    const ordinaryFigures = FIGURE_AXIS.filter(f => !matchedFigures.has(f.id));
+    ordinaryFigures.forEach(f => { f.isEmperor=false; });
+    FIGURE_AXIS.splice(0,FIGURE_AXIS.length,...ordinaryFigures,...emperorItems);
+    FIGURE_AXIS.sort((a,b) => a.year-b.year || Number(b.isEmperor)-Number(a.isEmperor));
+    const EMPEROR_KEYS = new Set(emperorItems.map(e => e.id));
 
     const LITERATI_AXIS = LITERATI.map((l) => ({
       id: `lt-${l.id}`, kind: 'literati', n: l.n, year: l.y, life: l.life,
@@ -8330,6 +8354,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 
       domCache.events = items.map((item) => {
         const node = document.createElement('div');
+        if (isPerson && item.isEmperor) node.title = item.n+' '+item.personalName+' · 在位 '+item.life+'年';
         const isSelected = isPerson ? state.selectedPersonId === item.id : state.selectedEventId === item.id;
         node.className = 'event-node' + (isSelected ? ' selected' : '');
 
@@ -8345,7 +8370,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
                 <div class="stem-line" style="background-color:${LAYER_META[state.axisLayer].color};"></div>
                 <div class="axis-person-card">
                   <span class="ap-name">${nameShort(item.n)}</span>
-                  <span class="ap-life">${lifeVertical(item.life)}</span>
+                  <span class="ap-life">${lifeVertical(item.cardLife || item.life)}</span>
                 </div>
               </div>
             </div>`;
@@ -9105,8 +9130,9 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         document.getElementById('detail-title').textContent = item.n;
 
         const rows = [];
-        rows.push(isEra ? `<span>盛期 <b>${item.life}</b></span>` : `<span>生卒 <b>${item.life}</b></span>`);
+        rows.push(isEra ? `<span>盛期 <b>${item.life}</b></span>` : `<span>${item.isEmperor ? '在位' : '生卒'} <b>${item.life}</b></span>`);
         rows.push(`<span>朝代 <b>${item.dyn}</b></span>`);
+        if (item.personalName) rows.push(`<span>本名 <b>${item.personalName}</b></span>`);
         if (item.role) rows.push(isEra ? `<span>核心君臣 <b>${item.role}</b></span>` : `<span>身份 <b>${item.role}</b></span>`);
         if (item.work) rows.push(`<span>代表作 <b>${item.work}</b></span>`);
         if (item.src) rows.push(`<span>出处 <b>${item.src}</b></span>`);
@@ -10891,9 +10917,9 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       const y = Number(d && d.year);
       const name = (d && d.personName) || '';
       if (name) {
-        const inFig = (typeof FIGURE_AXIS !== 'undefined' && FIGURE_AXIS || []).some((x) => x.n === name);
+        const inFig = (typeof FIGURE_AXIS !== 'undefined' && FIGURE_AXIS || []).some((x) => x.n === name || x.mapName === name);
         if (inFig) {
-          const item = FIGURE_AXIS.find((x) => x.n === name);
+          const item = FIGURE_AXIS.find((x) => x.n === name || x.mapName === name);
           locateOnAxis('figures', item.id, Number.isFinite(y) ? y : undefined);
           return;
         }
@@ -11009,7 +11035,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     function updatePersonMapBtn(p) {
       const btn = document.getElementById('person-map-btn');
       if (!btn) return;
-      const hit = p ? mapPersonOf(p.n) : null;
+      const hit = p ? mapPersonOf(p.mapName || p.n) : null;
       const ok = !!hit && mapYearOk(hit.from);
       btn.hidden = !ok;
       if (ok) {
@@ -11215,7 +11241,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       if (typeof origUpdatePersonMapBtn === 'function') origUpdatePersonMapBtn(p);
       const btn = document.getElementById('person-map-btn');
       if (!btn || !p) return;
-      const hit = typeof mapPersonOf === 'function' ? mapPersonOf(p.n) : null;
+      const hit = typeof mapPersonOf === 'function' ? mapPersonOf(p.mapName || p.n) : null;
       if (!hit) return;
       // 若人物有具体代表年份 y，且在合理范围内则优先用 p.y，否则用 hit.from
       const targetYear = Number.isFinite(p.year) ? p.year : ((typeof p.y === 'number' && Number.isFinite(p.y)) ? p.y : hit.from);
@@ -11287,9 +11313,9 @@ body.map-interacting #layers-popover:not(.popup-focused) {
         state.lastMapYear = y;
       }
       if (name) {
-        const inFig = (typeof FIGURE_AXIS !== 'undefined' && FIGURE_AXIS || []).some((x) => x.n === name);
+        const inFig = (typeof FIGURE_AXIS !== 'undefined' && FIGURE_AXIS || []).some((x) => x.n === name || x.mapName === name);
         if (inFig) {
-          const item = FIGURE_AXIS.find((x) => x.n === name);
+          const item = FIGURE_AXIS.find((x) => x.n === name || x.mapName === name);
           locateOnAxis('figures', item.id, Number.isFinite(y) ? y : undefined);
           return;
         }
