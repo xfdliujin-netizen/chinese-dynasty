@@ -6401,6 +6401,7 @@ body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
         handle.addEventListener('pointerdown', function(e) {
           if (e.button) return;
           e.preventDefault(); e.stopPropagation();
+          if (window.atlasApp) window.atlasApp.stopAutoplay();
           var r = key.getBoundingClientRect();
           dragState = {id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};
           handle.setPointerCapture(e.pointerId); key.classList.add('is-legend-dragging');
