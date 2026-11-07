@@ -5835,6 +5835,7 @@ body.atlas-embed #chronicle-pane::after,body.atlas-embed #milestone-balloon::aft
 body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
 @media(max-width:600px) { .atlas-view-switch button { padding:0 12px; font-size:14px; gap:5px; } }
 </style><link rel="stylesheet" href="view-switch.css" />
+<link rel="stylesheet" href="atlas-timeline-ui.css" />
 </head>
 <body class="atlas-embed">
   <nav class="atlas-view-switch" role="tablist" aria-label="长卷与史图切换">
@@ -6061,10 +6062,11 @@ body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
         </button>
       </div>
 
-      <div id="scrubber-rail-wrap">
         <div id="scrubber-Bubble" aria-live="polite">
           <span id="bubble-text">公元前403年 · 周威烈王二十三年</span>
         </div>
+      <div id="scrubber-rail-wrap">
+
         <div id="scrubber-track" role="slider" tabindex="0" aria-valuemin="-403" aria-valuemax="2026" aria-valuenow="-403" aria-label="年份滑块">
           <div id="dynasty-bands"></div>
           <div id="scrubber-handle"></div>
@@ -6376,44 +6378,54 @@ body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
       if (el) el.addEventListener('pointerdown', function () { recede(false); moving(false); dragging = false; }, { passive: true });
     });
 
-    /* 左下角图例：左右滑动 = 时间轴上一站 / 下一站 */
+    /* 图例仅通过手柄移动，不再响应左右滑动切换年份。 */
     var key = document.getElementById('map-key');
     if (key) {
-      key.addEventListener('dragstart', function (e) { e.preventDefault(); });
-      var sx = 0, sy = 0, dx = 0, active = false, horiz = false;
-      key.addEventListener('pointerdown', function (e) {
-        if (e.button && e.button !== 0) return;
-        e.stopPropagation();               /* 不当作地图触摸，也不触发地图拖拽 */
-        active = true; horiz = false; dx = 0;
-        sx = e.clientX; sy = e.clientY;
-      }, { passive: true });
-      window.addEventListener('pointermove', function (e) {
-        if (!active) return;
-        if (e.pointerType === 'mouse' && e.buttons === 0) { settle(); return; }  /* 兜底：pointerup 丢失 */
-        dx = e.clientX - sx;
-        var dy = e.clientY - sy;
-        if (!horiz) {
-          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-          horiz = Math.abs(dx) > Math.abs(dy);
-          if (!horiz) { active = false; return; }
-        }
-        var off = Math.max(-44, Math.min(44, dx / 2.4));
-        key.style.transition = 'none';
-        key.style.transform = 'translateX(' + off.toFixed(1) + 'px)';
-      }, { passive: true });
-      function settle() {
-        if (!active) return;
-        active = false;
-        key.style.transition = '';
-        key.style.transform = '';
-        if (horiz && Math.abs(dx) > 36) {
-          var btn = document.getElementById(dx < 0 ? 'act-step-next' : 'act-step-prev');
-          if (btn) btn.click();
-        }
-        horiz = false;
+      var dragState = null, customPosition = false;
+      function boundLegend(x, y) {
+        var r = key.getBoundingClientRect();
+        var dr = dock.getBoundingClientRect();
+        var bottomLimit = Math.max(70, dr.top - 8);
+        key.style.setProperty('left', Math.max(8, Math.min(window.innerWidth-r.width-8, x)) + 'px', 'important');
+        key.style.setProperty('top', Math.max(64, Math.min(bottomLimit-r.height, y)) + 'px', 'important');
+        key.style.setProperty('bottom', 'auto', 'important');
       }
-      window.addEventListener('pointerup', settle, { passive: true });
-      window.addEventListener('pointercancel', settle, { passive: true });
+      function addHandle() {
+        if (key.querySelector('.legend-drag-handle')) return;
+        var handle = document.createElement('button');
+        handle.className = 'legend-drag-handle'; handle.type = 'button';
+        handle.textContent = '⠿  图例';
+        handle.title = '拖动移动图例；方向键微调位置';
+        handle.setAttribute('aria-label', '移动图例，支持拖动和方向键');
+        key.prepend(handle);
+        handle.addEventListener('pointerdown', function(e) {
+          if (e.button) return;
+          e.preventDefault(); e.stopPropagation();
+          var r = key.getBoundingClientRect();
+          dragState = {id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};
+          handle.setPointerCapture(e.pointerId); key.classList.add('is-legend-dragging');
+        });
+        handle.addEventListener('pointermove', function(e) {
+          if (!dragState || e.pointerId !== dragState.id) return;
+          e.stopPropagation(); customPosition = true;
+          boundLegend(dragState.left+e.clientX-dragState.x, dragState.top+e.clientY-dragState.y);
+        });
+        function finish(e) { if (!dragState) return; e.stopPropagation(); dragState=null; key.classList.remove('is-legend-dragging'); }
+        handle.addEventListener('pointerup', finish);
+        handle.addEventListener('pointercancel', finish);
+        handle.addEventListener('lostpointercapture', finish);
+        handle.addEventListener('click', function(e) { e.stopPropagation(); });
+        handle.addEventListener('keydown', function(e) {
+          var step = e.shiftKey ? 30 : 10, dx = {ArrowLeft:-step,ArrowRight:step}[e.key]||0, dy = {ArrowUp:-step,ArrowDown:step}[e.key]||0;
+          if (!dx && !dy) return;
+          e.preventDefault(); e.stopPropagation(); customPosition=true;
+          var r=key.getBoundingClientRect(); boundLegend(r.x+dx,r.y+dy);
+        });
+      }
+      addHandle();
+      new MutationObserver(addHandle).observe(key,{childList:true});
+      new ResizeObserver(function(){if(customPosition){var r=key.getBoundingClientRect();boundLegend(r.x,r.y);}}).observe(key);
+      window.addEventListener('resize',function(){if(customPosition){var r=key.getBoundingClientRect();boundLegend(r.x,r.y);}});
     }
 
     /* ===== v13：档案夹双标签 + 浮卡对时间轴的实测避让 ===== */

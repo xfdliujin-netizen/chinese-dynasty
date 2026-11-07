@@ -7876,7 +7876,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       GEOM.macroH = Math.max(px(52), 36);
       GEOM.subH = Math.max(px(34), 24);
       GEOM.subTops = [0, 1, 2].map((i) => px(102 + i * 38));
-      GEOM.axisY = px(330);
+      GEOM.axisY = px(state.axisLayer === 'figures' ? 309 : 244);
       GEOM.slipW = Math.max(20, px(24));
       GEOM.stems = [px(12), px(24), px(38), px(52)];
 
@@ -8700,7 +8700,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       function placeNodes(items, gap, apply) {
         let lastX = -Infinity;
         const isCard = !!CARD_LAYERS[state.axisLayer];
-        const stemRows = [Math.round(8 * v), Math.round(32 * v)];
+        const stemRows = [Math.round(12 * v), Math.round(12 * v)];
         const cardH = CARD_H * v;
         items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
@@ -8738,7 +8738,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       } else {
         const cardW = CARD_W * v;
         const cardH = CARD_H * v;
-        const stemRows = [Math.round(10 * v), Math.round(34 * v)];
+        const stemRows = [Math.round(12 * v), Math.round(12 * v)];
         // 帝王上排：卡片整体倒挂于轴线上方；关键人物下排：卡片垂于轴线下方
         placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
           const { el, stemEl } = item;
@@ -10517,6 +10517,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       const layerChanged = next !== state.axisLayer;
 
       state.axisLayer = next;
+      recomputeGeometry();
       state.showEventsMaster = !!next;
 
       const activeKey = next || 'off';
