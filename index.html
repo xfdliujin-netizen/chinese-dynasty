@@ -521,8 +521,8 @@
     .event-stack { display: flex; flex-direction: column; align-items: center; }
 
     /* 帝王（上排）：卡片倒挂于轴线上方，圆点贴轴 */
-    .event-node.emperor .event-stack { flex-direction: column-reverse; }
-    .event-node.emperor .slip-fold-wrapper { transform-origin: bottom center; }
+    .event-node.emperor .event-stack { flex-direction: column; }
+    .event-node.emperor .slip-fold-wrapper { position:absolute; bottom:100%; flex-direction:column-reverse; transform-origin:bottom center; }
 
     .pulse-circle {
       position: relative;
@@ -4391,6 +4391,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 @media(max-width:600px) { .view-switch-capsule .vsc-item { padding:0 12px; font-size:14px; gap:5px; } }
 @media(max-width:600px) { #unified-console { left:10px; bottom:12px; } #unified-console .zen-opt { padding:0 9px; } }
 </style>
+<link rel="stylesheet" href="view-switch.css" />
 </head>
 <body data-view="scroll">
 
@@ -8689,7 +8690,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       //    节点一律钉在真实年份上，绝不水平顺延 —— 密集处只留圆点，放大后标签自动补全。
       //    引线采用短档循环（最深 50 设计单位），卡片紧贴轴线、上下错落，不再多行深垂。
       const isFoldedByZoom = state.zoomScale < EVENT_UNFOLD_THRESHOLD;
-      const nodeTop = GEOM.axisY - Math.round(6 * v);
+      const nodeTop = GEOM.axisY - Math.round(7 * v);
       const isCardLayer = !!CARD_LAYERS[state.axisLayer];
 
       /* 统一水平避让池：与左侧已放节点间距不足 gap 时默认收起标签（只留圆点），
@@ -8711,7 +8712,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
             item.x = x;
             item.row = -1;
             item.el.style.left = `${x}px`;
-            item.el.style.top = `${isEmp ? (GEOM.axisY - cardH - stemH - pulseH) : nodeTop}px`;
+            item.el.style.top = `${isEmp ? (nodeTop) : nodeTop}px`;
             item.stemEl.style.height = `${stemH}px`;
             item.el.classList.toggle('folded-by-zoom', !!state.axisLayer && isFoldedByZoom);
             return;
@@ -8747,7 +8748,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
           item.row = isEmp ? 1 : 0;
           el.style.left = `${x}px`;
           if (isEmp) {
-            el.style.top = `${GEOM.axisY - cardH - stemH - pulseH}px`;
+            el.style.top = `${nodeTop}px`;
           } else {
             el.style.top = `${nodeTop}px`;
           }

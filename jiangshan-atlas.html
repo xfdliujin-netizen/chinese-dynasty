@@ -5834,7 +5834,8 @@ body.atlas-embed #chronicle-pane::after,body.atlas-embed #milestone-balloon::aft
 .atlas-view-switch .active { background:linear-gradient(145deg,#C8382E,#9A241B); color:#fff8f0; box-shadow:0 3px 10px #b8332a57; }
 body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
 @media(max-width:600px) { .atlas-view-switch button { padding:0 12px; font-size:14px; gap:5px; } }
-</style></head>
+</style><link rel="stylesheet" href="view-switch.css" />
+</head>
 <body class="atlas-embed">
   <nav class="atlas-view-switch" role="tablist" aria-label="长卷与史图切换">
         <button class="vsc-item" data-switch-view="scroll" onclick="document.getElementById('act-home').click()" type="button" role="tab" aria-selected="false">
@@ -6507,8 +6508,11 @@ body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
           // 切到「沿革」签：若当前没有激活的地名沿革，显示引导占位
           var genCard = document.getElementById('genealogy-card');
           if (genCard && genCard.classList.contains('is-hidden')) {
-            var hint = genCard.querySelector('.genealogy-body');
-            if (hint) hint.textContent = '点击地图城名或双击任意位置，查看该地历代政区沿革。';
+            var timeline = genCard.querySelector('#genealogy-timeline');
+            if (timeline && !timeline.children.length) {
+              document.getElementById('genealogy-heading').textContent = '沿革档案';
+              document.getElementById('genealogy-sub').textContent = '点击地图城名或双击任意位置，查看该地历代政区沿革。';
+            }
             genCard.classList.remove('is-hidden');
           }
         } else if (name === 'journey') {
