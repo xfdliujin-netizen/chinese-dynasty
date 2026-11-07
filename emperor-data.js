@@ -1,9 +1,10 @@
-/* Explicit emperor succession catalog; dates are accession/abdication years, not era-name starting years. */
+/* Explicit accession-year catalog; exclude merely posthumous imperial titles. */
 window.EMPEROR_CATALOG = {
-  "scope": "秦以后项目主要朝代的正式在位皇帝；并立朝代分别列系；不收追尊、摄政、先秦君王和起义割据称帝者；元从1271年国号建立、清从1636年称帝起算。",
+  "scope": "秦以后项目主要朝代的正式在位皇帝，并立朝代分别列系；不收先秦君王、追尊者、摄政者、非帝号国主及朝廷之外另立的称帝者。按即位或开始使用帝号年份定位，复位合并。",
   "sources": [
     "https://dict.revised.moe.edu.tw/appendix.jsp?ID=2",
-    "https://www.dpm.org.cn/court/lineages.html"
+    "https://www.dpm.org.cn/court/lineages.html",
+    "https://www.dpm.org.cn/court/lineage/226259.html"
   ],
   "emperors": [
     {
@@ -266,9 +267,9 @@ window.EMPEROR_CATALOG = {
       "arcId": "han",
       "dyn": "新朝",
       "prefix": "新",
-      "title": "始建国帝",
+      "title": "新帝",
       "personalName": "王莽",
-      "n": "新始建国帝",
+      "n": "王莽",
       "from": 9,
       "to": 23,
       "reigns": [
@@ -1674,30 +1675,14 @@ window.EMPEROR_CATALOG = {
       "arcId": "nanbeichao",
       "dyn": "北周",
       "prefix": "北周",
-      "title": "孝闵帝",
-      "personalName": "宇文觉",
-      "n": "北周孝闵帝",
-      "from": 557,
-      "to": 557,
-      "reigns": [
-        [
-          557,
-          557
-        ]
-      ]
-    },
-    {
-      "arcId": "nanbeichao",
-      "dyn": "北周",
-      "prefix": "北周",
       "title": "明帝",
       "personalName": "宇文毓",
       "n": "北周明帝",
-      "from": 557,
+      "from": 559,
       "to": 560,
       "reigns": [
         [
-          557,
+          559,
           560
         ]
       ]
@@ -3731,6 +3716,70 @@ window.EMPEROR_CATALOG = {
         [
           1908,
           1912
+        ]
+      ]
+    },
+    {
+      "arcId": "nanbeichao",
+      "dyn": "北魏",
+      "prefix": "北魏",
+      "title": "前废帝",
+      "personalName": "元晔",
+      "n": "北魏前废帝",
+      "from": 530,
+      "to": 531,
+      "reigns": [
+        [
+          530,
+          531
+        ]
+      ]
+    },
+    {
+      "arcId": "nanbeichao",
+      "dyn": "北魏",
+      "prefix": "北魏",
+      "title": "后废帝",
+      "personalName": "元朗",
+      "n": "北魏后废帝",
+      "from": 531,
+      "to": 532,
+      "reigns": [
+        [
+          531,
+          532
+        ]
+      ]
+    },
+    {
+      "arcId": "nanbeichao",
+      "dyn": "南梁",
+      "prefix": "梁",
+      "title": "豫章王",
+      "personalName": "萧栋",
+      "n": "梁豫章王",
+      "from": 551,
+      "to": 551,
+      "reigns": [
+        [
+          551,
+          551
+        ]
+      ]
+    },
+    {
+      "arcId": "nanbeichao",
+      "dyn": "南梁",
+      "prefix": "梁",
+      "title": "贞阳侯",
+      "personalName": "萧渊明",
+      "n": "梁贞阳侯",
+      "from": 555,
+      "to": 555,
+      "reigns": [
+        [
+          555,
+          555
         ]
       ]
     }
