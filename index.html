@@ -7922,7 +7922,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     }
 
     function getRightPadding(customScale = state.zoomScale) {
-      return Math.max(48, Math.round(BASE_RIGHT_PADDING * Math.min(1, customScale + 0.15)));
+      return Math.max(Math.ceil(viewportEl.clientWidth / 2), 48, Math.round(BASE_RIGHT_PADDING * Math.min(1, customScale + 0.15)));
     }
 
     function yearToX(year, customScale = state.zoomScale) {
