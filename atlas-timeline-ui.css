@@ -28,3 +28,5 @@ body.atlas-embed #map-key::after { display:none !important; }
  body.atlas-embed .unit-label { display:none; }
  body.atlas-embed #map-key { left:8px; max-width:250px; }
 }
+
+body.atlas-embed .year-stepper input { display:inline-block !important; }

@@ -4698,6 +4698,8 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     /********************************************************************
      * 2. 细分朝代与并立政权三轨数据 (仅展示朝代名与时间，点击可看深度史料)
      ********************************************************************/
+    MACRO_DYNASTIES.push({"id":"roc","shortName":"民国","name":"民国时期","period":"1912—1949年","start":1912,"end":1949,"color":"#92714D","bg":"#F4EDE2","capital":"南京 / 北京 / 重庆","founder":"孙中山","desc":"1912年帝制终结、共和肇始。此后经历北洋时期、北伐战争、抗日战争和解放战争，长卷以1949年中华人民共和国成立为终点。","detail":"帝制终结，共和肇始。军阀混战、北伐、抗日战争与解放战争相继发生。","impact":"从帝制转向共和，在战争与社会变迁中走向现代中国。"});
+
     const SUB_REGIMES = [
       { id: 'chunqiu', shortName: '春秋', name: '春秋时期', period: '前770—前476', start: -770, end: -476, track: 0, color: '#9E6224', founder: '齐桓公 / 晋文公 / 楚庄王', desc: '周平王东迁后诸侯争霸的时代，因孔子修订鲁国史书《春秋》而得名。', detail: '齐桓公任用管仲“九合诸侯，一匡天下”首成霸业；晋文公城濮之战退避三舍大破楚军；秦穆公称霸西戎；楚庄王问鼎中原；春秋晚期吴王阖闾用孙武、伍子胥破楚入郢，越王勾践卧薪尝胆灭吴称霸。', impact: '列国在争霸与会盟中加快了华夏族群与周边戎狄蛮夷的融合。' },
       { id: 'zhanguo', shortName: '战国', name: '战国七雄', period: '前475—前221', start: -475, end: -221, track: 0, color: '#7D4816', founder: '秦/齐/楚/燕/韩/赵/魏', desc: '三家分晋、田氏代齐后，形成齐、楚、燕、韩、赵、魏、秦七大强国并立兼并的格局。', detail: '战国初期魏文侯任用李悝、吴起、西门豹率先变法称雄；中期齐国在桂陵之战、马陵之战两败魏军，与秦国东西对峙；后期赵国胡服骑射强军，但前260年长平之战赵军主力被秦将白起击溃，山东六国再无力单独抗秦。', impact: '郡县制、官僚制与铁器农耕全面普及，为秦统一天下准备了制度与经济条件。' },
@@ -4756,6 +4758,8 @@ body.map-interacting #layers-popover:not(.popup-focused) {
      * - detail: 历史背景、来龙去脉与细节扩展（支持向下深度阅读）
      * - impact: 史家评述与历史遗产
      ********************************************************************/
+    SUB_REGIMES.push(...[{"id":"roc-beiyang","shortName":"北洋","name":"民初与北洋时期","start":1912,"end":1928,"track":0,"color":"#967B66","period":"1912—1928年","desc":"民初政治转型与北洋军阀时期。"},{"id":"roc-nanjing","shortName":"国民政府","name":"南京国民政府时期","start":1928,"end":1949,"track":0,"color":"#A1855B","period":"1928—1949年","desc":"经历抗日战争与解放战争。"},{"id":"roc-war","shortName":"全面抗战","name":"全面抗战","start":1937,"end":1945,"track":1,"color":"#9C5549","period":"1937—1945年","desc":"七七事变后全面抗战开始，1945年抗日战争胜利。"}]);
+
     const HISTORICAL_EVENTS = [
       { id: 'e1', year: -2070, period: '夏朝', shortTitle: '大禹治水与夏朝建立', title: '大禹治水与夏朝建立', category: '政治变革', figure: '大禹、姒启、伯益',
         desc: '大禹改堵为疏平定黄河水患，受舜禅让；禹死后其子启击败伯益继承王位，废除禅让制，开创“家天下”的夏王朝。',
@@ -6553,6 +6557,8 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     ];
 
 
+    HISTORICAL_EVENTS.push(...[{"id":"modern-0","year":1912,"period":"民国时期","shortTitle":"中华民国成立","title":"孙中山于南京宣誓就职，中华民国成立","category":"政治变革","figure":"","desc":"孙中山于南京宣誓就职，中华民国成立","detail":"孙中山于南京宣誓就职，中华民国成立。地点：南京。","impact":"","bk":"中华民国成立","site":"南京"},{"id":"modern-1","year":1915,"period":"民国时期","shortTitle":"护国战争","title":"蔡锷在云南起义，发起讨袁护国战争","category":"军事风云","figure":"","desc":"蔡锷在云南起义，发起讨袁护国战争","detail":"蔡锷在云南起义，发起讨袁护国战争。地点：昆明。","impact":"","bk":"护国战争","site":"昆明"},{"id":"modern-2","year":1916,"period":"民国时期","shortTitle":"北洋军阀分裂","title":"袁世凯病逝，北洋集团分裂为皖、直、奉系，南北军阀割据","category":"政治变革","figure":"","desc":"袁世凯病逝，北洋集团分裂为皖、直、奉系，南北军阀割据","detail":"袁世凯病逝，北洋集团分裂为皖、直、奉系，南北军阀割据。地点：北京 · 广州。","impact":"","bk":"北洋军阀分裂","site":"北京 · 广州"},{"id":"modern-3","year":1919,"period":"民国时期","shortTitle":"五四运动","title":"巴黎和会外交失利，北京爆发五四运动","category":"政治变革","figure":"","desc":"巴黎和会外交失利，北京爆发五四运动","detail":"巴黎和会外交失利，北京爆发五四运动。地点：北京。","impact":"","bk":"五四运动","site":"北京"},{"id":"modern-4","year":1920,"period":"民国时期","shortTitle":"直皖战争","title":"直皖战争爆发，曹锟、吴佩孚直系击败段祺瑞皖系控制北京","category":"军事风云","figure":"","desc":"直皖战争爆发，曹锟、吴佩孚直系击败段祺瑞皖系控制北京","detail":"直皖战争爆发，曹锟、吴佩孚直系击败段祺瑞皖系控制北京。地点：涿州 · 北京。","impact":"","bk":"直皖战争","site":"涿州 · 北京"},{"id":"modern-5","year":1921,"period":"民国时期","shortTitle":"中国共产党成立","title":"中国共产党第一次全国代表大会召开","category":"政治变革","figure":"","desc":"中国共产党第一次全国代表大会召开","detail":"中国共产党第一次全国代表大会召开。地点：上海 · 嘉兴。","impact":"","bk":"中国共产党成立","site":"上海 · 嘉兴"},{"id":"modern-6","year":1924,"period":"民国时期","shortTitle":"国共第一次合作","title":"国共第一次合作，黄埔军校在广州创办","category":"政治变革","figure":"sunzhongshan、jiangjieshi、maozedong","desc":"国共第一次合作，黄埔军校在广州创办","detail":"国共第一次合作，黄埔军校在广州创办。地点：广州。","impact":"","bk":"国共第一次合作","site":"广州"},{"id":"modern-7","year":1926,"period":"民国时期","shortTitle":"北伐战争","title":"国民革命军自广州誓师北伐，攻克武昌、南昌","category":"军事风云","figure":"","desc":"国民革命军自广州誓师北伐，攻克武昌、南昌","detail":"国民革命军自广州誓师北伐，攻克武昌、南昌。地点：广州 · 武昌。","impact":"","bk":"北伐战争","site":"广州 · 武昌"},{"id":"modern-8","year":1928,"period":"民国时期","shortTitle":"北伐结束与东北易帜","title":"北伐结束，东北易帜","category":"军事风云","figure":"","desc":"北伐结束，东北易帜，南京国民政府实现形式上的全国统一。","detail":"北伐结束后，东北易帜，南京国民政府实现形式上的全国统一。","impact":"","bk":"东北易帜","site":"南京"},{"id":"modern-9","year":1931,"period":"民国时期","shortTitle":"九一八事变","title":"日本关东军袭占沈阳，发动九一八事变","category":"军事风云","figure":"","desc":"日本关东军袭占沈阳，发动九一八事变","detail":"日本关东军袭占沈阳，发动九一八事变。地点：沈阳。","impact":"","bk":"九一八事变","site":"沈阳"},{"id":"modern-10","year":1932,"period":"民国时期","shortTitle":"伪满洲国成立","title":"日本扶植溥仪在长春建伪“满洲国”，东北沦陷十四载","category":"军事风云","figure":"","desc":"日本扶植溥仪在长春建伪“满洲国”，东北沦陷十四载","detail":"日本扶植溥仪在长春建伪“满洲国”，东北沦陷十四载。地点：新京（长春）。","impact":"","bk":"伪满洲国成立","site":"新京（长春）"},{"id":"modern-11","year":1935,"period":"民国时期","shortTitle":"遵义会议","title":"红军长征途中召开遵义会议","category":"政治变革","figure":"maozedong、dengxiaoping","desc":"红军长征途中在遵义召开会议。","detail":"红军长征途中在遵义召开会议，成为中国革命进程中的重要转折。地点：遵义。","impact":"","bk":"遵义会议","site":"遵义"},{"id":"modern-12","year":1936,"period":"民国时期","shortTitle":"西安事变","title":"张学良、杨虎城发动西安事变，促成联共抗日","category":"军事风云","figure":"","desc":"张学良、杨虎城发动西安事变，促成联共抗日","detail":"张学良、杨虎城发动西安事变，促成联共抗日。地点：西安。","impact":"","bk":"西安事变","site":"西安"},{"id":"modern-13","year":1937,"period":"民国时期","shortTitle":"全面抗战开始","title":"七七事变，全面抗战","category":"军事风云","figure":"","desc":"七七事变，全面抗战","detail":"七七事变，全面抗战。地点：卢沟桥。","impact":"","bk":"全面抗战开始","site":"卢沟桥"},{"id":"modern-14","year":1938,"period":"民国时期","shortTitle":"台儿庄与武汉会战","title":"台儿庄大捷与武汉会战，抗战进入相持阶段","category":"军事风云","figure":"","desc":"台儿庄大捷与武汉会战，抗战进入相持阶段","detail":"台儿庄大捷与武汉会战，抗战进入相持阶段。地点：台儿庄 · 武汉。","impact":"","bk":"台儿庄与武汉会战","site":"台儿庄 · 武汉"},{"id":"modern-15","year":1945,"period":"民国时期","shortTitle":"抗日战争胜利","title":"抗日战争胜利，中国正式收回台湾全岛与澎湖列岛","category":"军事风云","figure":"","desc":"抗日战争胜利，中国正式收回台湾全岛与澎湖列岛","detail":"抗日战争胜利，中国正式收回台湾全岛与澎湖列岛。地点：台北 · 南京。","impact":"","bk":"抗日战争胜利","site":"台北 · 南京"},{"id":"modern-16","year":1946,"period":"民国时期","shortTitle":"外蒙古独立","title":"国民政府承认外蒙古独立公投结果，外蒙古脱离中国版图","category":"政治变革","figure":"","desc":"国民政府承认外蒙古独立公投结果，外蒙古脱离中国版图","detail":"国民政府承认外蒙古独立公投结果，外蒙古脱离中国版图。地点：库伦（乌兰巴托）。","impact":"","bk":"外蒙古独立","site":"库伦（乌兰巴托）"},{"id":"modern-17","year":1948,"period":"民国时期","shortTitle":"三大战役","title":"辽沈、淮海、平津三大战役展开","category":"军事风云","figure":"","desc":"辽沈、淮海、平津三大战役展开","detail":"辽沈、淮海、平津三大战役展开。地点：锦州 · 徐州 · 北平。","impact":"","bk":"三大战役","site":"锦州 · 徐州 · 北平"},{"id":"modern-18","year":1949,"period":"民国时期","shortTitle":"渡江战役","title":"渡江战役攻克南京，国民政府退往台北","category":"军事风云","figure":"","desc":"渡江战役攻克南京，国民政府退往台北","detail":"渡江战役攻克南京，国民政府退往台北。地点：南京。","impact":"","bk":"渡江战役","site":"南京"},{"id":"modern-19","year":1949,"period":"新中国成立","shortTitle":"中华人民共和国成立","title":"毛泽东于天安门宣告中华人民共和国成立","category":"政治变革","figure":"maozedong、dengxiaoping","desc":"毛泽东于天安门宣告中华人民共和国成立","detail":"毛泽东于天安门宣告中华人民共和国成立。地点：北京。","impact":"","bk":"渡江战役","site":"北京"}]);
+
     // 为重点事件补充背景与后续影响，保留原有史事摘要与完整标题。
     const EVENT_CONTEXT = [["商鞅变法","变法以奖励耕战、按军功授爵和推行县制为核心，将贵族世袭特权逐步转为由国家掌握的行政与军事秩序。秦国由此加强对户籍、赋税和兵员的控制，为此后的兼并战争积累实力。"],["统一六国","秦先后消灭韩、赵、魏、楚、燕、齐，把长期并立的诸侯国纳入统一王朝。统一之后，皇帝制度、郡县治理与文字、度量衡等制度整合相继展开，疆域统一与行政整合成为同一进程的两个方面。"],["文景之治","汉初休养生息政策在文帝、景帝时期得到延续。减轻赋役、重视农业与节制宫廷开支，使社会经济逐渐恢复；地方诸侯势力与中央权力的关系，也成为这一时期必须处理的政治问题。"],["赤壁","孙刘联军利用长江水域条件，以火攻打击曹军。战后曹操退回北方，刘备与孙权分别经营荆州、益州和江东，战争的影响由一次军事胜负延伸为三方势力格局的形成。"],["淝水","前秦南征与东晋北府兵在淝水一线交战。前秦失败后，其内部原有的族群与政治矛盾迅速显现，北方重新分裂；东晋则得以维持江南统治，南北对峙继续发展。"],["安史","叛乱使唐朝长期积累的军事与财政矛盾集中爆发。战火破坏北方生产，朝廷依靠地方军镇平乱，战后藩镇权力与中央财政之间的关系发生深刻变化，唐朝由盛转衰。"],["王安石变法","新法围绕财政、农业、市场流通与军事组织展开，试图增加国家收入并减轻财政压力。改革在执行效果、官员任用和利益分配上引发争议，新旧党争也由此持续影响北宋政治。"],["郑和","船队以朝廷使节身份开展远洋航行，连接东南亚、南亚与印度洋沿岸港口。航行兼具外交、贸易和海路交流功能，体现明初造船、导航与大规模海上组织能力。"],["虎门","禁烟行动既针对鸦片输入，也关系到白银外流与社会治理。林则徐在广东收缴并销毁鸦片，随后中英矛盾进一步激化；理解这一事件，需要把禁烟措施与随后爆发的鸦片战争联系起来。"],["武昌起义","起义后各省相继响应，清廷统治迅速瓦解。革命派、地方实力派与清政府之间的政治交涉继续推进，最终以清帝退位和共和政体建立结束帝制；新政体的权力安排仍面临复杂挑战。"]];
     HISTORICAL_EVENTS.forEach(ev => {
@@ -7102,6 +7108,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     ];
 
     // 档案索引：id -> 档案
+    DYNASTY_ARCHIVES.push({"id":"roc","name":"民国时期","range":"1912—1949年","capital":"南京 / 北京 / 重庆","founder":"孙中山","desc":"1912年帝制终结、共和肇始。此后经历北洋时期、北伐战争、抗日战争和解放战争，长卷以1949年中华人民共和国成立为终点。","rulers":[],"figures":[{"n":"孙中山","r":"孙文 · 字逸仙 · 近代民主革命先行者","d":"孙文 · 字逸仙 · 近代民主革命先行者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"},{"n":"蒋介石","r":"蒋中正 · 北伐与抗战统帅","d":"蒋中正 · 北伐与抗战统帅。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"},{"n":"毛泽东","r":"字润之 · 中华人民共和国主要缔造者","d":"字润之 · 中华人民共和国主要缔造者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"},{"n":"邓小平","r":"改革开放总设计师","d":"改革开放总设计师。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。"}]});
     const ARCHIVE_MAP = {};
     DYNASTY_ARCHIVES.forEach((a) => { ARCHIVE_MAP[a.id] = a; });
 
@@ -7798,7 +7805,8 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       { start: 589,   end: 907,  basePxPerYear: 2.35 }, // 隋唐
       { start: 907,   end: 979,  basePxPerYear: 5.60 }, // 五代十国
       { start: 979,   end: 1368, basePxPerYear: 2.45 }, // 宋辽夏金元
-      { start: 1368,  end: 1920, basePxPerYear: 2.40 }  // 明清至民初
+      { start: 1368, end: 1912, basePxPerYear: 2.40 },
+      { start: 1912, end: 1949, basePxPerYear: 8.00 }  // 明清至民初
     ];
 
     const BASE_LEFT_PADDING = 220;
@@ -7941,7 +7949,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     }
 
     function getTotalCanvasWidth(customScale = state.zoomScale) {
-      return yearToX(1920, customScale) + getRightPadding(customScale);
+      return yearToX(1949, customScale) + getRightPadding(customScale);
     }
 
     /* 画布窄于一屏时（例如缩到 5%）左右居中，避免全部挤在左边 */
@@ -8257,6 +8265,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       { id: 'at-hongxiuquan', kind: 'figure', n: '洪秀全', year: 1814, life: '1814—1864', role: '太平天国天王', d: '太平天国天王', dyn: '清朝', arcId: 'qing', src: '' },
       { id: 'at-lihongzhang', kind: 'figure', n: '李鸿章', year: 1823, life: '1823—1901', role: '李文忠公 · 字渐甫 · 北洋通商大臣', d: '李文忠公 · 字渐甫 · 北洋通商大臣', dyn: '清朝', arcId: 'qing', src: '' },
     ];
+    FIGURE_AXIS.push(...[{"id":"at-sunzhongshan","kind":"figure","n":"孙中山","year":1912,"life":"1866—1925","role":"孙文 · 字逸仙 · 近代民主革命先行者","d":"孙文 · 字逸仙 · 近代民主革命先行者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"},{"id":"at-jiangjieshi","kind":"figure","n":"蒋介石","year":1926,"life":"1887—1975","role":"蒋中正 · 北伐与抗战统帅","d":"蒋中正 · 北伐与抗战统帅。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"},{"id":"at-maozedong","kind":"figure","n":"毛泽东","year":1935,"life":"1893—1976","role":"字润之 · 中华人民共和国主要缔造者","d":"字润之 · 中华人民共和国主要缔造者。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"},{"id":"at-dengxiaoping","kind":"figure","n":"邓小平","year":1948,"life":"1904—1997","role":"改革开放总设计师","d":"改革开放总设计师。轴上定位年份为其在1912—1949年间的重要活动节点，生卒年见人物牌。","dyn":"近现代","arcId":"roc","src":"项目地图人物档案"}]);
     FIGURE_AXIS.sort((a, b) => a.year - b.year);
 
     /* 帝王（上排）识别：以地图 PERSON_PROFILES 的称号（role/courtesyZh）为准，
@@ -8447,7 +8456,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       const pad = getCenterPad();
       const viewLeft = state.scrollX - pad;
       const from = Math.max(TIME_SEGMENTS[0].start, xToYear(viewLeft - vw * 0.6));
-      const to = Math.min(1920, xToYear(viewLeft + vw * 1.6));
+      const to = Math.min(1949, xToYear(viewLeft + vw * 1.6));
       if (!force && tickRange.step && from >= tickRange.from && to <= tickRange.to) return;
 
       const majorYears = [];
@@ -8467,6 +8476,11 @@ body.map-interacting #layers-popover:not(.popup-focused) {
           majorSet.add(yr);
           majorYears.push(yr);
         }
+      }
+      if (to >= 1949) {
+        const endpointX = yearToX(1949, state.zoomScale);
+        for (let i = majorYears.length-1; i >= 0; i--) if (endpointX-yearToX(majorYears[i],state.zoomScale) < Math.max(72,Math.round(82*GEOM.v))) majorYears.splice(i,1);
+        majorYears.push(1949);
       }
       majorYears.sort((a, b) => a - b);
 
@@ -10734,7 +10748,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
        纯外链跳转，不内嵌地图、不增加本地体积
        ================================================================== */
     const MAP_MIN_YEAR = -403;   // 地图数据下限（周威烈王）
-    const MAP_MAX_YEAR = 1912;   // 上限（清宣统）
+    const MAP_MAX_YEAR = 1949;   // 上限（1949年）
 
     // 地图侧 124 位人物：中文名 → [拼音 key, 生年]
     const MAP_PEOPLE = { '孟子': ['mengzi', -372], '商鞅': ['shangyang', -390], '孙膑': ['sunbin', -380], '屈原': ['quyuan', -340], '白起': ['baiqi', -332], '李牧': ['limu', -290], '王翦': ['wangjian', -300], '秦始皇': ['qinshihuang', -259], '蒙恬': ['mengtian', -250], '项羽': ['xiangyu', -232], '刘邦': ['liubang', -256], '韩信': ['hanxin', -231], '张良': ['zhangliang', -250], '汉文帝': ['hanwendi', -203], '汉武帝': ['hanwudi', -156], '张骞': ['zhangqian', -164], '卫青': ['weiqing', -150], '霍去病': ['huoqubing', -140], '司马迁': ['simaqian', -145], '王莽': ['wangmang', -45], '刘秀': ['liuxiu', -5], '班超': ['banchao', 32], '曹操': ['caocao', 155], '刘备': ['liubei', 161], '孙权': ['sunquan', 182], '诸葛亮': ['zhugeliang', 181], '关羽': ['guanyu', 160], '周瑜': ['zhouyu', 175], '陆逊': ['luxun', 183], '司马懿': ['simayi', 179], '王羲之': ['wangxizhi', 303], '谢安': ['xiean', 320], '陶渊明': ['taoyuanming', 365], '刘裕': ['liuyu', 363], '北魏孝文帝': ['xiaowendi', 467], '杨坚': ['yangjian', 541], '隋炀帝': ['yangguang', 569], '唐太宗': ['lishimin', 598], '李靖': ['lijing', 571], '玄奘': ['xuanzang', 602], '武则天': ['wuzetian', 624], '唐玄宗': ['tangxuanzong', 685], '王维': ['wangwei', 701], '李白': ['libai', 701], '杜甫': ['dufu', 712], '高适': ['gaoshi', 704], '郭子仪': ['guoziyi', 697], '颜真卿': ['yanzhenqing', 709], '韩愈': ['hanyu', 768], '白居易': ['baijuyi', 772], '柳宗元': ['liuzongyuan', 773], '刘禹锡': ['liuyuxi', 772], '赵匡胤': ['zhaokuangyin', 927], '范仲淹': ['fanzhongyan', 989], '欧阳修': ['ouyangxiu', 1007], '王安石': ['wanganshi', 1021], '司马光': ['simaguang', 1019], '苏轼': ['sushi', 1037], '李清照': ['liqingzhao', 1084], '岳飞': ['yuefei', 1103], '陆游': ['luyou', 1125], '辛弃疾': ['xinqiji', 1140], '文天祥': ['wentianxiang', 1236], '成吉思汗': ['genghiskhan', 1162], '忽必烈': ['kublaikhan', 1215], '朱元璋': ['zhuyuanzhang', 1328], '朱棣': ['zhudi', 1360], '郑和': ['zhenghe', 1371], '于谦': ['yuqian', 1398], '王阳明': ['wangyangming', 1472], '戚继光': ['qijiguang', 1528], '张居正': ['zhangjuzheng', 1525], '郑成功': ['zhengchenggong', 1624], '康熙帝': ['kangxi', 1654], '林则徐': ['linzexu', 1785], '曾国藩': ['zengguofan', 1811], '左宗棠': ['zuozongtang', 1812], '孙中山': ['sunzhongshan', 1866], '蒋介石': ['jiangjieshi', 1887], '毛泽东': ['maozedong', 1893], '邓小平': ['dengxiaoping', 1904], '陈胜': ['chensheng', -240], '吕布': ['lvbu', 160], '袁绍': ['yuanshao', 154], '张飞': ['zhangfei', 165], '赵云': ['zhaoyun', 168], '姜维': ['jiangwei', 202], '邓艾': ['dengai', 197], '桓温': ['huanwen', 312], '苻坚': ['fujian', 338], '谢玄': ['xiexuan', 343], '安禄山': ['anlushan', 703], '黄巢': ['huangchao', 820], '李存勖': ['licunxu', 885], '柴荣': ['chairong', 921], '李煜': ['liyu_nt', 937], '韩世忠': ['hanshizhong', 1089], '徐达': ['xuda', 1332], '努尔哈赤': ['nurhaci', 1559], '皇太极': ['huangtaiji', 1592], '李自成': ['lizicheng', 1606], '雍正帝': ['yongzheng', 1678], '乾隆帝': ['qianlong', 1711], '洪秀全': ['hongxiuquan', 1814], '李鸿章': ['lihongzhang', 1823], '萧何': ['xiaohe', -257], '苏武': ['suwu', -140], '李斯': ['lisi', -284], '魏征': ['weizheng', 580], '狄仁杰': ['direnjie', 630], '寇准': ['kouzhun', 961], '包拯': ['baozheng', 999], '徐霞客': ['xuxiake', 1587], '袁崇焕': ['yuanchonghuan', 1584], '羊祜': ['yanghu', 221], '杜预': ['duyu', 222], '祖逖': ['zuti', 266], '刘琨': ['liukun', 271], '祖冲之': ['zuchongzhi', 429], '郦道元': ['lidaoyuan', 466], '沈括': ['shenkuo', 1031], '耶律楚材': ['yeluchucai', 1190], '马可·波罗': ['marcopolo', 1254], '传国玉玺': ['yuxi', -283] };
@@ -11203,7 +11217,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       const hit = typeof mapPersonOf === 'function' ? mapPersonOf(p.n) : null;
       if (!hit) return;
       // 若人物有具体代表年份 y，且在合理范围内则优先用 p.y，否则用 hit.from
-      const targetYear = (typeof p.y === 'number' && Number.isFinite(p.y)) ? p.y : hit.from;
+      const targetYear = Number.isFinite(p.year) ? p.year : ((typeof p.y === 'number' && Number.isFinite(p.y)) ? p.y : hit.from);
       const clampedYear = Math.max(MAP_MIN_YEAR, Math.min(MAP_MAX_YEAR, Math.round(targetYear)));
       btn.dataset.key = hit.key;
       btn.dataset.year = String(clampedYear);
