@@ -30,3 +30,5 @@ body.atlas-embed #map-key::after { display:none !important; }
 }
 
 body.atlas-embed .year-stepper input { display:inline-block !important; }
+
+@media(max-width:767px) { body.atlas-embed #map-key { bottom:var(--phone-pane-clearance,calc(var(--dock-clearance,150px) + 74px)) !important; } }
