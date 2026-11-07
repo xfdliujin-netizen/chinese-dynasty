@@ -5821,11 +5821,21 @@ body.atlas-embed #chronicle-pane::after,body.atlas-embed #milestone-balloon::aft
 }
 .atlas-view-switch { position:fixed; z-index:80; top:calc(env(safe-area-inset-top,0px) + 8px); left:50%; transform:translateX(-50%); display:flex; gap:3px; height:44px; padding:4px; box-sizing:content-box; border-radius:999px; background:rgba(252,249,242,.72); backdrop-filter:blur(18px) saturate(1.5); border:1px solid rgba(184,51,42,.24); box-shadow:0 6px 22px #1e18101f,inset 0 1px 0 #ffffffcc; align-items:center; }
 .atlas-view-switch button { height:36px; padding:0 20px; border:0; border-radius:999px; background:transparent; color:#6d5d47; font:700 15.5px 'Noto Serif SC','Songti SC',serif; letter-spacing:.06em; cursor:pointer; }
+.atlas-view-switch button { display:inline-flex; align-items:center; gap:7px; } .atlas-view-switch svg { width:18px; height:18px; flex:none; }
 .atlas-view-switch .active { background:linear-gradient(145deg,#C8382E,#9A241B); color:#fff8f0; box-shadow:0 3px 10px #b8332a57; }
 body.atlas-embed #nav-bar { top:calc(env(safe-area-inset-top,0px) + 68px); }
 </style></head>
 <body class="atlas-embed">
-  <nav class="atlas-view-switch" aria-label="长卷与史图切换"><button type="button" onclick="document.getElementById('act-home').click()">长卷</button><button type="button" class="active" aria-current="page">史图</button></nav><div id="atlas-shell">
+  <nav class="atlas-view-switch" role="tablist" aria-label="长卷与史图切换">
+        <button class="vsc-item" data-switch-view="scroll" onclick="document.getElementById('act-home').click()" type="button" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z"/><path d="M12 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1"/><path d="M5 8.5h4M5 12h4"/></svg>
+          <span>长卷</span>
+        </button>
+        <button class="vsc-item active" data-switch-view="map" type="button" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v14L9 18l6 2 6-2.5v-14L15 6 9 4z"/><path d="M9 4v14M15 6v14"/></svg>
+          <span>史图</span>
+        </button>
+      </nav><div id="atlas-shell">
     <header id="nav-bar">
       <div class="brand-group">
         <h1 id="site-heading">
