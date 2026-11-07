@@ -13,7 +13,7 @@ window.EMPEROR_CATALOG = {
       "prefix": "秦",
       "title": "始皇帝",
       "personalName": "嬴政",
-      "n": "秦始皇帝",
+      "n": "秦始皇",
       "from": -221,
       "to": -210,
       "reigns": [
@@ -1839,7 +1839,7 @@ window.EMPEROR_CATALOG = {
       "personalName": "李显",
       "n": "唐中宗",
       "from": 684,
-      "to": 684,
+      "to": 710,
       "reigns": [
         [
           684,
@@ -1859,7 +1859,7 @@ window.EMPEROR_CATALOG = {
       "personalName": "李旦",
       "n": "唐睿宗",
       "from": 684,
-      "to": 690,
+      "to": 712,
       "reigns": [
         [
           684,
@@ -3223,7 +3223,7 @@ window.EMPEROR_CATALOG = {
       "personalName": "图帖睦尔",
       "n": "元文宗",
       "from": 1328,
-      "to": 1329,
+      "to": 1332,
       "reigns": [
         [
           1328,
@@ -3371,7 +3371,7 @@ window.EMPEROR_CATALOG = {
       "personalName": "朱祁镇",
       "n": "明英宗",
       "from": 1435,
-      "to": 1449,
+      "to": 1464,
       "reigns": [
         [
           1435,
