@@ -7883,6 +7883,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     };
 
     /* 画卷纵向几何：由视口高度推导，保证 iPad 竖屏/横屏都填满，不留空洞 */
+    const PERSON_CARD_FOCUS_GROWTH = 0.34;
     const GEOM = {
       v: 1,
       macroTop: 26,
@@ -7906,7 +7907,12 @@ body.map-interacting #layers-popover:not(.popup-focused) {
       GEOM.macroH = Math.max(px(52), 36);
       GEOM.subH = Math.max(px(34), 24);
       GEOM.subTops = [0, 1, 2].map((i) => px(102 + i * 38));
-      GEOM.axisY = px(state.axisLayer === 'figures' ? 309 : 244);
+      // Reserve the full upward animation envelope below all three dynasty tracks.
+      const dynastyBottom = GEOM.subTops[2] + GEOM.subH;
+      const emperorFocusHeight = px(64) * (1 + PERSON_CARD_FOCUS_GROWTH);
+      GEOM.axisY = state.axisLayer === 'figures'
+        ? Math.ceil(dynastyBottom + emperorFocusHeight + px(12) + px(7) + 3 + 24)
+        : px(244);
       GEOM.slipW = Math.max(20, px(24));
       GEOM.stems = [px(12), px(24), px(38), px(52)];
 
@@ -10079,7 +10085,7 @@ body.map-interacting #layers-popover:not(.popup-focused) {
             item.el.style.zIndex = String(36 + Math.round(weight * 48) + (i === closestIdx ? 10 : 0));
 
             // 按上下排方向放大：帝王牌向上抬升，下排牌子向下展开。
-            const cardScale = 1 + weight * 0.34;
+            const cardScale = 1 + weight * PERSON_CARD_FOCUS_GROWTH;
             const cardDirection = item.data && item.data.isEmperor ? -1 : 1;
             const cardDropY = weight * 3.0 * cardDirection;
             card.style.transform = `translate3d(${pushX.toFixed(2)}px, ${cardDropY.toFixed(2)}px, 0) scale(${cardScale.toFixed(3)})`;
