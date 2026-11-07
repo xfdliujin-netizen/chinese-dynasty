@@ -696,7 +696,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "西晋",
       "prefix": "晋",
       "title": "武帝",
@@ -712,7 +712,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "西晋",
       "prefix": "晋",
       "title": "惠帝",
@@ -728,7 +728,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "西晋",
       "prefix": "晋",
       "title": "怀帝",
@@ -744,7 +744,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "西晋",
       "prefix": "晋",
       "title": "愍帝",
@@ -760,7 +760,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "元帝",
@@ -776,7 +776,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "明帝",
@@ -792,7 +792,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "成帝",
@@ -808,7 +808,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "康帝",
@@ -824,7 +824,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "穆帝",
@@ -840,7 +840,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "哀帝",
@@ -856,7 +856,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "废帝",
@@ -872,7 +872,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "简文帝",
@@ -888,7 +888,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "孝武帝",
@@ -904,7 +904,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "安帝",
@@ -920,7 +920,7 @@ window.EMPEROR_CATALOG = {
       ]
     },
     {
-      "arcId": "jin",
+      "arcId": "jin16",
       "dyn": "东晋",
       "prefix": "晋",
       "title": "恭帝",
