@@ -3678,6 +3678,7 @@
      * 9. 布局刷新（随 zoomScale 与画布高度实时重排）
      ********************************************************************/
     function updateCanvasLayout() {
+      const measureLabels=[];
       const v = GEOM.v;
       const totalW = getTotalCanvasWidth();
       canvasEl.style.width = `${totalW}px`;
@@ -3726,9 +3727,12 @@
           }
           el.__geo = {
             x: x1, w: width,
-            nameW: nameEl.scrollWidth || 0,
-            periodW: periodEl.style.display === 'none' ? 0 : (periodEl.scrollWidth || 0)
+            nameW:0, periodW:0
           };
+          measureLabels.push(()=>{
+            el.__geo.nameW=nameEl.scrollWidth||0;
+            el.__geo.periodW=periodEl.style.display==='none'?0:(periodEl.scrollWidth||0);
+          });
         } else if (el.__geo) {
           el.__geo.x = x1;
           el.__geo.w = width;
@@ -3781,12 +3785,12 @@
             periodSpan.className = 'sub-period inline-badge';
             periodSpan.style.fontSize = `${Math.round(10 * v)}px`;
           }
-          const nw = nameSpan.scrollWidth || 0;
-          const pw = periodSpan.style.display === 'none' ? 0 : (periodSpan.scrollWidth || 0);
-          el.__geo = {
-            x: x1, w: width,
-            labelW: tier === 3 ? (nw + pw + 8) : Math.max(nw, pw)
-          };
+          el.__geo = { x:x1,w:width,labelW:36 };
+          measureLabels.push(()=>{
+            const nw=nameSpan.scrollWidth||0;
+            const pw=periodSpan.style.display==='none'?0:(periodSpan.scrollWidth||0);
+            el.__geo.labelW=tier===3?(nw+pw+8):Math.max(nw,pw);
+          });
         } else if (el.__geo) {
           el.__geo.x = x1;
           el.__geo.w = width;
@@ -3864,6 +3868,8 @@
         });
       }
 
+      // Read label metrics together after all geometry/style writes.
+      measureLabels.forEach(measure=>measure());
       updateLayerBadge();
       updateActiveHighlights();
     }

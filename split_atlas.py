@@ -52,15 +52,23 @@ def locate(src, marker):
     return tag_start, tag_end, body_end, close_end
 
 
+def is_full_source(path):
+    if not os.path.isfile(path):
+        return False
+    text = read(path)
+    return ('data:image/webp;base64,' in text and
+            all(marker in text for marker in MARKERS.values()))
+
+
 def main():
     # 优先读取刚构建的完整单文件，避免旧 src 备份覆盖新构建；
     # 只有当前文件已是拆分后的骨架时，才回退到完整源备份。
-    if os.path.exists(SRC) and os.path.getsize(SRC) > 5_000_000:
+    if is_full_source(SRC):
         src = read(SRC)
         with open(KEEP, 'w', encoding='utf-8', newline='') as f:
             f.write(src)
         print('已从最新构建读取并更新源备份')
-    elif os.path.exists(KEEP) and os.path.getsize(KEEP) > 5_000_000:
+    elif is_full_source(KEEP):
         print('从源备份读取：jiangshan-atlas.src.html')
         src = read(KEEP)
     else:
