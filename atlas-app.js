@@ -8261,8 +8261,12 @@
           this.minYear,
           Math.min(this.maxYear, this._progressToYear((clientX - r.left) / r.width))
         );
+        if (this._fineScrub) {
+          y = Math.max(this.minYear, Math.min(this.maxYear, this._fineScrub.year + Math.round((clientX-this._fineScrub.x)/this._fineScrub.pixelsPerYear)));
+        }
         if (y === 0) y = this.year < 0 ? 1 : -1;
         if (!skipSameYear || y !== this.year) this.jumpToYear(y);
+        if (this._drawScrubberLoupe) this._drawScrubberLoupe();
       };
       track.addEventListener('pointerdown', (e) => {
         if (this.challenge) return;
@@ -8348,17 +8352,6 @@
         cell.appendChild(lbl);
 
         const span = Math.max(1, d.toYear - d.fromYear);
-        if (Array.isArray(d.phases) && d.phases.length > 1) {
-          for (let i = 0; i < d.phases.length - 1; i++) {
-            const u = d.phases[i].until;
-            if (u > d.fromYear && u < d.toYear) {
-              const pt = document.createElement('i');
-              pt.className = 'band-phase-tick';
-              pt.style.left = `${(((u - d.fromYear) / span) * 100).toFixed(2)}%`;
-              cell.appendChild(pt);
-            }
-          }
-        }
         const seenEvPct = new Set();
         for (const m of d.milestones || []) {
           const my = this._clampYearToDynasty(d, m.year);
@@ -15043,92 +15036,31 @@
   });
 })();
 
-/* ================= 长按时间轴放大镜（矩形精确定位辅助） ================= */
-(function () {
-  let started = false;
-  function boot() {
-    if (started) return;
-    const app = window.atlasApp;
-    const track = document.getElementById('scrubber-track');
-    if (!app || !track || !app.dynasties) { setTimeout(boot, 150); return; }
-    started = true;
-
-    const W = 300, H = 96, SPAN = 38;
-    const box = document.createElement('div');
-    box.id = 'scrubber-loupe';
-    box.innerHTML = '<canvas width="' + (W * 2) + '" height="' + (H * 2) + '"></canvas>' +
-      '<div class="loupe-pin"></div><div class="loupe-year"></div>';
-    document.body.appendChild(box);
-    const cv = box.querySelector('canvas');
-    const ctx = cv.getContext('2d');
-    ctx.scale(2, 2);
-    const yearEl = box.querySelector('.loupe-year');
-
-    const yLabel = (y) => (y < 0 ? '前' + Math.abs(y) : String(y));
-    const clampY = (y) => Math.max(app.minYear, Math.min(app.maxYear, y));
-
-    function draw(centerYear) {
-      const c = clampY(centerYear);
-      const x0 = c - SPAN, x1 = c + SPAN;
-      const px = (y) => ((y - x0) / (SPAN * 2)) * W;
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = '#FBF6EA';
-      ctx.fillRect(0, 0, W, H);
-      (app.dynasties || []).forEach((d) => {
-        const a = Math.max(x0, d.fromYear), b = Math.min(x1, d.toYear);
-        if (b <= a) return;
-        ctx.fillStyle = d.tint || '#8B6E45';
-        ctx.globalAlpha = 0.3;
-        ctx.fillRect(px(a), 0, px(b) - px(a), 20);
-        ctx.globalAlpha = 1;
-      });
-      const major = SPAN > 24 ? 10 : 5;
-      for (let y = Math.ceil(x0); y <= x1; y += 1) {
-        if (y === 0) continue;
-        const X = px(y);
-        const isMajor = (y % major === 0);
-        ctx.strokeStyle = isMajor ? 'rgba(90, 70, 45, 0.5)' : 'rgba(120, 100, 70, 0.22)';
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(X, 20); ctx.lineTo(X, isMajor ? 54 : 38); ctx.stroke();
-        if (isMajor) {
-          ctx.fillStyle = '#5A4A36';
-          ctx.font = '700 10px -apple-system, "PingFang SC", sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(yLabel(y), X, 68);
-        }
-      }
-      ctx.strokeStyle = '#B8332A';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H - 24); ctx.stroke();
-      yearEl.textContent = yLabel(Math.round(c)) + ' 年';
-    }
-
-    function show(clientX, clientY, centerYear) {
-      draw(centerYear);
-      box.style.left = clientX + 'px';
-      box.style.top = Math.max(70, clientY - 12) + 'px';
-      box.classList.add('on');
-    }
-    const hide = () => { box.classList.remove('on'); active = false; };
-
-    let timer = 0, downX = 0, downY = 0, active = false;
-
-    track.addEventListener('pointerdown', (e) => {
-      downX = e.clientX; downY = e.clientY;
-      clearTimeout(timer);
-      timer = setTimeout(() => { active = true; show(e.clientX, e.clientY, app.year); }, 380);
-    });
-    track.addEventListener('pointermove', (e) => {
-      if (!active) {
-        if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 14) clearTimeout(timer);
-        return;
-      }
-      show(e.clientX, e.clientY, app.year);
-    });
-    const end = () => { clearTimeout(timer); if (active) hide(); };
-    track.addEventListener('pointerup', end);
-    track.addEventListener('pointercancel', end);
+/* ================= 长按局部年份尺与逐年微调 ================= */
+(function(){
+ function boot(){
+  const app=window.atlasApp, track=document.getElementById('scrubber-track');
+  if(!app||!track||!app.dynasties){setTimeout(boot,150);return;}
+  const box=document.createElement('div');box.id='scrubber-loupe';
+  box.innerHTML='<canvas></canvas><div class="loupe-year"></div>';document.body.appendChild(box);
+  const canvas=box.querySelector('canvas'),ctx=canvas.getContext('2d'),label=box.querySelector('.loupe-year');
+  let timer=0,down=null,active=false;
+  const yearLabel=y=>y<0?'前'+Math.abs(y):String(y);
+  function draw(){
+   const w=Math.min(360,window.innerWidth-24),h=132,dpr=window.devicePixelRatio||1,c=app.year,span=18;
+   canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+   ctx.fillStyle='#fcf9f2';ctx.fillRect(0,0,w,h);
+   const px=y=>(y-c+span)/(span*2)*w;
+   app.dynasties.forEach(d=>{let a=Math.max(c-span,d.fromYear),b=Math.min(c+span,d.toYear);if(b<=a)return;ctx.fillStyle=d.tint||'#aa7954';ctx.globalAlpha=.22;ctx.fillRect(px(a),0,px(b)-px(a),30);ctx.globalAlpha=1;if(px(b)-px(a)>42){ctx.fillStyle='#604b38';ctx.font='600 12px sans-serif';ctx.textAlign='center';ctx.fillText(app.dynastyBadge(d),(px(a)+px(b))/2,20);}});
+   for(let y=Math.ceil(c-span);y<=c+span;y++){if(!y||y<app.minYear||y>app.maxYear)continue;let x=px(y),major=y%5===0;ctx.strokeStyle=major?'#9e8567':'#dfd4c3';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,34);ctx.lineTo(x,major?61:47);ctx.stroke();if(major){ctx.fillStyle='#78644e';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(yearLabel(y),x,77);}}
+   ctx.strokeStyle='#b8332a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(w/2,0);ctx.lineTo(w/2,88);ctx.stroke();
+   label.textContent=app.formatYear(c)+' · 左右移动逐年微调';
+   const r=track.getBoundingClientRect();box.style.left=Math.max(12,Math.min(window.innerWidth-w-12,(down?down.x:r.x+r.width/2)-w/2))+'px';box.style.top=Math.max(64,r.top-h-16)+'px';
   }
-  if (document.readyState === 'complete') boot();
-  else window.addEventListener('load', boot);
+  function end(){clearTimeout(timer);down=null;active=false;app._fineScrub=null;app._drawScrubberLoupe=null;box.classList.remove('on');}
+  track.addEventListener('pointerdown',e=>{if(e.button||app.challenge)return;down={x:e.clientX,y:e.clientY,id:e.pointerId};timer=setTimeout(()=>{if(!down)return;active=true;app._fineScrub={x:down.x,year:app.year,pixelsPerYear:8};app._drawScrubberLoupe=draw;draw();box.classList.add('on');},360);});
+  track.addEventListener('pointermove',e=>{if(!down)return;if(!active&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>12)clearTimeout(timer);if(active)requestAnimationFrame(draw);});
+  track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);track.addEventListener('lostpointercapture',end);window.addEventListener('blur',end);
+ }
+ if(document.readyState==='complete')boot();else window.addEventListener('load',boot);
 })();
