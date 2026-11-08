@@ -38,6 +38,7 @@ WEB_FILES = [
     "atlas-ui.js",
     "emperor-data.js",
     "atlas-terrain.webp",
+    "js/atlas_snapshots.js",
 ]
 
 FONT_FACE = """  <!-- 原生包：书法体改为本地子集（仅「史」「舆」等印章用字），不再请求 Google Fonts -->
@@ -63,7 +64,9 @@ def copy_assets():
         if not os.path.exists(src):
             missing.append(name)
             continue
-        shutil.copy2(src, os.path.join(OUT, name))
+        dst = os.path.join(OUT, name)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copy2(src, dst)
     if os.path.exists(FONT_SRC):
         shutil.copy2(FONT_SRC, os.path.join(OUT, "fonts", "seal.woff2"))
     else:
