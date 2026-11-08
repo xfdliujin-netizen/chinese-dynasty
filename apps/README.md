@@ -82,7 +82,7 @@ Artifacts 下载 `HistoryScroll-unsigned-ipa`）。Mac 由 GitHub 免费提供�
 
 ### 路线 C：本机 Mac 编译（买二手或借，适合要反复调原生层）
 
-### 生成工程（Mac 上）
+#### 生成工程（Mac 上）
 ```bash
 brew install xcodegen
 cd apps/ios
@@ -90,7 +90,7 @@ xcodegen generate     # 生成 HistoryScroll.xcodeproj
 open HistoryScroll.xcodeproj
 ```
 
-### 方式一：免费 Apple ID（0 元，7 天有效期）
+#### 方式一：免费 Apple ID（0 元，7 天有效期）
 
 1. Xcode → Settings → Accounts → 用 Apple ID 登录。
 2. 选中 HistoryScroll target → Signing & Capabilities → Team 选你的 Personal Team。
@@ -98,7 +98,7 @@ open HistoryScroll.xcodeproj
 4. 手机：设置 → 通用 → VPN 与设备管理 → 信任你的开发者证书。
 5. 7 天后 App 打不开，重新插 Mac 点一次 Run 即可。免费账号最多同时 3 个 App。
 
-### 方式二：Apple Developer 会员（$99/年，一年免维护）
+#### 方式二：Apple Developer 会员（$99/年，一年免维护）
 
 同上，只是 Team 选付费账号；签名证书一年有效，适合长期自用。
 
