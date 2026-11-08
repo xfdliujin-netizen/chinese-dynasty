@@ -1,0 +1,40 @@
+name: HistoryScroll
+options:
+  bundleIdPrefix: com.li
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  HistoryScroll:
+    type: application
+    platform: iOS
+    sources:
+      - path: HistoryScroll/Sources
+      - path: HistoryScroll/Resources/Assets.xcassets
+      - path: HistoryScroll/Resources/web
+        type: folder
+        buildPhase: resources
+    info:
+      path: HistoryScroll/Info.plist
+      properties:
+        CFBundleDisplayName: 历史长卷
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIRequiresFullScreen: true
+        UIStatusBarStyle: UIStatusBarStyleDarkContent
+        UIViewControllerBasedStatusBarAppearance: false
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.li.historyscroll
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
