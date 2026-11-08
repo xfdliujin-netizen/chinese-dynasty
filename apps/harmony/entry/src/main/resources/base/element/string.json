@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "华夏千年历史长卷"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "历史长卷主入口"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "历史长卷"
+    }
+  ]
+}
