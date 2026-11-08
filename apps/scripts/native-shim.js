@@ -16,6 +16,26 @@
 
   document.documentElement.classList.add('in-native-shell');
 
+  /* ---------- 0. 存储兜底：自定义协议下个别 WebView 会禁用 storage ---------- */
+  try {
+    window.localStorage.setItem('__probe', '1');
+    window.localStorage.removeItem('__probe');
+  } catch (e) {
+    var mem = Object.create(null);
+    var memStore = {
+      getItem: function (k) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+      setItem: function (k, v) { mem[k] = String(v); },
+      removeItem: function (k) { delete mem[k]; },
+      clear: function () { mem = Object.create(null); },
+      key: function (i) { return Object.keys(mem)[i] || null; }
+    };
+    Object.defineProperty(memStore, 'length', { get: function () { return Object.keys(mem).length; } });
+    try {
+      Object.defineProperty(window, 'localStorage', { value: memStore, configurable: true });
+      Object.defineProperty(window, 'sessionStorage', { value: memStore, configurable: true });
+    } catch (e2) { /* 极端环境保持只读 */ }
+  }
+
   /* ---------- 1. 通知 native ---------- */
   function toNative(channel, payload) {
     try {
