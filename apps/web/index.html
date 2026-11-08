@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="历史长卷" />
+  <meta name="theme-color" content="#F5F0E6" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>华夏千年历史长卷 · 全景无级缩放版</title>
+  <!-- 原生包：书法体改为本地子集（仅「史」「舆」等印章用字），不再请求 Google Fonts -->
+  <style>
+    @font-face {
+      font-family: 'Ma Shan Zheng';
+      src: url('fonts/seal.woff2') format('woff2');
+      font-weight: 400;
+      font-display: swap;
+    }
+  </style>
+<link rel="stylesheet" href="scroll.css" />
+
+
+<link rel="stylesheet" href="view-switch.css" />
+</head>
+<body data-view="scroll">
+
+  <!-- 顶部：标题 + 三页签 + 长卷专用工具 -->
+  <header class="app-header">
+    <div class="page-wrap header-top">
+      <div class="brand">
+        <div class="seal font-calligraphy">史</div>
+        <div class="brand-text">
+          <h1 class="app-title">华夏千年历史长卷</h1>
+          <p class="app-sub">五千年 · 长卷 · 帝王 · 事件</p>
+        </div>
+      </div>
+
+      <!-- 顶部工具已整合至长卷沉浸式天头 HUD -->
+    </div>
+  </header>
+
+  <!-- 长卷搜索面板（挂在 body 下，长卷专属） -->
+  <div id="axis-search-panel" class="axis-search-panel" hidden>
+    <div class="as-box">
+      <div class="as-input-row">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <input id="axis-search-input" type="search" enterkeyhint="search" autocomplete="off" placeholder="搜索：事件 / 关键人物 / 盛世…" />
+        <button id="axis-search-close" class="as-close" type="button" aria-label="关闭搜索">✕</button>
+      </div>
+      <div class="as-hint" id="axis-search-hint">全库搜索：重大事件 · 关键人物 · 各朝盛世</div>
+      <div class="as-results" id="axis-search-results"></div>
+    </div>
+  </div>
+
+  <main class="app-main">
+
+    <!-- ============ 视图一：时间轴长卷 ============ -->
+    <section id="view-scroll" class="view active">
+      <!-- 悬浮品牌印记（左上角：故宫卷轴题签风范） -->
+      <div id="scroll-brand" class="scroll-float-brand">
+        <div class="seal font-calligraphy">史</div>
+        <div class="brand-text">
+          <h1 class="app-title">华夏千年历史长卷</h1>
+          <p class="app-sub">五千年 · 帝王 · 史事 · 舆图</p>
+        </div>
+      </div>
+
+      <!-- 顶部「长卷 / 史图」大胶囊切换按钮 -->
+      <div class="view-switch-capsule" role="tablist" aria-label="长卷与史图切换">
+        <button class="vsc-item active" data-switch-view="scroll" type="button" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z"/><path d="M12 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1"/><path d="M5 8.5h4M5 12h4"/></svg>
+          <span>长卷</span>
+        </button>
+        <button class="vsc-item" data-switch-view="map" type="button" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v14L9 18l6 2 6-2.5v-14L15 6 9 4z"/><path d="M9 4v14M15 6v14"/></svg>
+          <span>史图</span>
+        </button>
+      </div>
+
+      <!-- 中央天头纪年罗盘（实时联动屏幕中央朱砂红线，显示当前朝代与精确纪年） -->
+      <div class="scroll-center-compass" aria-live="polite">
+        <span id="center-era-badge" class="compass-era">三国</span>
+        <span class="compass-sep">·</span>
+        <span id="center-year-display" class="compass-year">公元235年</span>
+      </div>
+
+      <!-- 右上角悬浮工具舱（无级缩放控制 + 全库搜索） -->
+      <div class="scroll-float-RightTools">
+        <div class="zoom-capsule" role="group" aria-label="长卷比例缩放">
+          <button id="zoom-out-btn" class="zc-btn" type="button" aria-label="缩小长卷">−</button>
+          <span id="zoom-label" class="zc-label" title="轻点恢复100%">100%</span>
+          <button id="zoom-in-btn" class="zc-btn" type="button" aria-label="放大长卷">+</button>
+        </div>
+        <button id="axis-search-btn" class="scroll-float-search" type="button" aria-label="搜索长卷">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          <span>检索</span>
+        </button>
+      </div>
+
+      <div id="timeline-viewport" class="timeline-band">
+        <div class="edge-fade edge-fade-l"></div>
+        <div class="edge-fade edge-fade-r"></div>
+
+        <div class="center-indicator"><div class="center-dot"></div></div>
+        <div class="band-hint" id="band-hint">轻点竹简 · 查看<b>史事详述</b></div>
+
+        <div id="timeline-canvas">
+          <div id="lens-layer"></div>
+          <div id="ticks-layer"></div>
+          <div id="macro-dynasty-layer" class="layer"></div>
+          <div id="sub-regime-layer" class="layer"></div>
+          <div id="events-axis-line"></div>
+          <div id="events-layer" class="layer"></div>
+        </div>
+      </div>
+
+      <!-- 左下角重构：东方雅集极简悬浮控制浮岛（一键收折 + 禅意双轨滑块） -->
+      <section class="app-controls zen-floating-dock" id="unified-console" aria-label="长卷视图控制舱">
+        <div class="zen-dock-card" id="console-body">
+          <!-- 第一轨：上轴支系三档（触碰 / 常驻 / 关闭） -->
+          <div class="zen-dock-row">
+            <span class="zen-tag">支系</span>
+            <div class="slide-track zen-track" id="sub-mode-track" role="radiogroup" aria-label="二三层政权支系模式">
+              <div class="slide-pill zen-pill" id="sub-mode-pill" data-mode="auto" aria-hidden="true"></div>
+              <button class="slide-opt zen-opt active" data-submode="auto" type="button" role="radio" aria-checked="true" title="光标接触时下拉弹出">触碰</button>
+              <button class="slide-opt zen-opt" data-submode="always" type="button" role="radio" aria-checked="false" title="常驻展开二三层政权">常驻</button>
+              <button class="slide-opt zen-opt" data-submode="off" type="button" role="radio" aria-checked="false" title="关闭隐藏二三层政权">关闭</button>
+            </div>
+          </div>
+
+          <div class="zen-divider" aria-hidden="true"></div>
+
+          <!-- 第二轨：下轴图层四档（事件 / 关键人物 / 盛世 / 关闭） -->
+          <div class="zen-dock-row">
+            <span class="zen-tag">下轴</span>
+            <div class="slide-track zen-track" id="axis-layer-track" role="radiogroup" aria-label="下方时间轴图层">
+              <div class="slide-pill zen-pill" id="axis-layer-pill" data-theme="events" aria-hidden="true"></div>
+              <button id="layer-events" class="slide-opt zen-opt layer-switch on active" data-layer="events" type="button" role="radio" aria-checked="true">
+                <span>事件</span>
+              </button>
+              <button id="layer-figures" class="slide-opt zen-opt layer-switch" data-layer="figures" type="button" role="radio" aria-checked="false">
+                <span>关键人物</span>
+              </button>
+              <button id="layer-eras" class="slide-opt zen-opt layer-switch" data-layer="eras" type="button" role="radio" aria-checked="false">
+                <span>盛世</span>
+              </button>
+              <button id="layer-off" class="slide-opt zen-opt" data-layer="off" type="button" role="radio" aria-checked="false" title="收起下方时间轴">
+                <span>关闭</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+        <span id="layer-count" class="layer-count" hidden>124 事件</span>
+      </section>
+
+      <!-- 底部详情弹窗：点击事件竹简后由屏幕下方升起，悬浮于卷轴之上 -->
+      <div id="sheet-backdrop" class="sheet-backdrop" aria-hidden="true"></div>
+      <footer id="detail-sheet" class="detail-sheet" aria-hidden="true" aria-label="史事详述">
+        <div class="page-wrap sheet-wrap">
+          <div class="sheet-grip" id="sheet-grip" aria-hidden="true"><span></span></div>
+          <div class="detail-card">
+            <div class="detail-head">
+              <div class="detail-tags">
+                <span id="detail-badge-type" class="tag-type">事件</span>
+                <span id="detail-dynasty-tag" class="tag-dynasty">—</span>
+                <span id="detail-year-tag" class="tag-year">—</span>
+              </div>
+              <div class="detail-nav">
+                <button id="open-archive-btn" class="nav-btn archive-btn" type="button">人物档案 ›</button>
+                <button id="person-map-btn" class="nav-btn map-btn" type="button" hidden>跳转地图 ›</button>
+                <button id="event-map-btn" class="nav-btn map-btn" type="button" hidden>地图 ›</button>
+                <button id="prev-event-btn" class="nav-btn" type="button">◀ 上一节点</button>
+                <button id="next-event-btn" class="nav-btn" type="button">下一节点 ▶</button>
+                <button id="close-sheet-btn" class="nav-btn close-btn" type="button" aria-label="关闭详情">✕</button>
+              </div>
+            </div>
+
+            <div id="detail-scroll-container" class="detail-scroll ancient-scroll detail-fade-transition">
+              <div class="dt-col dt-col-main">
+                <div class="detail-title-row">
+                  <h2 id="detail-title"></h2>
+                </div>
+                <div id="detail-meta" class="detail-meta"></div>
+                <div id="detail-figures" class="fig-chips"></div>
+              </div>
+
+              <div class="dt-col dt-col-read">
+                <p id="detail-desc" class="detail-desc"></p>
+                <div id="detail-extended-box" class="detail-extended">
+                  <div class="extended-head">
+                    <span id="detail-extended-label">📜 史事详述</span>
+                    <span class="hint">（上下滑动阅览）</span>
+                  </div>
+                  <p id="detail-extended-text"></p>
+                  <p id="detail-more"></p>
+                </div>
+                <div class="detail-impact">
+                  <span id="detail-impact-label" class="impact-label">【史家评述与制度遗产】</span>
+                  <span id="detail-impact"></span>
+                </div>
+              </div>
+
+              <div class="dt-col dt-col-side">
+                <div class="person-box" id="person-box" hidden>
+                  <div class="person-head">
+                    <span class="person-name" id="person-name"></span>
+                    <span class="person-role" id="person-role"></span>
+                    <button class="baike-more-btn" id="person-close" type="button">收起</button>
+                  </div>
+                  <p class="person-text" id="person-text"></p>
+                  <a class="baike-link" id="person-link" target="_blank" rel="noopener">百度百科 ›</a>
+                </div>
+
+                <div class="baike-box" id="baike-box" data-state="loading">
+                  <div class="baike-head">
+                    <span class="bk-logo">百度百科</span>
+                    <span id="bk-state">联网加载中…</span>
+                  </div>
+                  <div class="baike-body" id="baike-body">
+                    <p id="bk-abstract"></p>
+                    <dl class="bk-card" id="bk-card"></dl>
+                    <div class="baike-foot">
+                      <a class="baike-link" id="bk-link" target="_blank" rel="noopener">查看完整词条 ›</a>
+                      <button class="baike-more-btn" id="bk-expand" type="button">展开摘要</button>
+                    </div>
+                  </div>
+                  <p class="baike-note" id="bk-note" hidden></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+    <!-- ============ 视图二：疆域图谱（内嵌 · 全屏沉浸 + 双向联动）============ -->
+    <section id="view-map" class="view">
+      <div class="map-stage" id="map-stage">
+        <iframe id="map-embed" class="map-frame" title="疆域图谱"></iframe>
+
+        <div class="map-skel" id="map-embed-ph" role="status" aria-live="polite">
+          <div class="mep-seal font-calligraphy">舆</div>
+          <div class="mep-spin"></div>
+          <p id="map-embed-ph-text">正在展开疆域图谱…<br /><span>首次载入约 2 秒，之后常驻秒开</span></p>
+          <div class="mep-bar" aria-hidden="true"><i></i></div>
+          <button class="map-retry" id="map-embed-load" type="button" hidden>重新载入</button>
+        </div>
+
+        <div class="map-toast" id="map-toast" aria-live="polite"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 应用内百科阅读器：点任何「百度百科」链接都在这里打开，不离开应用 -->
+  <div id="baike-reader" class="br-overlay" data-state="idle" aria-hidden="true" role="dialog" aria-modal="true" aria-label="百科阅读">
+    <div class="br-nav">
+      <button class="br-btn" id="br-back" type="button">‹ 返回</button>
+      <span class="br-nav-title" id="br-nav-title">百科</span>
+      <button class="br-btn right" id="br-ext" type="button">浏览器</button>
+    </div>
+    <div class="br-scroll" id="br-scroll">
+      <div class="br-inner">
+        <div class="br-hero">
+          <img class="br-thumb" id="br-thumb" alt="" hidden />
+          <div class="br-hero-text">
+            <h2 id="br-title">—</h2>
+            <p id="br-sub"></p>
+            <div class="br-chip-row" id="br-chips"></div>
+          </div>
+        </div>
+
+        <div class="br-skeleton">
+          <div class="sk-line" style="width:96%"></div>
+          <div class="sk-line" style="width:88%"></div>
+          <div class="sk-line" style="width:92%"></div>
+          <div class="sk-line" style="width:70%"></div>
+        </div>
+
+        <div class="br-infobox" id="br-infobox" hidden></div>
+        <div class="br-article" id="br-article"></div>
+
+        <div class="br-fallback" id="br-fallback">
+          <div class="fb-icon">🌐</div>
+          <p id="br-fallback-text">当前无法自动读取百科内容，可点击下方按钮在浏览器中查看原文。</p>
+          <button class="fb-btn" id="br-fallback-btn" type="button">在浏览器中打开 ›</button>
+        </div>
+
+        <p class="br-foot" id="br-foot">
+          以上内容来自<b>百度百科</b>开放词条接口，已在应用内离线排版呈现；如词条未完整加载，
+          <a id="br-foot-link" href="#" target="_blank" rel="noopener">查看完整词条 ›</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <script src="emperor-data.js"></script>
+  <script src="scroll-app.js"></script>
+
+
+
+  <script src="native-shim.js"></script>
+</body>
+</html>
