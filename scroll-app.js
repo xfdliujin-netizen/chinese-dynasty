@@ -4860,8 +4860,18 @@
       }
     }
 
+    let scrollMotionTimer=0, lastMotionX=null, lastMotionZoom=null;
+    function markScrollMotion() {
+      if(document.body.dataset.view!=='scroll') return;
+      if(lastMotionX===state.scrollX && lastMotionZoom===state.zoomScale) return;
+      lastMotionX=state.scrollX; lastMotionZoom=state.zoomScale;
+      if(!document.body.classList.contains('scroll-in-motion')) document.body.classList.add('scroll-in-motion');
+      clearTimeout(scrollMotionTimer);
+      scrollMotionTimer=setTimeout(()=>{document.body.classList.remove('scroll-in-motion');updateBrandConflict();},160);
+    }
     function applyScrollTransform() {
       state.scrollX = clampScrollX(state.scrollX);
+      markScrollMotion();
       const pad = getCenterPad();
       // 折叠进度下内容在「完整居中 ⇄ 纯朝代居中」之间平滑过渡
       const offsetY = Math.round(GEOM.offsetY + ((GEOM.foldedOffsetY || GEOM.offsetY) - GEOM.offsetY) * (state.foldT || 0));
@@ -5024,6 +5034,7 @@
 
     // 记录上一次经过中央红线激活的刻度年份，当切换时触发天头罗盘微脉冲反馈
     let lastHotTickYear = null;
+    let compassPulseAnimation=null;
 
     let activeDockItems=[];
     function setClass(el,name,on) { if(el.classList.contains(name)!==on) el.classList.toggle(name,on); }
@@ -5085,9 +5096,15 @@
         lastHotTickYear = currentPeakYear;
         const compassEl = document.querySelector('.scroll-center-compass');
         if (compassEl) {
-          compassEl.classList.remove('compass-tick-pulse');
-          void compassEl.offsetWidth;
-          compassEl.classList.add('compass-tick-pulse');
+          if(compassEl.animate) {
+            if(!compassPulseAnimation) {
+              compassPulseAnimation=compassEl.animate([
+                {transform:'translateX(-50%) scale(1)'},
+                {offset:.45,transform:'translateX(-50%) scale(1.055)',borderColor:'rgba(184,51,42,.58)'},
+                {transform:'translateX(-50%) scale(1)'}
+              ],{duration:240,easing:'cubic-bezier(0.22,1,0.36,1)'});
+            } else { compassPulseAnimation.currentTime=0; compassPulseAnimation.play(); }
+          }
         }
       }
 
@@ -5228,6 +5245,7 @@
     function updateBrandConflict() {
       const brandEl = document.getElementById('scroll-brand');
       if (!brandEl || brandEl.classList.contains('brand-hidden')) return;
+      if(document.body.classList.contains('scroll-in-motion')) return;
       const now = performance.now();
       if (now - brandCheckAt < 220) return;
       brandCheckAt = now;

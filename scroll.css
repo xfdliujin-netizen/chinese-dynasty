@@ -4122,3 +4122,19 @@ body.map-interacting #layers-popover:not(.popup-focused) {
     bottom: 0 !important;
     padding-bottom: 0 !important;
   }
+
+/* Frame-driven fisheye transforms must follow the gesture directly, without a second CSS tween. */
+#timeline-canvas .vertical-bamboo-slip,
+#timeline-canvas .axis-person-card {
+  transition-property:background,background-color,color,border-color,box-shadow !important;
+}
+body.scroll-in-motion #timeline-canvas .vertical-bamboo-slip,
+body.scroll-in-motion #timeline-canvas .axis-person-card,
+body.scroll-in-motion #timeline-canvas .slip-fold-wrapper,
+body.scroll-in-motion #timeline-canvas .pulse-circle {
+  transition:none !important;
+}
+body.scroll-in-motion #timeline-canvas .macro-dynasty-block,
+body.scroll-in-motion #timeline-canvas .sub-regime-block {
+  animation-play-state:paused !important;
+}
