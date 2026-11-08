@@ -9,6 +9,9 @@
   <meta name="theme-color" content="#F5F0E6" />
   <meta name="format-detection" content="telephone=no" />
   <title>华夏千年历史长卷 · 全景无级缩放版</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="favicon-32.png" />
   <!-- 字体异步加载：断网 / 弱网 / iPad 离线时不会阻塞首屏，自动退回系统宋体 -->
   <link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
         href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" />
@@ -297,7 +300,14 @@
   <script src="emperor-data.js"></script>
   <script src="scroll-app.js"></script>
 
-
-
+  <script>
+    // PWA：注册 Service Worker（仅 https / localhost 生效，file:// 下静默跳过）
+    if ('serviceWorker' in navigator &&
+        (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>
