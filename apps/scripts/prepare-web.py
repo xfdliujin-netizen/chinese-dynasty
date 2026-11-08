@@ -110,10 +110,25 @@ def patch_index():
           f"(google fonts removed: {'fonts.googleapis.com' not in html})")
 
 
+def sync_native():
+    """把 apps/web 同步到鸿蒙 rawfile 与 iOS Resources（先清后拷，避免残留旧文件）"""
+    import shutil as _sh
+    targets = [
+        os.path.join(APPS, "harmony", "entry", "src", "main", "resources", "rawfile", "web"),
+        os.path.join(APPS, "ios", "HistoryScroll", "Resources", "web"),
+    ]
+    for dst in targets:
+        if os.path.exists(dst):
+            _sh.rmtree(dst)
+        shutil.copytree(OUT, dst)
+        print("  ->", os.path.relpath(dst, ROOT))
+
+
 def main():
     print("打包 web 资源 ->", OUT)
     missing = copy_assets()
     patch_index()
+    sync_native()
     if missing:
         print("[!] 缺失文件:", ", ".join(missing))
     total = 0

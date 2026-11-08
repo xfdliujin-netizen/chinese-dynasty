@@ -1,0 +1,13 @@
+.band-phase-tick { display:none; }
+body.atlas-embed #map-key { position:fixed !important; left:12px; bottom:calc(var(--dock-clearance,150px) + 4px) !important; max-height:min(45vh,380px) !important; max-width:min(320px,calc(100vw - 24px)); transform:none !important; overflow-y:auto; z-index:67; }
+body.atlas-embed #map-key::after { display:none !important; }
+.legend-drag-handle { display:block; position:sticky; top:0; z-index:2; width:100%; margin:0 0 6px; padding:5px 8px; text-align:left; font:600 12px inherit; letter-spacing:.1em; color:#78644e; background:#f7f1e5; border:0; border-radius:7px; cursor:grab; touch-action:none; }
+.is-legend-dragging .legend-drag-handle { cursor:grabbing; }
+#scrubber-loupe { width:min(360px,calc(100vw - 24px)) !important; height:132px !important; transform:none !important; border-radius:16px; background:#fcf9f2; box-shadow:0 12px 36px #30251b35; }
+#scrubber-loupe .loupe-pin { display:none; }
+#scrubber-loupe .loupe-year { bottom:7px; font-size:13px; }
+@media(max-width:600px) { body.atlas-embed #map-key { left:8px; max-width:250px; } }
+
+
+
+@media(max-width:767px) { body.atlas-embed #map-key { bottom:var(--phone-pane-clearance,calc(var(--dock-clearance,150px) + 74px)) !important; } }
