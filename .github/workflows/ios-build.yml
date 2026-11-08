@@ -1,0 +1,84 @@
+name: iOS Build (unsigned ipa)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "index.html"
+      - "scroll.css"
+      - "view-switch.css"
+      - "scroll-app.js"
+      - "emperor-data.js"
+      - "jiangshan-atlas.html"
+      - "atlas-app.js"
+      - "atlas-ui.js"
+      - "atlas-bridge.js"
+      - "atlas.css"
+      - "atlas-timeline-ui.css"
+      - "atlas-dynasty.js"
+      - "atlas-lore.js"
+      - "atlas-terrain.webp"
+      - "js/**"
+      - "apps/**"
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare web resources
+        run: python3 apps/scripts/prepare-web.py
+
+      - name: Install XcodeGen
+        run: |
+          if ! command -v xcodegen >/dev/null; then
+            brew install xcodegen
+          fi
+          xcodegen --version
+
+      - name: Generate Xcode project
+        working-directory: apps/ios
+        run: xcodegen generate
+
+      - name: Show toolchain
+        run: xcodebuild -version
+
+      - name: Build unsigned .app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project apps/ios/HistoryScroll.xcodeproj \
+            -scheme HistoryScroll \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            -derivedDataPath apps/_build/xcode \
+            | tee apps/_build/build.log | grep -E "(error:|warning: |BUILD SUCCEEDED|BUILD FAILED)" || true
+          test -d apps/_build/xcode/Build/Products/Release-iphoneos/HistoryScroll.app
+
+      - name: Package unsigned ipa
+        run: |
+          mkdir -p Payload
+          cp -R "apps/_build/xcode/Build/Products/Release-iphoneos/HistoryScroll.app" Payload/
+          zip -qry HistoryScroll-unsigned.ipa Payload
+          ls -lh HistoryScroll-unsigned.ipa
+
+      - name: Upload ipa artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HistoryScroll-unsigned-ipa
+          path: HistoryScroll-unsigned.ipa
+          retention-days: 90
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: apps/_build/build.log
