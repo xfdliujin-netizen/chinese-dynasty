@@ -53,10 +53,36 @@ python apps/scripts/prepare-web.py
 
 ---
 
-## iOS 安装（需要一台 Mac，仅最后一步编译）
+## iOS 安装（三条路线，按成本从低到高）
+
+### 路线 A：PWA 添加到主屏幕（0 元，今天就能用，推荐先做）
+
+iOS Safari 打开 GitHub Pages 地址 → 分享 → 「添加到主屏幕」。
+图标、全屏无地址栏、离线可用（Service Worker 已预缓存全部资源）。
+不进 App Store、不需要签名、不存在 7 天续签问题。
+
+### 路线 B：GitHub Actions 云端编译 + Windows 侧载（0 元，需要数据线）
+
+仓库内置流水线 `.github/workflows/ios-build.yml`：push 触发后在 GitHub 的
+macOS 机器上自动 XcodeGen + xcodebuild，产出**未签名 ipa**（Actions 页面
+Artifacts 下载 `HistoryScroll-unsigned-ipa`）。Mac 由 GitHub 免费提供。
+
+拿到 ipa 后在 Windows 上签名安装：
+
+1. 下载安装 [Sideloadly](https://sideloadly.io)（Windows 版）。
+2. iPhone 用数据线连电脑；若首次连接装一次 iTunes（只装驱动，Apple 官网下载）。
+3. Sideloadly 拖入 ipa → Apple ID 登录 → Start。
+4. 手机：设置 → 通用 → VPN 与设备管理 → 信任开发者证书。
+   首次需在 设置 → 隐私与安全性 打开「开发者模式」。
+5. 免费账号限制：7 天有效期、最多 3 个 App。到期重复第 3 步即可；
+   嫌麻烦用 [AltStore](https://altstore.io)（Windows 常驻自动续签），
+   或 Apple Developer 会员（688 元/年，一年免维护）。
+
+手动触发构建：GitHub 仓库页 → Actions → iOS Build → Run workflow。
+
+### 路线 C：本机 Mac 编译（买二手或借，适合要反复调原生层）
 
 ### 生成工程（Mac 上）
-
 ```bash
 brew install xcodegen
 cd apps/ios
