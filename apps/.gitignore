@@ -1,0 +1,11 @@
+# 原生打包生成物（prepare-web.py 可重建）
+apps/web/
+apps/harmony/entry/src/main/resources/rawfile/
+apps/ios/HistoryScroll/Resources/web/
+
+# 字体构建中间产物
+apps/_build/
+
+# iOS 本地生成
+apps/ios/*.xcodeproj
+apps/ios/DerivedData/
