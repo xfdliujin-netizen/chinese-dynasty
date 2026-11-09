@@ -589,6 +589,16 @@
     /* 帝王（上排）：暗红朱砂，庄重肃穆 */
     #timeline-canvas[data-layer="figures"] .event-node.emperor .axis-person-card { --ac: #B8332A; --ac-soft: #F6E4E0; }
     #timeline-canvas[data-layer="figures"] .event-node.emperor .axis-person-card .ap-life { color: #9C3A2E; }
+    #timeline-canvas[data-layer="figures"] .event-node.emperor .axis-person-card {
+      width: calc(41px * var(--v));
+      background: linear-gradient(165deg, #fff9e9 0%, #ecd19a 52%, #c98d33 100%);
+      border: 2px solid #8d321f;
+      box-shadow: 0 3px 9px rgba(99,42,21,.28), inset 0 0 0 2px rgba(255,248,221,.58);
+    }
+    #timeline-canvas[data-layer="figures"] .event-node.emperor .axis-person-card::before {
+      content: '帝'; position:absolute; top:calc(2px * var(--v)); right:calc(2px * var(--v));
+      color:#8d321f; font-size:calc(7px * var(--v)); font-weight:900; line-height:1;
+    }
     /* 各朝盛世：鎏金 */
     #timeline-canvas[data-layer="eras"] .axis-person-card { --ac: #C09A3E; --ac-soft: #FAF1D8; }
     #timeline-canvas[data-layer="eras"] .axis-person-card .ap-life { color: #8A6A1C; }
