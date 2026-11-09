@@ -3811,7 +3811,8 @@
       function placeNodes(items, gap, apply) {
         let lastX = -Infinity;
         const isCard = !!CARD_LAYERS[state.axisLayer];
-        const stemRows = [Math.round(12 * v), Math.round(12 * v)];
+        const figureStemRows = [Math.round(20 * v), Math.round(28 * v)];
+        const emperorStemRows = [Math.round(30 * v), Math.round(40 * v)];
         items.forEach((item, idx) => {
           const x = yearToX(item.data.year);
           const forced = item.el.classList.contains('selected');
@@ -3851,7 +3852,7 @@
         placeNodes(domCache.events, cardW + 6, (item, x, idx) => {
           const { el, stemEl } = item;
           const isEmp = el.classList.contains('emperor');
-          const stemH = stemRows[idx % 2];
+          const stemH = (item.el.classList.contains('emperor') ? emperorStemRows : figureStemRows)[idx % 2];
           item.x = x;
           item.row = isEmp ? 1 : 0;
           el.style.left = `${x}px`;
