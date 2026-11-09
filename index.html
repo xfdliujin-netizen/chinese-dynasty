@@ -221,51 +221,6 @@
 
   </main>
 
-  <!-- 应用内百科阅读器：点任何「百度百科」链接都在这里打开，不离开应用 -->
-  <div id="baike-reader" class="br-overlay" data-state="idle" aria-hidden="true" role="dialog" aria-modal="true" aria-label="百科阅读">
-    <div class="br-nav">
-      <button class="br-btn" id="br-back" type="button">‹ 返回</button>
-      <span class="br-nav-title" id="br-nav-title">百科</span>
-      <button class="br-btn right" id="br-ext" type="button">浏览器</button>
-    </div>
-    <div class="br-scroll" id="br-scroll">
-      <div class="br-inner">
-        <div class="br-hero">
-          <img class="br-thumb" id="br-thumb" alt="" hidden />
-          <div class="br-hero-text">
-            <h2 id="br-title">—</h2>
-            <p id="br-sub"></p>
-            <div class="br-chip-row" id="br-chips"></div>
-          </div>
-        </div>
-
-        <div class="br-skeleton">
-          <div class="sk-line" style="width:96%"></div>
-          <div class="sk-line" style="width:88%"></div>
-          <div class="sk-line" style="width:92%"></div>
-          <div class="sk-line" style="width:70%"></div>
-        </div>
-
-        <div class="br-infobox" id="br-infobox" hidden></div>
-        <div class="br-article" id="br-article"></div>
-
-        <div class="br-fallback" id="br-fallback">
-          <div class="fb-icon">🌐</div>
-          <p id="br-fallback-text">当前无法自动读取百科内容，可点击下方按钮在浏览器中查看原文。</p>
-          <button class="fb-btn" id="br-fallback-btn" type="button">在浏览器中打开 ›</button>
-        </div>
-
-        <p class="br-foot" id="br-foot">
-          以上内容来自<b>百度百科</b>开放词条接口，已在应用内离线排版呈现；如词条未完整加载，
-          <a id="br-foot-link" href="#" target="_blank" rel="noopener">查看完整词条 ›</a>
-        </p>
-      </div>
-    </div>
-  </div>
-
-
-
-
   <script src="emperor-data.js"></script>
   <script src="scroll-app.js?v=20261108-drag1"></script>
 
