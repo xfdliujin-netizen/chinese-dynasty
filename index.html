@@ -112,12 +112,11 @@
         </div>
       </div>
 
-      <!-- 左下角重构：东方雅集极简悬浮控制浮岛（一键收折 + 禅意双轨滑块） -->
+      <!-- 左下角：整合为单一观卷控制，不保留底部 TAB 栏 -->
       <section class="app-controls zen-floating-dock" id="unified-console" aria-label="长卷视图控制舱">
         <div class="zen-dock-card" id="console-body">
-          <!-- 第一轨：上轴支系三档（触碰 / 常驻 / 关闭） -->
           <div class="zen-dock-row">
-            <span class="zen-tag">支系</span>
+            <span class="zen-tag">卷轴</span>
             <div class="slide-track zen-track" id="sub-mode-track" role="radiogroup" aria-label="二三层政权支系模式">
               <div class="slide-pill zen-pill" id="sub-mode-pill" data-mode="auto" aria-hidden="true"></div>
               <button class="slide-opt zen-opt active" data-submode="auto" type="button" role="radio" aria-checked="true" title="光标接触时下拉弹出">触碰</button>
@@ -126,25 +125,12 @@
             </div>
           </div>
 
-          <div class="zen-divider" aria-hidden="true"></div>
-
-          <!-- 第二轨：下轴图层四档（事件 / 关键人物 / 盛世 / 关闭） -->
           <div class="zen-dock-row">
-            <span class="zen-tag">下轴</span>
-            <div class="slide-track zen-track" id="axis-layer-track" role="radiogroup" aria-label="下方时间轴图层">
-              <div class="slide-pill zen-pill" id="axis-layer-pill" data-theme="events" aria-hidden="true"></div>
-              <button id="layer-events" class="slide-opt zen-opt layer-switch on active" data-layer="events" type="button" role="radio" aria-checked="true">
-                <span>事件</span>
-              </button>
-              <button id="layer-figures" class="slide-opt zen-opt layer-switch" data-layer="figures" type="button" role="radio" aria-checked="false">
-                <span>关键人物</span>
-              </button>
-              <button id="layer-eras" class="slide-opt zen-opt layer-switch" data-layer="eras" type="button" role="radio" aria-checked="false">
-                <span>盛世</span>
-              </button>
-              <button id="layer-off" class="slide-opt zen-opt" data-layer="off" type="button" role="radio" aria-checked="false" title="收起下方时间轴">
-                <span>关闭</span>
-              </button>
+            <span class="zen-tag">阅览</span>
+            <div class="axis-actions" role="group" aria-label="长卷内容">
+              <button class="axis-action is-active" data-axis-action="events" type="button">史事</button>
+              <button class="axis-action" data-axis-action="figures" type="button">帝王与人物</button>
+              <button class="axis-action" data-axis-action="eras" type="button">盛世</button>
             </div>
           </div>
         </div>
@@ -208,23 +194,6 @@
                     <button class="baike-more-btn" id="person-close" type="button">收起</button>
                   </div>
                   <p class="person-text" id="person-text"></p>
-                  <a class="baike-link" id="person-link" target="_blank" rel="noopener">百度百科 ›</a>
-                </div>
-
-                <div class="baike-box" id="baike-box" data-state="loading">
-                  <div class="baike-head">
-                    <span class="bk-logo">百度百科</span>
-                    <span id="bk-state">联网加载中…</span>
-                  </div>
-                  <div class="baike-body" id="baike-body">
-                    <p id="bk-abstract"></p>
-                    <dl class="bk-card" id="bk-card"></dl>
-                    <div class="baike-foot">
-                      <a class="baike-link" id="bk-link" target="_blank" rel="noopener">查看完整词条 ›</a>
-                      <button class="baike-more-btn" id="bk-expand" type="button">展开摘要</button>
-                    </div>
-                  </div>
-                  <p class="baike-note" id="bk-note" hidden></p>
                 </div>
               </div>
             </div>
