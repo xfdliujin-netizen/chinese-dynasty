@@ -4107,6 +4107,13 @@ body.map-interacting #layers-popover:not(.popup-focused) {
 #unified-console .zen-track { background:rgba(95,76,50,.06); border:0; box-shadow:none; }
 #unified-console .zen-opt { min-height:34px; padding:0 12px; }
 #unified-console .zen-pill { border-radius:10px; box-shadow:0 2px 6px #30251b12; }
+
+/* 单体观卷控制：用印章式分段按钮替代底部 TAB 条 */
+#unified-console .zen-dock-card { border:1px solid rgba(113,75,40,.22); background:linear-gradient(145deg,#fffaf0,#eee1c9); }
+#unified-console .axis-actions { display:flex; gap:3px; padding:3px; border-radius:12px; background:rgba(89,56,29,.08); }
+#unified-console .axis-action { min-height:32px; padding:0 10px; border:1px solid transparent; border-radius:9px; background:transparent; color:#62472c; font:800 12px/1 var(--serif-stack,serif); cursor:pointer; white-space:nowrap; transition:.16s ease; }
+#unified-console .axis-action:hover { background:rgba(142,44,31,.1); }
+#unified-console .axis-action.is-active { color:#fff8eb; background:linear-gradient(135deg,#8f251d,#b84432); border-color:#762018; box-shadow:0 2px 6px rgba(99,28,21,.24); }
 .slip-title { max-height:none !important; }
 .view-switch-capsule .vsc-item { white-space:nowrap; flex-shrink:0; }
 @media(max-width:600px) { .view-switch-capsule .vsc-item { padding:0 12px; font-size:14px; gap:5px; } }
