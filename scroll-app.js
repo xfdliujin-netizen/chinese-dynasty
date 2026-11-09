@@ -3879,17 +3879,13 @@
     }
 
     /********************************************************************
-     * 10. 详情抽屉（默认收起）+ 人物索引 + 百度百科在线详述
+     * 10. 详情抽屉（默认收起）+ 人物索引
      ********************************************************************/
     const viewScrollEl = document.getElementById('view-scroll');
     const sheetEl = document.getElementById('detail-sheet');
     const metaEl = document.getElementById('detail-meta');
     const figChipsEl = document.getElementById('detail-figures');
     const personBoxEl = document.getElementById('person-box');
-    const baikeBoxEl = document.getElementById('baike-box');
-    const baikeBodyEl = document.getElementById('baike-body');
-    const baikeNoteEl = document.getElementById('bk-note');
-    const baikeLinkEl = document.getElementById('bk-link');
     const bandHintEl = document.getElementById('band-hint');
 
     let sheetOpen = false;
@@ -4031,7 +4027,6 @@
         scroller.scrollTop = 0;
         scroller.querySelectorAll('.dt-col').forEach((c) => { c.scrollTop = 0; });
 
-        loadBaike(ev.bk || ev.title);
       });
 
       if (centerView) {
@@ -4341,70 +4336,16 @@
       });
     }
 
-    let personBaikeToken = 0;
-
     function showPerson(p) {
       personBoxEl.hidden = false;
       document.getElementById('person-name').textContent = p.n;
       document.getElementById('person-role').textContent = [p.dyn, p.r].filter(Boolean).join(' · ') || '历史人物';
       updatePersonMapBtn(p);
-      const link = document.getElementById('person-link');
-      link.href = baikeUrl(stripParen(p.n));
-      link.textContent = `百度百科：${stripParen(p.n)} ›`;
-
-      const text = p.lore || p.d;
-      if (text) {
-        document.getElementById('person-text').textContent = text;
-      } else {
-        const key = stripParen(p.n);
-        const cached = baikeCache.get(key);
-        if (cached) {
-          renderPersonAbstract(cached);
-        } else {
-          document.getElementById('person-text').textContent = '正在从百度百科读取小传…';
-          loadPersonBaike(key);
-        }
-      }
+      document.getElementById('person-text').textContent = p.lore || p.d || '本地资料待补充。';
       // 竖屏时面板位于抽屉下方，滚动到可视位置
       requestAnimationFrame(() => {
         personBoxEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
-
-      const key = stripParen(p.n);
-      const cached = baikeCache.get(key);
-      if (cached) {
-        renderPersonAbstract(cached);
-        return;
-      }
-      document.getElementById('person-text').textContent = '正在从百度百科读取小传…';
-      loadPersonBaike(key);
-    }
-
-    async function loadPersonBaike(name) {
-      const token = ++personBaikeToken;
-      try {
-        const data = await jsonpBaike(name);
-        if (token !== personBaikeToken) return;
-        if (data) {
-          baikeCache.set(name, data);
-          renderPersonAbstract(data);
-        } else {
-          document.getElementById('person-text').textContent = '本地暂无该人物小传，可点击下方百科词条查看原文。';
-        }
-      } catch (err) {
-        if (token === personBaikeToken) {
-          document.getElementById('person-text').textContent = navigator.onLine === false
-            ? '当前离线：暂无本地小传，联网后可自动读取百科介绍。'
-            : '本地暂无该人物小传，可点击下方百科词条查看原文。';
-        }
-      }
-    }
-
-    function renderPersonAbstract(data) {
-      const abs = stripHtml(data.abstract || data.desc || '');
-      document.getElementById('person-text').textContent = abs
-        ? (abs.length > 170 ? abs.slice(0, 170) + '……' : abs)
-        : '本地暂无该人物小传，可点击下方百科词条查看原文。';
     }
 
     /* ---------------- 百度百科（联网加载，离线隐藏） ---------------- */
@@ -4562,6 +4503,7 @@
      *      不跳转浏览器、不离开长卷页面；离线时给出降级入口
      ********************************************************************/
     const brEl = document.getElementById('baike-reader');
+    if (brEl) {
     const brScrollEl = document.getElementById('br-scroll');
     const brTitleEl = document.getElementById('br-title');
     const brSubEl = document.getElementById('br-sub');
@@ -4744,6 +4686,8 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && brOpened) { e.stopPropagation(); closeBaikeReader(); }
     }, true);
+
+    }
 
     function updateActiveHighlights() {
       domCache.macros.forEach(({ dyn, el }) => {
@@ -5613,6 +5557,11 @@
         if (sw) sw.classList.toggle('on', on);
         btn.setAttribute('aria-checked', String(on));
       });
+      document.querySelectorAll('[data-axis-action]').forEach((btn) => {
+        const on = btn.dataset.axisAction === activeKey;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-pressed', String(on));
+      });
       syncSlidingSwitchPills();
 
       if (!next) {
@@ -5713,9 +5662,8 @@
         setSubMode(btn.dataset.submode);
       });
 
-      const layerTrack = document.getElementById('axis-layer-track');
-      bindSlidingTrackGesture(layerTrack, (btn, fromSlide) => {
-        setAxisLayer(btn.dataset.layer, { fromSlide });
+      document.querySelectorAll('[data-axis-action]').forEach((btn) => {
+        btn.addEventListener('click', () => setAxisLayer(btn.dataset.axisAction, { force: true }));
       });
 
       requestAnimationFrame(() => syncSlidingSwitchPills());
