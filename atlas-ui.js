@@ -58,6 +58,7 @@
 
     /* ===== v13：档案夹双标签 + 浮卡对时间轴的实测避让 ===== */
     var pane = document.getElementById('chronicle-pane');
+    var workspaceBody = document.getElementById('workspace-body');
     var balloon = document.getElementById('milestone-balloon');
     var root = document.documentElement;
     var archivePlaceholder = false;
@@ -117,6 +118,21 @@
       body.appendChild(tabs);
       body.setAttribute('data-archive-tab', 'chronicle');
 
+      // 「全图」不是孤立按钮：它收起编年栏时，同时收起右侧档案夹；恢复编年栏时档案夹仍可用。
+      function syncArchiveWithPane() {
+        var collapsed = !!(workspaceBody && workspaceBody.classList.contains('is-pane-collapsed'));
+        body.classList.toggle('archive-collapsed', collapsed);
+        collapseButton.textContent = collapsed ? '展开' : '收起';
+        collapseButton.setAttribute('aria-expanded', String(!collapsed));
+      }
+      if (workspaceBody) {
+        new MutationObserver(function () {
+          syncArchiveWithPane();
+          scheduleLayout();
+        }).observe(workspaceBody, { attributes:true, attributeFilter:['class'] });
+      }
+      syncArchiveWithPane();
+
       function paintTabs(name) {
         tabs.querySelectorAll('.archive-folder-tab').forEach(function (btn) {
           var on = btn.getAttribute('data-tab') === name;
@@ -155,12 +171,16 @@
             }
             genCard.classList.remove('is-hidden');
           }
+          var routeCard = document.getElementById('journey-card');
+          if (routeCard && !routeCard.classList.contains('is-hidden')) routeCard.classList.add('is-hidden');
         } else if (name === 'journey') {
           var journeyCard = document.getElementById('journey-card');
           if (journeyCard && journeyCard.classList.contains('is-hidden')) {
             journeyCard.innerHTML = '<div class="archive-empty"><strong>路线档案</strong>在地图上选择人物或事件后，这里会展示对应的行迹路线与多站轨迹。</div>';
             journeyCard.classList.remove('is-hidden');
           }
+          var genealogyCard = document.getElementById('genealogy-card');
+          if (genealogyCard && !genealogyCard.classList.contains('is-hidden')) genealogyCard.classList.add('is-hidden');
         }
         body.setAttribute('data-archive-tab', name);
         paintTabs(name);
